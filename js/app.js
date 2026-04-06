@@ -158,6 +158,9 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
     console.log('Saved setup:', data);
+
+    console.log('SAVE FIRED');
+      
   }
 
   function loadSetup() {
@@ -218,32 +221,27 @@
   // ─────────────────────────────────────────────
   // EVENT HANDLING
   // ─────────────────────────────────────────────
-  document.addEventListener('click', (e) => {
-    const action = e.target.dataset.action;
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
 
-    if (!action) return;
+  const action = el.dataset.action;
 
-    if (action === 'add-account') addAccount({});
-    if (action === 'remove-account') removeAccount(Number(e.target.dataset.accountId));
-    if (action === 'save-setup') saveSetup();
-    if (action === 'load-setup') loadSetup();
+  if (action === 'add-account') addAccount({});
+  if (action === 'remove-account') removeAccount(Number(el.dataset.accountId));
+  if (action === 'save-setup') saveSetup();
+  if (action === 'load-setup') loadSetup();
 
-    if (action === 'continue-to-main') {
-      document.getElementById('setup-page').style.display = 'none';
-      document.getElementById('main-app').style.display = '';
-    }
+  if (action === 'continue-to-main') {
+    document.getElementById('setup-page').style.display = 'none';
+    document.getElementById('main-app').style.display = '';
+  }
 
-    if (action === 'back-to-setup') {
-      document.getElementById('setup-page').style.display = '';
-      document.getElementById('main-app').style.display = 'none';
-    }
-  });
-
-  document.addEventListener('input', (e) => {
-    if (e.target.dataset.action === 'setup-summary-input') {
-      refreshSetupSummary();
-    }
-  });
+  if (action === 'back-to-setup') {
+    document.getElementById('setup-page').style.display = '';
+    document.getElementById('main-app').style.display = 'none';
+  }
+});
 
   // ─────────────────────────────────────────────
   // INIT
