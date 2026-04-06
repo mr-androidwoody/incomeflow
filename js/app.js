@@ -66,29 +66,7 @@
     } else {
       presetSelect.value = 'custom';
     }
-  }    
-
-  function handleInputOrChange(target) {
-    if (target.matches('[data-action="setup-summary-input"]')) {
-      refreshSetupSummary();
-      return;
-    }
-    if (target.hasAttribute('data-account-id') && target.hasAttribute('data-field')) {
-      updateAccount(parseInt(target.getAttribute('data-account-id'), 10), target.getAttribute('data-field'), target.value);
-      return;
-    }
-    if (target.id === 'growthPreset') {
-      applyGrowthPreset(target.value);
-      return;
-    }
-    if (target.id === 'growth') {
-      syncGrowthPresetToValue();
-     return;
-    }
-    if (target.id === 'bniEnabled') {
-      document.getElementById('bni-fields').style.display = target.checked ? '' : 'none';
-    }
-  } 
+  }
 
   function refreshSetupSummary() {
     R.refreshOwnerOptions(state.portfolioAccounts, ownerNames());
@@ -106,13 +84,17 @@
       if (!el) return;
       el.value = D.MONEY_FIELDS.has(k) && val !== '' ? D.formatCurrency(val) : val;
     });
+
     const tm = document.getElementById('thresholdFrozen');
     if (tm) tm.checked = true;
+
     const bniCb = document.getElementById('bniEnabled');
     if (bniCb) {
       bniCb.checked = true;
       document.getElementById('bni-fields').style.display = '';
     }
+
+    syncGrowthPresetToValue();
   }
 
   function toggleSection(titleEl) {
@@ -126,15 +108,19 @@
   function syncExpandBtn() {
     const btn = document.getElementById('expand-all-btn');
     if (!btn) return;
-    const allOpen = Array.from(document.querySelectorAll('[data-collapsible] .section-body')).every((b) => !b.classList.contains('collapsed'));
+    const allOpen = Array.from(document.querySelectorAll('[data-collapsible] .section-body'))
+      .every((b) => !b.classList.contains('collapsed'));
     btn.textContent = allOpen ? 'Close all' : 'Expand all';
   }
 
   function toggleAllSections() {
     const bodies = Array.from(document.querySelectorAll('[data-collapsible] .section-body'));
     const allOpen = bodies.every((b) => !b.classList.contains('collapsed'));
+
     bodies.forEach((b) => {
-      const chevron = b.previousElementSibling && b.previousElementSibling.querySelector('.section-chevron');
+      const chevron = b.previousElementSibling &&
+        b.previousElementSibling.querySelector('.section-chevron');
+
       if (allOpen) {
         b.classList.add('collapsed');
         if (chevron) chevron.textContent = '▸';
@@ -143,6 +129,7 @@
         if (chevron) chevron.textContent = '▾';
       }
     });
+
     syncExpandBtn();
   }
 
@@ -150,6 +137,7 @@
     const result = C.addAccount(state.portfolioAccounts, state.nextId, data);
     state.portfolioAccounts = result.accounts;
     state.nextId = result.nextId;
+
     R.renderAccountRow(result.account, ownerNames());
     R.updateRowBadge(result.account);
     refreshSetupSummary();
@@ -166,6 +154,7 @@
     state.portfolioAccounts = C.updateAccount(state.portfolioAccounts, id, field, value);
     const acc = state.portfolioAccounts.find((a) => a.id === id);
     if (!acc) return;
+
     R.applyWrapperFieldState(acc);
     R.updateRowBadge(acc);
     refreshSetupSummary();
@@ -175,7 +164,9 @@
     state.portfolioAccounts = [];
     state.nextId = 1;
     document.getElementById('acct-tbody').innerHTML = '';
+
     D.PRELOAD_ACCOUNTS.forEach((a) => addAccount({ ...a, alloc: { ...a.alloc } }));
+
     R.initialiseCurrencyInputs();
     refreshSetupSummary();
   }
@@ -183,18 +174,24 @@
   function continueToMain() {
     const names = ownerNames();
     const handoff = C.continueToMainData(state.portfolioAccounts, names[0], names[1]);
+
     Object.entries(handoff.mainValues).forEach(([id, val]) => {
       const el = document.getElementById(id);
       if (!el) return;
+
       if (val === undefined || val === null || val === '') {
         el.value = '';
       } else {
         el.value = D.MONEY_FIELDS.has(id) ? D.formatCurrency(val) : val;
       }
     });
+
     state.interestAccounts = handoff.interestAccounts;
     R.updateInterestAccountsBanner(state.interestAccounts);
     R.renderHandoffBanner(handoff.banner);
+
+    syncGrowthPresetToValue();
+
     document.getElementById('setup-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
   }
@@ -206,6 +203,7 @@
 
   function readProjectionInputs() {
     const names = ownerNames();
+
     return {
       p1name: names[0],
       p2name: names[1],
@@ -250,15 +248,19 @@
 
   function runProjection() {
     const inputs = readProjectionInputs();
+
     if (!inputs.startYear || !inputs.endYear || inputs.endYear <= inputs.startYear) {
       alert('Please enter valid start and end years.');
       return;
     }
+
     const result = C.runProjection(inputs);
     state.rows = result.rows;
+
     R.renderAlerts(result.depletions);
     R.renderMetrics(state.rows, state.viewPerson, state.useReal);
     R.renderCharts(state.rows, state.viewPerson, state.useReal, state.charts);
+
     if (state.activeTab === 'tables') {
       R.renderTables(state.rows, state.useReal);
     }
@@ -268,6 +270,7 @@
     state.viewPerson = vp;
     btn.closest('.toggle-group').querySelectorAll('button').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
+
     R.renderCharts(state.rows, state.viewPerson, state.useReal, state.charts);
     R.renderMetrics(state.rows, state.viewPerson, state.useReal);
   }
@@ -276,8 +279,10 @@
     state.useReal = r;
     btn.closest('.toggle-group').querySelectorAll('button').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
+
     R.renderCharts(state.rows, state.viewPerson, state.useReal, state.charts);
     R.renderMetrics(state.rows, state.viewPerson, state.useReal);
+
     if (document.getElementById('tables-panel').style.display !== 'none') {
       R.renderTables(state.rows, state.useReal);
     }
@@ -287,8 +292,10 @@
     state.activeTab = tab;
     btn.closest('.toggle-group').querySelectorAll('button').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
+
     const charts = document.querySelector('.charts');
     const tables = document.getElementById('tables-panel');
+
     if (tab === 'charts') {
       charts.style.display = 'flex';
       tables.style.display = 'none';
@@ -302,31 +309,105 @@
   function handleActionClick(target) {
     const actionEl = target.closest('[data-action]');
     if (!actionEl) return;
+
     const action = actionEl.getAttribute('data-action');
+
     switch (action) {
-      case 'preload-setup': preloadSetup(); break;
-      case 'continue-to-main': continueToMain(); break;
-      case 'back-to-setup': backToSetup(); break;
-      case 'preload-main': preload(); break;
-      case 'run-projection': runProjection(); break;
-      case 'toggle-section': toggleSection(actionEl); break;
-      case 'toggle-all-sections': toggleAllSections(); break;
-      case 'add-account': addAccount(); break;
-      case 'remove-account': removeAccount(parseInt(actionEl.getAttribute('data-account-id'), 10)); break;
-      case 'set-view': setView(actionEl.getAttribute('data-value'), actionEl); break;
-      case 'set-real': setReal(actionEl.getAttribute('data-value') === 'true', actionEl); break;
-      case 'set-tab': setTab(actionEl.getAttribute('data-value'), actionEl); break;
-      default: break;
+      case 'preload-setup':
+        preloadSetup();
+        break;
+      case 'continue-to-main':
+        continueToMain();
+        break;
+      case 'back-to-setup':
+        backToSetup();
+        break;
+      case 'preload-main':
+        preload();
+        break;
+      case 'run-projection':
+        runProjection();
+        break;
+      case 'toggle-section':
+        toggleSection(actionEl);
+        break;
+      case 'toggle-all-sections':
+        toggleAllSections();
+        break;
+      case 'add-account':
+        addAccount();
+        break;
+      case 'remove-account':
+        removeAccount(parseInt(actionEl.getAttribute('data-account-id'), 10));
+        break;
+      case 'set-view':
+        setView(actionEl.getAttribute('data-value'), actionEl);
+        break;
+      case 'set-real':
+        setReal(actionEl.getAttribute('data-value') === 'true', actionEl);
+        break;
+      case 'set-tab':
+        setTab(actionEl.getAttribute('data-value'), actionEl);
+        break;
+      default:
+        break;
     }
+  }
+
+  function handleInputOrChange(target) {
+    if (target.matches('[data-action="setup-summary-input"]')) {
+      refreshSetupSummary();
+      return;
+    }
+
+    if (target.hasAttribute('data-account-id') && target.hasAttribute('data-field')) {
+      updateAccount(
+        parseInt(target.getAttribute('data-account-id'), 10),
+        target.getAttribute('data-field'),
+        target.value
+      );
+      return;
+    }
+
+    if (target.id === 'growthPreset') {
+      applyGrowthPreset(target.value);
+      return;
+    }
+
+    if (target.id === 'growth') {
+      syncGrowthPresetToValue();
+      return;
+    }
+
+    if (target.id === 'bniEnabled') {
+      document.getElementById('bni-fields').style.display = target.checked ? '' : 'none';
+    }
+  }
+
+  function initCurrencyFocusHandlers() {
+    document.addEventListener('focusin', (e) => {
+      if (!e.target.matches('.currency-input')) return;
+      if (String(e.target.value).trim() === '') return;
+
+      const parsed = D.parseCurrency(e.target.value);
+      e.target.value = String(Math.round(parsed));
+    });
+
+    document.addEventListener('focusout', (e) => {
+      if (!e.target.matches('.currency-input')) return;
+      R.applyCurrencyFormattingToInput(e.target);
+    });
   }
 
   function init() {
     R.initialiseCurrencyInputs();
     refreshSetupSummary();
     initCurrencyFocusHandlers();
+
     document.addEventListener('click', (e) => handleActionClick(e.target));
     document.addEventListener('input', (e) => handleInputOrChange(e.target));
     document.addEventListener('change', (e) => handleInputOrChange(e.target));
+
     syncGrowthPresetToValue();
   }
 
