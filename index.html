@@ -14,16 +14,44 @@
 
 <div class="app">
 
-  <div class="topbar">
-    <h1 class="topbar-title">Tax Planner</h1>
-    <p class="topbar-sub">This tool optimises the sequencing of pension and ISA withdrawals to minimise tax liabilities. It automates drawdown logic across your portfolio to ensure your retirement income remains as efficient as possible.</p>
-  </div>
+  <!-- ═══ Fixed frosted header ═══ -->
+  <header class="top-header">
+    <div class="top-header__inner">
+      <div class="title-block">
+        <h1>UK Retirement Tax Planner</h1>
+        <p>Optimise the sequencing of pension and ISA withdrawals to minimise tax liabilities across your whole retirement portfolio.</p>
+      </div>
+      <div class="top-header__controls">
+        <nav class="top-header__tabs">
+          <button data-action="switch-tab" data-tab="setup"       class="tab-btn tab-active">Setup</button>
+          <span class="tab-sep" aria-hidden="true"></span>
+          <button data-action="switch-tab" data-tab="assumptions" class="tab-btn">Assumptions</button>
+          <span class="tab-sep" aria-hidden="true"></span>
+          <button data-action="switch-tab" data-tab="results"     class="tab-btn">Results</button>
+        </nav>
+        <div class="top-header__actions">
+          <button class="btn btn-secondary" data-action="load-excel" type="button">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 9l4-4 4 4"/><path d="M4 15v4h16v-4"/></svg>
+            Load Excel
+          </button>
+          <button class="btn btn-success" data-action="save-setup" type="button">
+            <svg viewBox="0 0 24 24"><path d="M5 21h14"/><path d="M7 21V5h8l2 2v14"/><path d="M9 9h6"/><path d="M9 13h6"/></svg>
+            Save
+          </button>
+          <button class="btn btn-secondary" data-action="load-setup" type="button">
+            <svg viewBox="0 0 24 24"><path d="M4 7a2 2 0 0 1 2-2h7l2 2h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/></svg>
+            Load
+          </button>
+          <button class="btn btn-primary" data-action="switch-tab" data-tab="assumptions" type="button">
+            Continue &#x2192;
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
 
-  <nav class="tab-bar">
-    <button data-action="switch-tab" data-tab="setup"       class="tab-btn tab-active">Setup</button>
-    <button data-action="switch-tab" data-tab="assumptions" class="tab-btn">Assumptions</button>
-    <button data-action="switch-tab" data-tab="results"     class="tab-btn">Results</button>
-  </nav>
+  <!-- ═══ Scrolling page content ═══ -->
+  <div class="page-content">
 
   <!-- ═══════════════════════════════════════════
        TAB 1 — SETUP
@@ -34,23 +62,6 @@
       <div>
         <h1>Portfolio setup</h1>
         <p>Add the accounts you hold, their current values, and how they're invested. Once done, continue to assumptions.</p>
-      </div>
-      <div class="hero-actions">
-        <button class="btn-hero btn-hero-blue" data-action="load-excel" type="button">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M8 9l4-4 4 4"/><path d="M4 15v4h16v-4"/></svg>
-          Load Excel
-        </button>
-        <button class="btn-hero btn-hero-green" data-action="save-setup" type="button">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21h14"/><path d="M7 21V5h8l2 2v14"/><path d="M9 9h6"/><path d="M9 13h6"/></svg>
-          Save
-        </button>
-        <button class="btn-hero btn-hero-blue" data-action="load-setup" type="button">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7a2 2 0 0 1 2-2h7l2 2h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/></svg>
-          Load
-        </button>
-        <button class="btn-hero btn-hero-blue" data-action="switch-tab" data-tab="assumptions" type="button">
-          Continue to assumptions →
-        </button>
       </div>
     </div>
 
@@ -69,12 +80,12 @@
 
           <div>
             <label>Birth Year</label>
-            <input data-action="setup-summary-input" id="sp-p1dob" type="number" placeholder="e.g. 1968"/>
+            <div class="stepper-input"><input data-action="setup-summary-input" id="sp-p1dob" type="number" placeholder="e.g. 1968"/><button class="stepper-btn" data-step-for="sp-p1dob" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="sp-p1dob" data-step-direction="-1" type="button">&#x25BC;</button></div>
           </div>
 
           <div>
             <label>State Pension Age</label>
-            <input type="number" id="p1SPAge" placeholder="e.g. 67"/>
+            <div class="stepper-input"><input type="number" id="p1SPAge" placeholder="e.g. 67"/><button class="stepper-btn" data-step-for="p1SPAge" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="p1SPAge" data-step-direction="-1" type="button">&#x25BC;</button></div>
           </div>
 
           <div>
@@ -89,7 +100,7 @@
 
           <div class="full">
             <label>Salary Stop Age</label>
-            <input type="number" id="p1SalaryStopAge" placeholder="e.g. 60"/>
+            <div class="stepper-input"><input type="number" id="p1SalaryStopAge" placeholder="e.g. 60"/><button class="stepper-btn" data-step-for="p1SalaryStopAge" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="p1SalaryStopAge" data-step-direction="-1" type="button">&#x25BC;</button></div>
           </div>
         </div>
       </div>
@@ -112,12 +123,12 @@
 
           <div>
             <label>Birth Year</label>
-            <input data-action="setup-summary-input" id="sp-p2dob" type="number" placeholder="e.g. 1967"/>
+            <div class="stepper-input"><input data-action="setup-summary-input" id="sp-p2dob" type="number" placeholder="e.g. 1967"/><button class="stepper-btn" data-step-for="sp-p2dob" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="sp-p2dob" data-step-direction="-1" type="button">&#x25BC;</button></div>
           </div>
 
           <div>
             <label>State Pension Age</label>
-            <input type="number" id="p2SPAge" placeholder="e.g. 67"/>
+            <div class="stepper-input"><input type="number" id="p2SPAge" placeholder="e.g. 67"/><button class="stepper-btn" data-step-for="p2SPAge" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="p2SPAge" data-step-direction="-1" type="button">&#x25BC;</button></div>
           </div>
 
           <div>
@@ -132,7 +143,7 @@
 
           <div class="full">
             <label>Salary Stop Age</label>
-            <input type="number" id="p2SalaryStopAge" placeholder="e.g. 63"/>
+            <div class="stepper-input"><input type="number" id="p2SalaryStopAge" placeholder="e.g. 63"/><button class="stepper-btn" data-step-for="p2SalaryStopAge" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="p2SalaryStopAge" data-step-direction="-1" type="button">&#x25BC;</button></div>
           </div>
         </div>
       </div>
@@ -189,11 +200,11 @@
     <div class="range-card">
       <div class="range-field">
         <label>Start Year</label>
-        <input data-action="setup-summary-input" id="sp-startYear" type="number" placeholder="e.g. 2026"/>
+        <div class="stepper-input"><input data-action="setup-summary-input" id="sp-startYear" type="number" placeholder="e.g. 2026"/><button class="stepper-btn" data-step-for="sp-startYear" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="sp-startYear" data-step-direction="-1" type="button">&#x25BC;</button></div>
       </div>
       <div class="range-field">
         <label>End Year</label>
-        <input data-action="setup-summary-input" id="sp-endYear" type="number" placeholder="e.g. 2060"/>
+        <div class="stepper-input"><input data-action="setup-summary-input" id="sp-endYear" type="number" placeholder="e.g. 2060"/><button class="stepper-btn" data-step-for="sp-endYear" data-step-direction="1" type="button">&#x25B2;</button><button class="stepper-btn" data-step-for="sp-endYear" data-step-direction="-1" type="button">&#x25BC;</button></div>
       </div>
     </div>
 
@@ -239,7 +250,7 @@
   <!-- ═══════════════════════════════════════════
        TAB 2 — ASSUMPTIONS
   ═══════════════════════════════════════════ -->
-  <div id="tab-assumptions" class="tab-panel" style="display:none">
+  <div id="tab-assumptions" class="tab-panel">
 
     <div class="assump-cards">
 
@@ -445,7 +456,7 @@
   <!-- ═══════════════════════════════════════════
        TAB 3 — RESULTS
   ═══════════════════════════════════════════ -->
-  <div id="tab-results" class="tab-panel" style="display:none">
+  <div id="tab-results" class="tab-panel">
 
     <div style="margin-bottom:1rem">
       <button type="button" class="run-btn" data-action="run-projection">▶ Run projection</button>
@@ -513,6 +524,8 @@
     </div>
 
   </div><!-- /#tab-results -->
+
+  </div><!-- /.page-content -->
 
 </div><!-- /.app -->
 
