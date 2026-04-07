@@ -1,31 +1,4 @@
 (function () {
-  const PRELOAD = {
-    p1name: 'Woody',
-    p2name: 'Heidi',
-    p1age: 58,
-    p2age: 59,
-    woodyDOB: 1968,
-    heidiDOB: 1967,
-    startYear: 2026,
-    endYear: 2060,
-    spending: 45000,
-    stepDownPct: 0,
-    heidiSalary: 15000,
-    heidiSalaryStopAge: 63,
-    woodySalary: 0,
-    woodySalaryStopAge: 0,
-    woodySPAge: 67,
-    woodySP: 12000,
-    heidiSPAge: 67,
-    heidiSP: 12547,
-    growth: 4,
-    inflation: 2.5,
-    thresholdFromYearVal: 2028,
-    bniWoodyGIA: 20000,
-    bniHeidiGIA: 5000,
-    dividendYield: 1.5,
-  };
-
   const TAX_RULES = {
     '2026-27': {
       PA: 12570,
@@ -92,73 +65,6 @@
   const FIXED_CASH_WRAPPERS = new Set(['Cash']);
   const ISA_ALLOWANCE = 20000;
 
-  // IMPORTANT: owner now uses 'p1' / 'p2' — NOT names
-  const PRELOAD_ACCOUNTS = [
-    {
-      name: 'SIPP',
-      wrapper: 'SIPP',
-      owner: 'p1',
-      value: 450000,
-      alloc: { equities: 65, bonds: 35, cashlike: 0, cash: 0 },
-      rate: null,
-      monthlyDraw: null,
-    },
-    {
-      name: 'SIPP',
-      wrapper: 'SIPP',
-      owner: 'p2',
-      value: 190000,
-      alloc: { equities: 65, bonds: 35, cashlike: 0, cash: 0 },
-      rate: null,
-      monthlyDraw: null,
-    },
-    {
-      name: 'ISA',
-      wrapper: 'ISA',
-      owner: 'p1',
-      value: 260000,
-      alloc: { equities: 100, bonds: 0, cashlike: 0, cash: 0 },
-      rate: null,
-      monthlyDraw: null,
-    },
-    {
-      name: 'ISA',
-      wrapper: 'ISA',
-      owner: 'p2',
-      value: 140000,
-      alloc: { equities: 100, bonds: 0, cashlike: 0, cash: 0 },
-      rate: null,
-      monthlyDraw: null,
-    },
-    {
-      name: 'GIA',
-      wrapper: 'GIA',
-      owner: 'p1',
-      value: 150000,
-      alloc: { equities: 100, bonds: 0, cashlike: 0, cash: 0 },
-      rate: null,
-      monthlyDraw: null,
-    },
-    {
-      name: 'QMMF',
-      wrapper: 'GIA',
-      owner: 'p1',
-      value: 420000,
-      alloc: { equities: 0, bonds: 0, cashlike: 100, cash: 0 },
-      rate: 4.5,
-      monthlyDraw: null,
-    },
-    {
-      name: 'Cash',
-      wrapper: 'Cash',
-      owner: 'p1',
-      value: 100000,
-      alloc: { equities: 0, bonds: 0, cashlike: 0, cash: 100 },
-      rate: null,
-      monthlyDraw: null,
-    },
-  ];
-
   function parseCurrency(val) {
     if (val === null || val === undefined) return 0;
     return Number(String(val).replace(/[^0-9.-]+/g, '')) || 0;
@@ -175,14 +81,12 @@
   }
 
   window.RetireData = {
-    PRELOAD,
     TAX_RULES,
     MONEY_FIELDS,
     WRAPPERS,
     ALLOC_CLASSES,
     FIXED_CASH_WRAPPERS,
     ISA_ALLOWANCE,
-    PRELOAD_ACCOUNTS,
     parseCurrency,
     formatCurrency,
     formatMoney,
