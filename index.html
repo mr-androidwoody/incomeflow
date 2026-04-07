@@ -25,6 +25,7 @@
 
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn-save" data-action="load-excel" type="button">📊 Load Excel</button>
+      <button class="btn-save" data-action="preload-setup" type="button">⬇ Preload</button>
       <button class="btn-save" data-action="save-setup" type="button">💾 Save</button>
       <button class="btn-save" data-action="load-setup" type="button">📂 Load</button>
       <button class="btn-continue" data-action="continue-to-main" type="button">
@@ -38,28 +39,38 @@
 
     <!-- People -->
     <div class="setup-panel">
-      <div class="setup-panel-title">People</div>
-      <div class="setup-panel-sub">Name the people in this plan.</div>
+      <div class="setup-panel-title">People &amp; projection</div>
+      <div class="setup-panel-sub">Names, birth years, and projection range.</div>
 
       <div class="people-grid">
         <div>
-          <label>Person 1</label>
+          <label>Person 1 name</label>
           <input data-action="setup-summary-input" id="sp-p1name" type="text" placeholder="Person 1"/>
         </div>
 
         <div>
-          <label>Current age</label>
-          <input data-action="setup-summary-input" id="sp-p1age" type="number"/>
-        </div>
-
-        <div>
-          <label>Person 2</label>
+          <label>Person 2 name</label>
           <input data-action="setup-summary-input" id="sp-p2name" type="text" placeholder="Person 2"/>
         </div>
 
         <div>
-          <label>Current age</label>
-          <input data-action="setup-summary-input" id="sp-p2age" type="number"/>
+          <label>Person 1 – birth year</label>
+          <input data-action="setup-summary-input" id="sp-p1dob" type="number" placeholder="e.g. 1968"/>
+        </div>
+
+        <div>
+          <label>Person 2 – birth year</label>
+          <input data-action="setup-summary-input" id="sp-p2dob" type="number" placeholder="e.g. 1967"/>
+        </div>
+
+        <div>
+          <label>Projection start year</label>
+          <input data-action="setup-summary-input" id="sp-startYear" type="number" placeholder="e.g. 2026"/>
+        </div>
+
+        <div>
+          <label>Projection end year</label>
+          <input data-action="setup-summary-input" id="sp-endYear" type="number" placeholder="e.g. 2060"/>
         </div>
       </div>
     </div>
@@ -112,6 +123,7 @@
 
       <div style="display:flex;gap:8px">
         <button class="btn-save" data-action="load-excel" type="button">📊 Load Excel</button>
+      <button class="btn-save" data-action="preload-setup" type="button">⬇ Preload</button>
         <button class="btn-save" data-action="save-setup" type="button">💾 Save</button>
         <button class="btn-save" data-action="load-setup" type="button">📂 Load</button>
         <button class="btn-continue" data-action="continue-to-main" type="button">
@@ -156,6 +168,7 @@
       <h1>rUK Retirement Tax Calculator</h1>
       <div style="display:flex;gap:6px">
         <button type="button" class="preload-btn" data-action="back-to-setup">← Setup</button>
+        <button type="button" class="preload-btn" data-action="preload-calc">⬇ Preload</button>
       </div>
     </div>
 
@@ -170,13 +183,14 @@
         <div class="section-title" style="cursor:default">People</div>
         <div class="section-body">
           <div class="two-col">
-            <div class="field"><label data-p1="– birth year">Woody – birth year</label><input type="number" id="woodyDOB" placeholder="e.g. 1968"></div>
-            <div class="field"><label data-p2="– birth year">Heidi – birth year</label><input type="number" id="heidiDOB" placeholder="e.g. 1967"></div>
+            <div class="field"><label data-p1="– birth year">Woody – birth year</label><input type="number" id="woodyDOB" class="from-setup" readonly></div>
+            <div class="field"><label data-p2="– birth year">Heidi – birth year</label><input type="number" id="heidiDOB" class="from-setup" readonly></div>
           </div>
           <div class="two-col">
-            <div class="field"><label>Projection start year</label><input type="number" id="startYear" placeholder="e.g. 2026"></div>
-            <div class="field"><label>Projection end year</label><input type="number" id="endYear" placeholder="e.g. 2060"></div>
+            <div class="field"><label>Projection start year</label><input type="number" id="startYear" class="from-setup" readonly></div>
+            <div class="field"><label>Projection end year</label><input type="number" id="endYear" class="from-setup" readonly></div>
           </div>
+          <div class="hint">Set on the Setup page. Use ← Setup to change.</div>
         </div>
       </div>
 
@@ -247,8 +261,8 @@
         <div class="section-title" data-action="toggle-section">Cash holdings<span class="section-chevron">▸</span></div>
         <div class="section-body collapsed">
           <div class="two-col">
-            <div class="field"><label data-p1="cash (£)">Woody cash (£)</label><input type="text" id="woodyCash" class="currency-input" placeholder="e.g. 96,264"></div>
-            <div class="field"><label data-p2="cash (£)">Heidi cash (£)</label><input type="text" id="heidiCash" class="currency-input" placeholder="e.g. 100"></div>
+            <div class="field"><label data-p1="cash (£)">Woody cash (£)</label><input type="text" id="woodyCash" class="currency-input from-setup" readonly></div>
+            <div class="field"><label data-p2="cash (£)">Heidi cash (£)</label><input type="text" id="heidiCash" class="currency-input from-setup" readonly></div>
           </div>
           <div class="hint">Cash earns no return and is not inflation-uprated.</div>
         </div>
@@ -266,8 +280,8 @@
         <div class="section-title" data-action="toggle-section">Pension (SIPP) balances<span class="section-chevron">▸</span></div>
         <div class="section-body collapsed">
           <div class="two-col">
-            <div class="field"><label data-p1="(£)">Woody (£)</label><input type="text" id="woodySIPP" class="currency-input" placeholder="e.g. 450,000"></div>
-            <div class="field"><label data-p2="(£)">Heidi (£)</label><input type="text" id="heidiSIPP" class="currency-input" placeholder="e.g. 200,000"></div>
+            <div class="field"><label data-p1="(£)">Woody (£)</label><input type="text" id="woodySIPP" class="currency-input from-setup" readonly></div>
+            <div class="field"><label data-p2="(£)">Heidi (£)</label><input type="text" id="heidiSIPP" class="currency-input from-setup" readonly></div>
           </div>
         </div>
       </div>
@@ -276,8 +290,8 @@
         <div class="section-title" data-action="toggle-section">ISA balances<span class="section-chevron">▸</span></div>
         <div class="section-body collapsed">
           <div class="two-col">
-            <div class="field"><label data-p1="(£)">Woody (£)</label><input type="text" id="woodyISA" class="currency-input" placeholder="e.g. 250,000"></div>
-            <div class="field"><label data-p2="(£)">Heidi (£)</label><input type="text" id="heidiISA" class="currency-input" placeholder="e.g. 150,000"></div>
+            <div class="field"><label data-p1="(£)">Woody (£)</label><input type="text" id="woodyISA" class="currency-input from-setup" readonly></div>
+            <div class="field"><label data-p2="(£)">Heidi (£)</label><input type="text" id="heidiISA" class="currency-input from-setup" readonly></div>
           </div>
         </div>
       </div>
@@ -286,8 +300,8 @@
         <div class="section-title" data-action="toggle-section">GIA balances (equity growth)<span class="section-chevron">▸</span></div>
         <div class="section-body collapsed">
           <div class="two-col">
-            <div class="field"><label data-p1="(£)">Woody (£)</label><input type="text" id="woodyGIA" class="currency-input" placeholder="e.g. 154,000"></div>
-            <div class="field"><label data-p2="(£)">Heidi (£)</label><input type="text" id="heidiGIA" class="currency-input" placeholder="e.g. 5,000"></div>
+            <div class="field"><label data-p1="(£)">Woody (£)</label><input type="text" id="woodyGIA" class="currency-input from-setup" readonly></div>
+            <div class="field"><label data-p2="(£)">Heidi (£)</label><input type="text" id="heidiGIA" class="currency-input from-setup" readonly></div>
           </div>
           <div class="field" style="margin-top:6px">
             <label>Dividend yield on GIA equities (%)</label>
