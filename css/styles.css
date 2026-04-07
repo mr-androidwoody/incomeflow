@@ -1,12 +1,21 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: system-ui, sans-serif; font-size: 14px; background: #f5f5f5; color: #1a1a1a; }
-  .app { display: grid; grid-template-columns: 340px 1fr; min-height: 100vh; }
+  .app { min-height: 100vh; background: #f5f5f5; }
 
-  .sidebar { background: #fff; border-right: 1px solid #e0e0e0; overflow-y: auto; display: flex; flex-direction: column; }
-  .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; border-bottom: 2px solid #e0e8ff; background: #f5f8ff; flex-shrink: 0; }
-  .sidebar-header h1 { font-size: 13px; font-weight: 700; color: #111; }
-  .sidebar-body { flex: 1; overflow-y: auto; }
+  /* ── Tab bar ── */
+  .tab-bar { display: flex; border-bottom: 2px solid #e0e0e0; background: #fff; }
+  .tab-btn  { padding: 10px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #555; }
+  .tab-btn:hover { color: #1a56db; }
+  .tab-active { font-weight: 700; color: #1a56db; border-bottom: 2px solid #1a56db; margin-bottom: -2px; }
+
+  /* ── Tab panels ── */
+  .tab-panel { padding: 1.25rem; }
+
+  /* ── P2 disabled state ── */
+  .p2-disabled { opacity: 0.45; pointer-events: none; }
+
+  .sidebar-body { }
   .preload-btn { padding: 4px 10px; font-size: 12px; background: #f0f4ff; color: #1a56db; border: 1px solid #c7d7f8; border-radius: 5px; cursor: pointer; white-space: nowrap; }
   .preload-btn:hover { background: #dce8ff; }
 
@@ -28,7 +37,7 @@
   .hint { font-size: 11px; color: #999; margin-top: 3px; }
   .from-setup { background: #e8f0fe !important; color: #374151 !important; border-color: #c7d7f8 !important; cursor: not-allowed !important; }
 
-  .main { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+  .main { display: flex; flex-direction: column; gap: 1rem; }
 
   .controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .toggle-group { display: flex; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
@@ -66,12 +75,6 @@
   .data-table td.depleted { color: #b91c1c; font-weight: 600; }
 
   /* ── Setup page ── */
-  #setup-page {
-    min-height: 100vh;
-    background: #f5f5f5;
-    padding: 2rem;
-    font-family: system-ui, sans-serif;
-  }
   .setup-header {
     margin: 0 0 1.5rem;
     display: flex;
