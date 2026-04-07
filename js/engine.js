@@ -175,7 +175,11 @@
         const p1Unmet = Math.max(0, p1Half - p1Drawn.GIA - p1Drawn.SIPP - p1Drawn.ISA);
         p2Drawn       = C.withdraw(p2Bal, p2WrapperOrder, shortfall / 2 + p1Unmet);
         const p2Unmet = Math.max(0, (shortfall / 2 + p1Unmet) - p2Drawn.GIA - p2Drawn.SIPP - p2Drawn.ISA);
-        if (p2Unmet > 0) C.withdraw(p1Bal, p1WrapperOrder, p2Unmet);
+        if (p2Unmet > 0) {
+          const extra = C.withdraw(p1Bal, p1WrapperOrder, p2Unmet);
+          p1Drawn.GIA += extra.GIA; p1Drawn.SIPP += extra.SIPP; p1Drawn.ISA += extra.ISA;
+          p1Drawn.sippTaxable += extra.sippTaxable;
+        }
 
       } else {
         // FIX 3: tax-aware mode — SIPP to fill PA, then proportional split by remaining headroom
@@ -204,8 +208,8 @@
         const p1Weight      = totalHeadroom > 0 ? p1RemHeadroom / totalHeadroom : 0.5;
         const p2Weight      = 1 - p1Weight;
 
-        const p1NonSippOrder = p1WrapperOrder.filter(w => w !== 'SIPP');
-        const p2NonSippOrder = p2WrapperOrder.filter(w => w !== 'SIPP');
+        const p1NonSippOrder = p1WrapperOrder.filter(w => w !== 'SIPP' && w !== 'Cash');
+        const p2NonSippOrder = p2WrapperOrder.filter(w => w !== 'SIPP' && w !== 'Cash');
         const p1RemDrawn = C.withdraw(p1Bal, p1NonSippOrder, remShortfall * p1Weight);
         const p2RemDrawn = C.withdraw(p2Bal, p2NonSippOrder, remShortfall * p2Weight);
 
