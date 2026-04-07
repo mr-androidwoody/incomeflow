@@ -343,10 +343,73 @@
   }
 
   // ─────────────────────────────
+  // GATHER INPUTS (DOM → plain object)
+  // Single source of truth for all sidebar DOM reads.
+  // engine.js must contain zero document.* calls.
+  // ─────────────────────────────
+  function gv(id)  { return D.parseCurrency(safeEl(id)?.value || ''); }
+  function gvi(id) { return parseInt(String(D.parseCurrency(safeEl(id)?.value || '')), 10) || 0; }
+  function gvs(id) { return safeEl(id)?.value || ''; }
+
+  function getOrder(prefix, slots) {
+    const o = [];
+    for (let i = 1; i <= slots; i++) o.push(gvs(prefix + 'Order' + i));
+    return o;
+  }
+
+  function gatherInputs() {
+    const bniEnabled = safeEl('bniEnabled')?.checked || false;
+    const growthRaw    = gv('growth');
+    const inflationRaw = gv('inflation');
+
+    return {
+      startYear:        gvi('startYear'),
+      endYear:          gvi('endYear'),
+      p1DOB:            gvi('woodyDOB'),
+      p2DOB:            gvi('heidiDOB'),
+      p1name:           safeEl('sp-p1name')?.value?.trim() || 'Person 1',
+      p2name:           safeEl('sp-p2name')?.value?.trim() || 'Person 2',
+      spending:         gv('spending'),
+      stepDownPct:      gvi('stepDownPct'),
+      p1Salary:         gv('woodySalary'),
+      p1SalaryStop:     gvi('woodySalaryStopAge'),
+      p2Salary:         gv('heidiSalary'),
+      p2SalaryStop:     gvi('heidiSalaryStopAge'),
+      p1SPAge:          gvi('woodySPAge'),
+      p1SPAmt:          gv('woodySP'),
+      p2SPAge:          gvi('heidiSPAge'),
+      p2SPAmt:          gv('heidiSP'),
+      growth:           growthRaw / 100,
+      inflation:        inflationRaw / 100,
+      thresholdMode:    document.querySelector('input[name="thresholdMode"]:checked')?.value || 'frozen',
+      thresholdFromYear: parseInt(safeEl('thresholdFromYearVal')?.value) || 2028,
+      bniEnabled,
+      bniP1GIA:         bniEnabled ? gv('bniWoodyGIA') : 0,
+      bniP2GIA:         bniEnabled ? gv('bniHeidiGIA') : 0,
+      dividendYield:    (parseFloat(safeEl('dividendYield')?.value) || 1.5) / 100,
+      withdrawalMode:   document.querySelector('input[name="withdrawalMode"]:checked')?.value || '50/50',
+      p1Bal: {
+        Cash: gv('woodyCash'),
+        GIA:  gv('woodyGIA'),
+        SIPP: gv('woodySIPP'),
+        ISA:  gv('woodyISA'),
+      },
+      p2Bal: {
+        Cash: gv('heidiCash'),
+        GIA:  gv('heidiGIA'),
+        SIPP: gv('heidiSIPP'),
+        ISA:  gv('heidiISA'),
+      },
+      p1Order: getOrder('woody', 4),
+      p2Order: getOrder('heidi', 4),
+    };
+  }
+
+  // ─────────────────────────────
   // RUN PROJECTION
   // ─────────────────────────────
   function runProjection() {
-    const result = E.runProjection(state.interestAccounts);
+    const result = E.runProjection(gatherInputs(), state.interestAccounts);
     if (!result) return;
     CR.setResults(result.rows);
     CR.renderAlerts(result.depletions);

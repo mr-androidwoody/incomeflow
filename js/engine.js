@@ -2,57 +2,37 @@
   const D = window.RetireData;
   const C = window.RetireCalc;
 
-  function gv(id)  { return D.parseCurrency(document.getElementById(id)?.value || ''); }
-  function gvi(id) { return parseInt(String(D.parseCurrency(document.getElementById(id)?.value || '')), 10) || 0; }
-  function gvs(id) { return document.getElementById(id)?.value || ''; }
+  // inputs  — plain object built by gatherInputs() in app.js
+  // accounts — interest-bearing accounts array (may be empty)
+  function runProjection(inputs, accounts) {
+    const {
+      startYear, endYear,
+      p1DOB, p2DOB,
+      p1name, p2name,
+      spending, stepDownPct,
+      p1Salary, p1SalaryStop,
+      p2Salary, p2SalaryStop,
+      p1SPAge, p1SPAmt,
+      p2SPAge, p2SPAmt,
+      growth, inflation,
+      thresholdMode, thresholdFromYear,
+      bniEnabled, bniP1GIA, bniP2GIA,
+      dividendYield,
+      withdrawalMode,
+      p1Order, p2Order,
+    } = inputs;
 
-  function getOrder(prefix, slots) {
-    const o = [];
-    for (let i = 1; i <= slots; i++) o.push(gvs(prefix + 'Order' + i));
-    return o;
-  }
+    // Deep-copy balances so the engine never mutates the caller's object
+    const p1Bal = { ...inputs.p1Bal };
+    const p2Bal = { ...inputs.p2Bal };
 
-  function runProjection(interestAccounts) {
-    const startYear = gvi('startYear');
-    const endYear   = gvi('endYear');
     if (!startYear || !endYear || endYear <= startYear) {
       alert('Please enter valid start and end years.'); return null;
     }
 
-    const p1DOB           = gvi('woodyDOB');
-    const p2DOB           = gvi('heidiDOB');
-    const spending        = gv('spending');
-    const stepDownPct     = gvi('stepDownPct');
-    const p2Salary        = gv('heidiSalary');
-    const p2SalaryStop    = gvi('heidiSalaryStopAge');
-    const p1Salary        = gv('woodySalary');
-    const p1SalaryStop    = gvi('woodySalaryStopAge');
-    const p1SPAge         = gvi('woodySPAge');
-    const p1SPAmt         = gv('woodySP');
-    const p2SPAge         = gvi('heidiSPAge');
-    const p2SPAmt         = gv('heidiSP');
-    const growth          = gv('growth') / 100;
-    const inflation       = gv('inflation') / 100;
-    const thresholdMode   = document.querySelector('input[name="thresholdMode"]:checked')?.value || 'frozen';
-    const thresholdFromYear = parseInt(document.getElementById('thresholdFromYearVal')?.value) || 2028;
-    const bniEnabled      = document.getElementById('bniEnabled')?.checked || false;
-    const bniP1GIA        = bniEnabled ? gv('bniWoodyGIA') : 0;
-    const bniP2GIA        = bniEnabled ? gv('bniHeidiGIA') : 0;
-    const ISA_ALLOWANCE   = D.ISA_ALLOWANCE;
-    const dividendYieldRaw = parseFloat(document.getElementById('dividendYield')?.value) || 1.5;
-    const dividendYield   = dividendYieldRaw / 100;
-    const withdrawalMode  = document.querySelector('input[name="withdrawalMode"]:checked')?.value || '50/50';
+    const ISA_ALLOWANCE = D.ISA_ALLOWANCE;
 
-    const intAccts = (interestAccounts || []).map(a => ({ ...a }));
-
-    const p1Bal = { Cash: gv('woodyCash'), GIA: gv('woodyGIA'), SIPP: gv('woodySIPP'), ISA: gv('woodyISA') };
-    const p2Bal = { Cash: gv('heidiCash'), GIA: gv('heidiGIA'), SIPP: gv('heidiSIPP'), ISA: gv('heidiISA') };
-
-    const p1Order = getOrder('woody', 4);
-    const p2Order = getOrder('heidi', 4);
-
-    const p1name = document.getElementById('sp-p1name')?.value?.trim() || 'Person 1';
-    const p2name = document.getElementById('sp-p2name')?.value?.trim() || 'Person 2';
+    const intAccts = (accounts || []).map(a => ({ ...a }));
 
     let p1GIACost = p1Bal.GIA;
     let p2GIACost = p2Bal.GIA;
@@ -134,7 +114,7 @@
         const effectiveRate  = C.interestEffective(a.rate);
         const interestEarned = (a.balance || 0) * effectiveRate;
         const annualTarget   = (a.monthlyDraw || 0) * 12;
-        const isP1           = a.owner === p1name;
+        const isP1           = a.owner === 'p1';  // FIX: compare token, not display name
         if (annualTarget <= 0) {
           a.balance += interestEarned;
           if (a.wrapper === 'GIA') { if (isP1) p1IntTaxable += interestEarned; else p2IntTaxable += interestEarned; }
@@ -186,7 +166,6 @@
         // FIX 3: tax-aware mode — SIPP to fill PA, then proportional split by remaining headroom
 
         // Step 1: PA headroom — deduct all known income that consumes PA
-        // Interest and dividends are included so we don't overfill SIPP into PSA/dividend band
         const p1GuaranteedNS = p1SP + p1SalInc + p1IntTaxable + p1Divs;
         const p2GuaranteedNS = p2SP + p2SalInc + p2IntTaxable + p2Divs;
         const p1PAHeadroom   = Math.max(0, effThresholds.PA - p1GuaranteedNS);
@@ -275,7 +254,7 @@
       const p1NI = C.calcEmployeeNI(p1SalInc, effThresholds, p1Age >= p1SPAge);
       const p2NI = C.calcEmployeeNI(p2SalInc, effThresholds, p2Age >= p2SPAge);
 
-      // Depletion tracking
+      // Depletion tracking — keys kept as "${name} Wrapper" (unchanged; rename deferred)
       const checkMap = {
         [`${p1name} Cash`]: p1Bal.Cash, [`${p1name} GIA`]: p1Bal.GIA,
         [`${p1name} SIPP`]: p1Bal.SIPP, [`${p1name} ISA`]: p1Bal.ISA,
@@ -287,8 +266,9 @@
           depletions[key] = { year, age: year - (key.startsWith(p1name) ? p1DOB : p2DOB) };
       });
 
-      const intBalP1 = intAccts.filter(a => a.owner === p1name).reduce((s, a) => s + (a.balance || 0), 0);
-      const intBalP2 = intAccts.filter(a => a.owner !== p1name).reduce((s, a) => s + (a.balance || 0), 0);
+      // FIX: filter by 'p1'/'p2' token, not display name
+      const intBalP1 = intAccts.filter(a => a.owner === 'p1').reduce((s, a) => s + (a.balance || 0), 0);
+      const intBalP2 = intAccts.filter(a => a.owner !== 'p1').reduce((s, a) => s + (a.balance || 0), 0);
 
       rows.push({
         year, p1Age, p2Age,
