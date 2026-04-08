@@ -831,16 +831,6 @@ input[type="radio"] { accent-color: var(--accent); }
   line-height: 1.42;
 }
 
-.assump-intro-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex: 0 0 auto;
-  margin-left: auto;
-  white-space: nowrap;
-}
-
 .assump-layout {
   display: flex;
   flex-direction: column;
@@ -1004,17 +994,6 @@ input[type="radio"] { accent-color: var(--accent); }
   .assump-intro-row {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .assump-intro-actions {
-    width: 100%;
-    justify-content: flex-start;
-    margin-left: 0;
-  }
-
-  .assump-intro-actions .btn {
-    width: 100%;
-    justify-content: center;
   }
 }
 
