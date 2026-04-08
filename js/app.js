@@ -6,6 +6,7 @@
   const CR = window.RetireCalcRender;
 
   const STORAGE_KEY = 'rukRetirementSetup';
+  const ASSUMPTIONS_KEY = 'rukRetirementAssumptions'; 
 
   const state = {
     portfolioAccounts: [],
@@ -126,6 +127,11 @@
     };
   }
 
+  function readAssumptionsInputs() {
+    return readSetupInputs().assumptions;
+  }   
+
+    
   function applySetupInputs(data) {
     if (!data) return;
 
@@ -202,6 +208,51 @@
     }
   }
 
+    function applyAssumptionsInputs(a) {
+      if (!a) return;
+    
+      const sv = (id, val) => {
+        const el = safeEl(id);
+        if (el && val != null) el.value = val;
+      };
+    
+      sv('spending',          a.spending);
+      sv('stepDownPct',       a.stepDownPct);
+      sv('growth',            a.growth);
+      sv('inflation',         a.inflation);
+      sv('thresholdFromYearVal', a.thresholdFromYear);
+      sv('dividendYield',     a.dividendYield);
+      sv('bniP1GIA',          a.bniP1GIA);
+      sv('bniP2GIA',          a.bniP2GIA);
+    
+      if (a.thresholdMode) {
+        const r = document.querySelector(`input[name="thresholdMode"][value="${a.thresholdMode}"]`);
+        if (r) r.checked = true;
+      }
+    
+      if (a.withdrawalMode) {
+        const r = document.querySelector(`input[name="withdrawalMode"][value="${a.withdrawalMode}"]`);
+        if (r) r.checked = true;
+      }
+    
+      ['p1Order1','p1Order2','p1Order3','p2Order1','p2Order2','p2Order3']
+        .forEach(id => sv(id, a[id]));
+    
+      const bni = safeEl('bniEnabled');
+      if (bni) {
+        bni.checked = !!a.bniEnabled;
+        ['bniP1GIA','bniP2GIA'].forEach(id => {
+          const el = safeEl(id);
+          if (el) {
+            el.disabled = !a.bniEnabled;
+            el.style.opacity = a.bniEnabled ? '' : '0.45';
+          }
+        });
+      }
+    }
+
+    
+
   // ─────────────────────────────
   // OWNER NAMES
   // ─────────────────────────────
@@ -235,6 +286,39 @@
     } catch (err) {
       console.error(err);
       showToast('Load failed – see console', true);
+    }
+  }
+
+  function saveAssumptions() {
+    try {
+      const data = readAssumptionsInputs();
+      localStorage.setItem(ASSUMPTIONS_KEY, JSON.stringify(data));
+      showToast('Assumptions saved ✓');
+    } catch (err) {
+      console.error(err);
+      showToast('Save failed – see console', true);
+    }
+  }
+
+  function deleteAssumptions() {
+    try {
+      localStorage.removeItem(ASSUMPTIONS_KEY);
+
+      applyAssumptionsInputs({
+        spending: '',
+        stepDownPct: '0',
+        growth: '',
+        inflation: '',
+        thresholdMode: 'frozen',
+        withdrawalMode: 'tax-aware',
+        dividendYield: '1.5',
+        bniEnabled: false
+      });
+
+      showToast('Saved assumptions deleted');
+    } catch (err) {
+      console.error(err);
+      showToast('Delete failed – see console', true);
     }
   }
 
@@ -574,170 +658,200 @@
     };
   }
 
-  // ─────────────────────────────
-  // RUN PROJECTION
-  // ─────────────────────────────
-  function runProjection() {
-    const result = E.runProjection(gatherInputs(), state.portfolioAccounts);
-    if (!result) return;
-    CR.setResults(result.rows);
-    CR.renderAlerts(result.depletions);
-    CR.renderMetrics();
-    CR.renderCharts();
-    // Auto-advance to Results tab
-    RetireTabs.switchTab('results');
-    state.activeTab = 'results';
-  }
-
-  // ─────────────────────────────
-  // CURRENCY FORMATTING
-  // ─────────────────────────────
-  document.addEventListener('focusin', (e) => {
-    if (!e.target.matches('.currency-input')) return;
-    if (String(e.target.value).trim() === '') return;
-    e.target.value = String(Math.round(D.parseCurrency(e.target.value)));
-  });
-  document.addEventListener('focusout', (e) => {
-    if (!e.target.matches('.currency-input')) return;
-    R.applyCurrencyFormattingToInput(e.target);
-  });
-
-  // ─────────────────────────────
-  // GLOBAL CLICK DISPATCHER
-  // ─────────────────────────────
-  document.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-action]');
-    if (!el) return;
-    const action = el.dataset.action;
-
-    if (action === 'add-account')    return addAccount();
-    if (action === 'remove-account') return removeAccount(el);
-    if (action === 'save-setup')     return saveSetup();
-    if (action === 'load-setup')     return loadSetup();
-    if (action === 'load-excel')     return window.RetireExcelLoader.openFilePicker();
-    if (action === 'run-projection') return runProjection();
-
-    if (action === 'switch-tab') {
-      const tab = el.dataset.tab;
-      if (state.activeTab === 'setup') syncSetupToAssumptions();
-      state.activeTab = tab;
-      return RetireTabs.switchTab(tab);
+    // ─────────────────────────────
+    // RUN PROJECTION
+    // ─────────────────────────────
+    function runProjection() {
+      const result = E.runProjection(gatherInputs(), state.portfolioAccounts);
+      if (!result) return;
+    
+      CR.setResults(result.rows);
+      CR.renderAlerts(result.depletions);
+      CR.renderMetrics();
+      CR.renderCharts();
+    
+      // Auto-advance to Results tab
+      RetireTabs.switchTab('results');
+      state.activeTab = 'results';
     }
-
-    if (action === 'view-both')  return CR.setView('both', el);
-    if (action === 'view-p1') return CR.setView('p1',   el);
-    if (action === 'view-p2') return CR.setView('p2',   el);
-    if (action === 'real-on')    return CR.setReal(true,  el);
-    if (action === 'real-off')   return CR.setReal(false, el);
-    if (action === 'tab-charts') return CR.setTab('charts', el);
-    if (action === 'tab-tables') return CR.setTab('tables', el);
-  });
-
-  // BNI checkbox — enable/disable inputs (fields always visible)
-  document.addEventListener('change', (e) => {
-    if (e.target.id === 'bniEnabled') {
-      const enabled = e.target.checked;
-      ['bniP1GIA', 'bniP2GIA'].forEach(id => {
-        const el = safeEl(id);
-        if (el) {
-          el.disabled = !enabled;
-          el.style.opacity = enabled ? '' : '0.45';
-        }
-      });
-    }
-
-    // P2 toggle checkbox
-    if (e.target.id === 'p2enabled') {
-      state.p2enabled = e.target.checked;
-      applyP2State();
-    }
-  });
-
-  // ─────────────────────────────
-  // EXCEL LOAD
-  // ─────────────────────────────
-  document.addEventListener('excel-loaded', (e) => {
-    const { accounts, params } = e.detail;
-
-    // ── Setup page accounts ──────────────────
-    state.portfolioAccounts = [];
-    state.nextId = 1;
-    const tbody = safeEl('acct-tbody');
-    if (tbody) tbody.innerHTML = '';
-    const ownerNames = [
-      String(params.p1name || 'Person 1'),
-      String(params.p2name || 'Person 2'),
-    ];
-    // Update name fields
-    if (safeEl('sp-p1name')) safeEl('sp-p1name').value = ownerNames[0];
-    if (safeEl('sp-p2name')) safeEl('sp-p2name').value = ownerNames[1];
-
-    accounts.forEach(a => {
-      const acc = { id: state.nextId++, ...a };
-      state.portfolioAccounts.push(acc);
-      R.renderAccountRow(acc, ownerNames);
-      R.updateRowBadge(acc);
-      R.applyWrapperFieldState(acc);
+    
+    // ─────────────────────────────
+    // CURRENCY FORMATTING
+    // ─────────────────────────────
+    document.addEventListener('focusin', (e) => {
+      if (!e.target.matches('.currency-input')) return;
+      if (String(e.target.value).trim() === '') return;
+      e.target.value = String(Math.round(D.parseCurrency(e.target.value)));
     });
-    refreshSetupSummary();
-
-    // ── Calculator sidebar params ────────────
-    const MONEY = D.MONEY_FIELDS;
-    Object.entries(params).forEach(([k, v]) => {
-      if (k === 'p1name' || k === 'p2name') return; // handled above
-      const el = safeEl(k);
+    
+    document.addEventListener('focusout', (e) => {
+      if (!e.target.matches('.currency-input')) return;
+      R.applyCurrencyFormattingToInput(e.target);
+    });
+    
+    // ─────────────────────────────
+    // GLOBAL CLICK DISPATCHER
+    // ─────────────────────────────
+    document.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-action]');
       if (!el) return;
-      if (el.type === 'checkbox') {
-        el.checked = String(v).toLowerCase() === 'true';
-        if (el.id === 'bniEnabled') {
-          // Enable/disable BNI inputs to match loaded state
-          ['bniP1GIA', 'bniP2GIA'].forEach(fid => {
-            const f = safeEl(fid);
-            if (f) { f.disabled = !el.checked; f.style.opacity = el.checked ? '' : '0.45'; }
-          });
-        }
-        return;
+    
+      const action = el.dataset.action;
+    
+      if (action === 'add-account')    return addAccount();
+      if (action === 'remove-account') return removeAccount(el);
+      if (action === 'save-setup')     return saveSetup();
+      if (action === 'load-setup')     return loadSetup();
+      if (action === 'save-assumptions')   return saveAssumptions();
+      if (action === 'delete-assumptions') return deleteAssumptions();
+      if (action === 'load-excel')     return window.RetireExcelLoader.openFilePicker();
+      if (action === 'run-projection') return runProjection();
+    
+      if (action === 'switch-tab') {
+        const tab = el.dataset.tab;
+        if (state.activeTab === 'setup') syncSetupToAssumptions();
+        state.activeTab = tab;
+        return RetireTabs.switchTab(tab);
       }
-      if (el.type === 'radio') return; // handled separately below
-      el.value = MONEY.has(k) ? formatCurrency(Number(v) || 0) : v;
+    
+      if (action === 'view-both')   return CR.setView('both', el);
+      if (action === 'view-p1')     return CR.setView('p1', el);
+      if (action === 'view-p2')     return CR.setView('p2', el);
+      if (action === 'real-on')     return CR.setReal(true, el);
+      if (action === 'real-off')    return CR.setReal(false, el);
+      if (action === 'tab-charts')  return CR.setTab('charts', el);
+      if (action === 'tab-tables')  return CR.setTab('tables', el);
     });
-
-    // thresholdMode radio
-    if (params.thresholdMode) {
-      const radio = document.querySelector(`input[name="thresholdMode"][value="${params.thresholdMode}"]`);
-      if (radio) radio.checked = true;
+    
+    // ─────────────────────────────
+    // BNI + P2 TOGGLES
+    // ─────────────────────────────
+    document.addEventListener('change', (e) => {
+      if (e.target.id === 'bniEnabled') {
+        const enabled = e.target.checked;
+        ['bniP1GIA', 'bniP2GIA'].forEach(id => {
+          const el = safeEl(id);
+          if (el) {
+            el.disabled = !enabled;
+            el.style.opacity = enabled ? '' : '0.45';
+          }
+        });
+      }
+    
+      if (e.target.id === 'p2enabled') {
+        state.p2enabled = e.target.checked;
+        applyP2State();
+      }
+    });
+    
+    // ─────────────────────────────
+    // EXCEL LOAD
+    // ─────────────────────────────
+    document.addEventListener('excel-loaded', (e) => {
+      const { accounts, params } = e.detail;
+    
+      state.portfolioAccounts = [];
+      state.nextId = 1;
+    
+      const tbody = safeEl('acct-tbody');
+      if (tbody) tbody.innerHTML = '';
+    
+      const ownerNames = [
+        String(params.p1name || 'Person 1'),
+        String(params.p2name || 'Person 2'),
+      ];
+    
+      if (safeEl('sp-p1name')) safeEl('sp-p1name').value = ownerNames[0];
+      if (safeEl('sp-p2name')) safeEl('sp-p2name').value = ownerNames[1];
+    
+      accounts.forEach(a => {
+        const acc = { id: state.nextId++, ...a };
+        state.portfolioAccounts.push(acc);
+        R.renderAccountRow(acc, ownerNames);
+        R.updateRowBadge(acc);
+        R.applyWrapperFieldState(acc);
+      });
+    
+      refreshSetupSummary();
+    
+      const MONEY = D.MONEY_FIELDS;
+    
+      Object.entries(params).forEach(([k, v]) => {
+        if (k === 'p1name' || k === 'p2name') return;
+    
+        const el = safeEl(k);
+        if (!el) return;
+    
+        if (el.type === 'checkbox') {
+          el.checked = String(v).toLowerCase() === 'true';
+    
+          if (el.id === 'bniEnabled') {
+            ['bniP1GIA', 'bniP2GIA'].forEach(fid => {
+              const f = safeEl(fid);
+              if (f) {
+                f.disabled = !el.checked;
+                f.style.opacity = el.checked ? '' : '0.45';
+              }
+            });
+          }
+          return;
+        }
+    
+        if (el.type === 'radio') return;
+    
+        el.value = MONEY.has(k) ? formatCurrency(Number(v) || 0) : v;
+      });
+    
+      if (params.thresholdMode) {
+        const radio = document.querySelector(`input[name="thresholdMode"][value="${params.thresholdMode}"]`);
+        if (radio) radio.checked = true;
+      }
+    
+      if (params.p1DOB && safeEl('sp-p1dob')) safeEl('sp-p1dob').value = params.p1DOB;
+      if (params.p2DOB && safeEl('sp-p2dob')) safeEl('sp-p2dob').value = params.p2DOB;
+    
+      showToast(`Loaded ${accounts.length} accounts from Excel ✓`);
+      updateSidebarNames();
+      applyP2State();
+    });
+    
+    // ─────────────────────────────
+    // STEPPER BUTTONS (INSIDE IIFE)
+    // ─────────────────────────────
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.stepper-btn');
+      if (!btn) return;
+    
+      const targetId = btn.dataset.stepFor;
+      const dir      = Number(btn.dataset.stepDirection);
+      const input    = document.getElementById(targetId);
+      if (!input) return;
+    
+      const step = Number(input.step) || 1;
+      const val  = Number(input.value) || 0;
+    
+      input.value = val + (dir * step);
+      input.dispatchEvent(new Event('input',  { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    
+    // ─────────────────────────────
+    // INIT
+    // ─────────────────────────────
+    refreshSetupSummary();
+    R.initialiseCurrencyInputs();
+    RetireTabs.init();
+    
+    // ─────────────────────────────
+    // LOAD SAVED ASSUMPTIONS
+    // ─────────────────────────────
+    const savedAssumptions = localStorage.getItem(ASSUMPTIONS_KEY);
+    if (savedAssumptions) {
+      try {
+        applyAssumptionsInputs(JSON.parse(savedAssumptions));
+      } catch (e) {
+        console.error(e);
+      }
     }
-
-    // DOBs — write directly to setup page fields
-    if (params.p1DOB && safeEl('sp-p1dob'))
-      safeEl('sp-p1dob').value = params.p1DOB;
-    if (params.p2DOB && safeEl('sp-p2dob'))
-      safeEl('sp-p2dob').value = params.p2DOB;
-
-    showToast(`Loaded ${accounts.length} accounts from Excel ✓`);
-    updateSidebarNames();
-    applyP2State();
-  });
-
-  // ─────────────────────────────
-  // INIT
-  // ─────────────────────────────
-  refreshSetupSummary();
-  R.initialiseCurrencyInputs();
-  RetireTabs.init();
-
-  // ─── Stepper buttons ─────────────────────────────────────────────────────
-  document.addEventListener('click', function (e) {
-    const btn = e.target.closest('.stepper-btn');
-    if (!btn) return;
-    const targetId = btn.dataset.stepFor;
-    const dir      = Number(btn.dataset.stepDirection);
-    const input    = document.getElementById(targetId);
-    if (!input) return;
-    const step = Number(input.step) || 1;
-    const val  = Number(input.value) || 0;
-    input.value = val + (dir * step);
-    input.dispatchEvent(new Event('input',  { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-})();
+    
+    })();
