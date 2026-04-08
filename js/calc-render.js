@@ -230,8 +230,70 @@
   }
 
   // ─────────────────────────────────────────────
-  // CHARTS
+  // GROSS VS NET LEGEND
   // ─────────────────────────────────────────────
+  function renderGrossNetLegend(chart) {
+    const host = document.getElementById('spendingLegend');
+    if (!host) return;
+    host.innerHTML = '';
+
+    const header = document.createElement('div');
+    header.className = 'sidebar-legend__header';
+    header.innerHTML = '<span>Source</span><span>Lifetime</span>';
+    host.appendChild(header);
+
+    chart.data.datasets.forEach((ds, i) => {
+      if (ds.type === 'line') return;
+
+      const fixed = ds._fixed === true;
+      const item = document.createElement('div');
+      item.className = 'sidebar-legend__item' + (fixed ? ' sidebar-legend__item--fixed' : '');
+      if (!fixed && !chart.isDatasetVisible(i)) item.classList.add('is-hidden');
+
+      const swatch = document.createElement('span');
+      swatch.className = 'sidebar-legend__swatch';
+      swatch.style.background = ds.backgroundColor;
+
+      const label = document.createElement('span');
+      label.textContent = ds.label;
+      label.style.flex = '1';
+
+      const value = document.createElement('span');
+      value.className = 'sidebar-legend__value';
+      const raw = ds._lifetimeValue || 0;
+      value.textContent = raw > 0 ? fmt(raw) : '—';
+
+      item.appendChild(swatch);
+      item.appendChild(label);
+      item.appendChild(value);
+
+      if (!fixed) {
+        item.addEventListener('click', () => {
+          chart.setDatasetVisibility(i, !chart.isDatasetVisible(i));
+          chart.update();
+          renderGrossNetLegend(chart);
+        });
+      }
+
+      host.appendChild(item);
+    });
+
+    // Spending target — line, shown as a note
+    const tgtItem = document.createElement('div');
+    tgtItem.className = 'sidebar-legend__item sidebar-legend__item--fixed';
+    tgtItem.style.borderTop = '1px solid var(--border)';
+    tgtItem.style.marginTop = '4px';
+    tgtItem.style.paddingTop = '6px';
+    const tgtSwatch = document.createElement('span');
+    tgtSwatch.style.cssText = 'width:18px;height:3px;border-top:2px dashed #1F2937;display:inline-block;flex:0 0 18px;margin-right:5px;';
+    const tgtLabel = document.createElement('span');
+    tgtLabel.textContent = 'Spending target';
+    tgtLabel.style.flex = '1';
+    tgtLabel.style.color = 'var(--muted)';
+    tgtItem.appendChild(tgtSwatch);
+    tgtItem.appendChild(tgtLabel);
+    host.appendChild(tgtItem);
+  }
     function renderCharts() {
     if (!_rows.length) return;
     const labels = _rows.map(r => r.year);
@@ -381,35 +443,57 @@
 
     // ─────────────────────────────────────────────
     // GROSS VS NET INCOME CHART
-    // Stacked gross bars + flat gross target line + net income line.
-    // Gap between bars and net line = tax paid each year.
+    // Stacked bars by source + Tax segment on top + spending target line.
+    // Tax segment shows what gross - net = tax paid each year.
     // ─────────────────────────────────────────────
     const spendingCtx = document.getElementById('spendingChart')?.getContext('2d');
     if (spendingCtx) {
       const grossNetSets = [];
 
-      // Same source stacks as income chart
-      function gds(label, fn, color) {
+      function gds(label, p1fn, p2fn, color) {
+        const both = r => (p1fn(r) || 0) + (p2fn(r) || 0);
+        const fn   = _viewPerson === 'p1' ? p1fn
+                   : _viewPerson === 'p2' ? p2fn
+                   : both;
         return {
           label,
           data: _rows.map(r => Math.round(adj(fn(r), r) / 1000)),
           backgroundColor: color,
           stack: 'gross',
           type: 'bar',
+          _lifetimeValue: _rows.reduce((s, r) => s + adj(fn(r) || 0, r), 0),
         };
       }
-      grossNetSets.push(gds('State Pension', r => (r.p1SP         || 0) + (r.p2SP         || 0), COLOURS.p1SP));
-      grossNetSets.push(gds('Salary',        r => (r.p1SalInc     || 0) + (r.p2SalInc     || 0), COLOURS.salary));
-      grossNetSets.push(gds('SIPP',          r => (r.p1Drawn.SIPP || 0) + (r.p2Drawn.SIPP || 0), COLOURS.p1SIPP));
-      grossNetSets.push(gds('ISA',           r => (r.p1Drawn.ISA  || 0) + (r.p2Drawn.ISA  || 0), COLOURS.p1ISA));
-      grossNetSets.push(gds('GIA',           r => (r.p1Drawn.GIA  || 0) + (r.p2Drawn.GIA  || 0), COLOURS.p1GIA));
-      grossNetSets.push(gds('Interest',      r => (r.p1IntDraw    || 0) + (r.p2IntDraw    || 0), COLOURS.intDraw));
-      grossNetSets.push(gds('Dividends',     r => (r.p1Divs       || 0) + (r.p2Divs       || 0), COLOURS.p1Divs));
-      grossNetSets.push(gds('Cash',          r => (r.p1Drawn.Cash || 0) + (r.p2Drawn.Cash || 0), COLOURS.p1Cash));
 
-      // Flat gross spending target line
+      grossNetSets.push(gds('Salary',        r => r.p1SalInc     || 0, r => r.p2SalInc     || 0, COLOURS.salary));
+      grossNetSets.push(gds('Cash',          r => r.p1Drawn.Cash || 0, r => r.p2Drawn.Cash || 0, COLOURS.p1Cash));
+      grossNetSets.push(gds('Interest',      r => r.p1IntDraw    || 0, r => r.p2IntDraw    || 0, COLOURS.intDraw));
+      grossNetSets.push(gds('Dividends',     r => r.p1Divs       || 0, r => r.p2Divs       || 0, COLOURS.p1Divs));
+      grossNetSets.push(gds('GIA',           r => r.p1Drawn.GIA  || 0, r => r.p2Drawn.GIA  || 0, COLOURS.p1GIA));
+      grossNetSets.push(gds('ISA',           r => r.p1Drawn.ISA  || 0, r => r.p2Drawn.ISA  || 0, COLOURS.p1ISA));
+      grossNetSets.push(gds('SIPP / WP',     r => r.p1Drawn.SIPP || 0, r => r.p2Drawn.SIPP || 0, COLOURS.p1SIPP));
+      grossNetSets.push(gds('State Pension', r => r.p1SP         || 0, r => r.p2SP         || 0, COLOURS.p1SP));
+
+      // Tax segment — stacked on top of income sources
+      const taxFn = r => _viewPerson === 'p1'
+        ? (r.p1IncomeTax || 0) + (r.p1CGT || 0)
+        : _viewPerson === 'p2'
+          ? (r.p2IncomeTax || 0) + (r.p2CGT || 0)
+          : (r.p1IncomeTax || 0) + (r.p1CGT || 0) + (r.p2IncomeTax || 0) + (r.p2CGT || 0);
+
       grossNetSets.push({
-        label: 'Spending target (gross)',
+        label: 'Tax',
+        data: _rows.map(r => Math.round(adj(taxFn(r), r) / 1000)),
+        backgroundColor: '#C55A11',
+        stack: 'gross',
+        type: 'bar',
+        _lifetimeValue: _rows.reduce((s, r) => s + adj(taxFn(r), r), 0),
+        _fixed: true,
+      });
+
+      // Spending target line
+      grossNetSets.push({
+        label: 'Spending target',
         data: _rows.map(r => Math.round(adj(r.target || 0, r) / 1000)),
         type: 'line',
         stack: undefined,
@@ -417,21 +501,6 @@
         borderColor: COLOURS.target,
         borderWidth: 2,
         borderDash: [6, 3],
-        pointRadius: 0,
-        tension: 0,
-        order: 0,
-      });
-
-      // Net income line — what actually lands after all tax
-      grossNetSets.push({
-        label: 'Net income',
-        data: _rows.map(r => Math.round(adj(r.householdNetIncome || 0, r) / 1000)),
-        type: 'line',
-        stack: undefined,
-        backgroundColor: 'transparent',
-        borderColor: COLOURS.net,
-        borderWidth: 2,
-        borderDash: [3, 3],
         pointRadius: 0,
         tension: 0,
         order: 0,
@@ -445,14 +514,13 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: ctx => {
                   const val = (ctx.parsed.y || 0) * 1000;
                   if (!val) return null;
-                  if (ctx.dataset.label === 'Spending target (gross)') return `Gross target: ${D.formatMoney(val)}`;
-                  if (ctx.dataset.label === 'Net income') return `Net income: ${D.formatMoney(val)}`;
+                  if (ctx.dataset.label === 'Spending target') return `Target: ${D.formatMoney(val)}`;
                   return `${ctx.dataset.label}: ${D.formatMoney(val)}`;
                 },
               },
@@ -478,6 +546,8 @@
           },
         },
       });
+
+      renderGrossNetLegend(_spendingChart);
 
       // Update chart panel heading if present
       const heading = document.getElementById('spendingChartTitle');
