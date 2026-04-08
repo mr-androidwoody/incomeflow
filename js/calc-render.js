@@ -126,7 +126,7 @@
     // ─────────────────────────────────────────────
     // INCOME LEGEND
     // ─────────────────────────────────────────────
-    function renderIncomeLegend(chart, recomputeShortfall) {
+    function renderIncomeLegend(chart) {
       const host = document.getElementById('incomeLegend');
       if (!host) return;
       host.innerHTML = '';
@@ -135,9 +135,7 @@
       row.className = 'split-legend-row';
 
       chart.data.datasets.forEach((ds, i) => {
-        // Skip non-income datasets and the shortfall (not toggleable)
         if (ds.stack !== 'income') return;
-        if (ds.label === 'Spending shortfall') return;
 
         const item = document.createElement('div');
         item.className = 'split-legend-item';
@@ -155,28 +153,14 @@
 
         item.addEventListener('click', () => {
           chart.setDatasetVisibility(i, !chart.isDatasetVisible(i));
-          recomputeShortfall(chart);
           chart.update();
-          renderIncomeLegend(chart, recomputeShortfall);
+          renderIncomeLegend(chart);
         });
 
         row.appendChild(item);
       });
 
       host.appendChild(row);
-
-      // Shortfall indicator — always visible, not toggleable
-      const sfItem = document.createElement('div');
-      sfItem.className = 'split-legend-item';
-      sfItem.style.marginTop = '4px';
-      const sfSwatch = document.createElement('span');
-      sfSwatch.className = 'split-legend-swatch';
-      sfSwatch.style.background = '#DC2626';
-      const sfLabel = document.createElement('span');
-      sfLabel.textContent = 'Spending shortfall';
-      sfItem.appendChild(sfSwatch);
-      sfItem.appendChild(sfLabel);
-      host.appendChild(sfItem);
     }
 
   // ─────────────────────────────────────────────
@@ -219,11 +203,8 @@
     // ─────────────────────────────────────────────
     // INCOME CHART
     // One dataset per source type; p1+p2 combined gross draws.
-    // Red shortfall recomputed on toggle so hiding a source grows the red bar.
+    // Bars sum to gross spending target in funded years — no shortfall overlay.
     // ─────────────────────────────────────────────
-
-    const _engineShortfall = _rows.map(r => Math.round(adj(r.spendingShortfall || 0, r) / 1000));
-    const _targetData      = _rows.map(r => Math.round(adj(r.target            || 0, r) / 1000));
 
     let sets = [];
     sets.push(ds('State Pension', r => (r.p1SP         || 0) + (r.p2SP         || 0), COLOURS.p1SP));
@@ -234,45 +215,6 @@
     sets.push(ds('Interest',      r => (r.p1IntDraw    || 0) + (r.p2IntDraw    || 0), COLOURS.intDraw));
     sets.push(ds('Dividends',     r => (r.p1Divs       || 0) + (r.p2Divs       || 0), COLOURS.p1Divs));
     sets.push(ds('Cash',          r => (r.p1Drawn.Cash || 0) + (r.p2Drawn.Cash || 0), COLOURS.p1Cash));
-
-    // Shortfall — recomputed dynamically on toggle so red grows when sources are hidden
-    sets.push({
-      label: 'Spending shortfall',
-      data: _engineShortfall.slice(),
-      backgroundColor: COLOURS.shortfall,
-      stack: 'income',
-    });
-
-    // Target line — dashed, flat in Real terms
-    sets.push({
-      label: 'Spending target',
-      data: _targetData.slice(),
-      type: 'line',
-      stack: undefined,
-      backgroundColor: 'transparent',
-      borderColor: COLOURS.target,
-      borderWidth: 2,
-      borderDash: [6, 3],
-      pointRadius: 0,
-      tension: 0,
-      order: 0,
-    });
-
-    // Recompute shortfall so toggling a source grows the red bar to fill the gap.
-    // Floor is always the engine shortfall (can't show more covered than reality).
-    function recomputeShortfall(chart) {
-      const sfIdx = chart.data.datasets.findIndex(d => d.label === 'Spending shortfall');
-      if (sfIdx < 0) return;
-      const sourceSets = chart.data.datasets.filter(
-        d => d.stack === 'income' && d.label !== 'Spending shortfall'
-      );
-      chart.data.datasets[sfIdx].data = _targetData.map((tgt, i) => {
-        const visibleGross = sourceSets.reduce((sum, d) => {
-          return sum + (chart.isDatasetVisible(chart.data.datasets.indexOf(d)) ? (d.data[i] || 0) : 0);
-        }, 0);
-        return Math.max(_engineShortfall[i], tgt - visibleGross);
-      });
-    }
 
     const incCtx = document.getElementById('incomeChart')?.getContext('2d');
     if (incCtx) {
@@ -290,8 +232,6 @@
                 label: ctx => {
                   const val = (ctx.parsed.y || 0) * 1000;
                   if (!val) return null;
-                  if (ctx.dataset.label === 'Spending shortfall') return `Shortfall: ${D.formatMoney(val)}`;
-                  if (ctx.dataset.label === 'Spending target')    return `Target: ${D.formatMoney(val)}`;
                   return `${ctx.dataset.label}: ${D.formatMoney(val)}`;
                 },
               },
@@ -304,16 +244,6 @@
             },
             y: {
               stacked: true,
-
-              max: Math.ceil(
-                Math.max(
-                  ..._rows.map(r => Math.round(adj(r.target || 0, r) / 1000)),
-                  ...labels.map((_, i) => sets
-                    .filter(s => s.stack === 'income')
-                    .reduce((sum, s) => sum + (s.data[i] || 0), 0))
-                ) * 1.1 / 5
-              ) * 5,
-            
               title: {
                 display: true,
                 text: _useReal ? 'Real £k' : 'Nominal £k',
@@ -327,133 +257,104 @@
           },
         },
       });
-      renderIncomeLegend(_incomeChart, recomputeShortfall);
+      renderIncomeLegend(_incomeChart);
     }
 
     // ─────────────────────────────────────────────
-    // WITHDRAWAL RATE CHART
-    // Annual portfolio drawdown as % of portfolio value, with 4% reference line
+    // GROSS VS NET INCOME CHART
+    // Stacked gross bars + flat gross target line + net income line.
+    // Gap between bars and net line = tax paid each year.
     // ─────────────────────────────────────────────
     const spendingCtx = document.getElementById('spendingChart')?.getContext('2d');
     if (spendingCtx) {
+      const grossNetSets = [];
 
-      // Drawdown = everything pulled from invested wrappers (SIPP, ISA, GIA, Cash)
-      // excluding interest account draws (those aren't portfolio drawdown)
-      function getDrawdown(r) {
-        if (_viewPerson === 'p1') {
-          return (r.p1Drawn.SIPP || 0) + (r.p1Drawn.ISA || 0)
-               + (r.p1Drawn.GIA  || 0) + (r.p1Drawn.Cash || 0);
-        }
-        if (_viewPerson === 'p2') {
-          return (r.p2Drawn.SIPP || 0) + (r.p2Drawn.ISA || 0)
-               + (r.p2Drawn.GIA  || 0) + (r.p2Drawn.Cash || 0);
-        }
-        return (r.p1Drawn.SIPP || 0) + (r.p1Drawn.ISA || 0)
-             + (r.p1Drawn.GIA  || 0) + (r.p1Drawn.Cash || 0)
-             + (r.p2Drawn.SIPP || 0) + (r.p2Drawn.ISA || 0)
-             + (r.p2Drawn.GIA  || 0) + (r.p2Drawn.Cash || 0);
+      // Same source stacks as income chart
+      function gds(label, fn, color) {
+        return {
+          label,
+          data: _rows.map(r => Math.round(adj(fn(r), r) / 1000)),
+          backgroundColor: color,
+          stack: 'gross',
+          type: 'bar',
+        };
       }
+      grossNetSets.push(gds('State Pension', r => (r.p1SP         || 0) + (r.p2SP         || 0), COLOURS.p1SP));
+      grossNetSets.push(gds('Salary',        r => (r.p1SalInc     || 0) + (r.p2SalInc     || 0), COLOURS.salary));
+      grossNetSets.push(gds('SIPP',          r => (r.p1Drawn.SIPP || 0) + (r.p2Drawn.SIPP || 0), COLOURS.p1SIPP));
+      grossNetSets.push(gds('ISA',           r => (r.p1Drawn.ISA  || 0) + (r.p2Drawn.ISA  || 0), COLOURS.p1ISA));
+      grossNetSets.push(gds('GIA',           r => (r.p1Drawn.GIA  || 0) + (r.p2Drawn.GIA  || 0), COLOURS.p1GIA));
+      grossNetSets.push(gds('Interest',      r => (r.p1IntDraw    || 0) + (r.p2IntDraw    || 0), COLOURS.intDraw));
+      grossNetSets.push(gds('Dividends',     r => (r.p1Divs       || 0) + (r.p2Divs       || 0), COLOURS.p1Divs));
+      grossNetSets.push(gds('Cash',          r => (r.p1Drawn.Cash || 0) + (r.p2Drawn.Cash || 0), COLOURS.p1Cash));
 
-      function getPortfolio(r) {
-        const s = r.snap;
-        if (_viewPerson === 'p1') {
-          return (s.p1Cash || 0) + (s.p1IntBal || 0) + (s.p1GIA || 0)
-               + (s.p1SIPP || 0) + (s.p1ISA || 0);
-        }
-        if (_viewPerson === 'p2') {
-          return (s.p2Cash || 0) + (s.p2IntBal || 0) + (s.p2GIA || 0)
-               + (s.p2SIPP || 0) + (s.p2ISA || 0);
-        }
-        return r.totalPortfolio;
-      }
-
-      // Withdrawal rate = drawdown / portfolio at start of year (snap is end-of-year,
-      // so use previous row's snap as opening balance, fall back to current for first year)
-      const withdrawalRateData = _rows.map((r, i) => {
-        const drawdown  = getDrawdown(r);
-        const openingPortfolio = i === 0
-          ? getPortfolio(r) + drawdown   // approximate: add back what was drawn
-          : getPortfolio(_rows[i - 1]);
-        if (openingPortfolio <= 0) return 0;
-        return parseFloat((drawdown / openingPortfolio * 100).toFixed(2));
+      // Flat gross spending target line
+      grossNetSets.push({
+        label: 'Spending target (gross)',
+        data: _rows.map(r => Math.round(adj(r.target || 0, r) / 1000)),
+        type: 'line',
+        stack: undefined,
+        backgroundColor: 'transparent',
+        borderColor: COLOURS.target,
+        borderWidth: 2,
+        borderDash: [6, 3],
+        pointRadius: 0,
+        tension: 0,
+        order: 0,
       });
 
-      // Colour each point: green ≤4%, amber 4–6%, red >6%
-      const pointColours = withdrawalRateData.map(v =>
-        v <= 4 ? COLOURS.surplus : v <= 6 ? '#F59E0B' : COLOURS.shortfall
-      );
-
-      // Static 4% reference line
-      const refLine = _rows.map(() => 4);
+      // Net income line — what actually lands after all tax
+      grossNetSets.push({
+        label: 'Net income',
+        data: _rows.map(r => Math.round(adj(r.householdNetIncome || 0, r) / 1000)),
+        type: 'line',
+        stack: undefined,
+        backgroundColor: 'transparent',
+        borderColor: COLOURS.net,
+        borderWidth: 2,
+        borderDash: [3, 3],
+        pointRadius: 0,
+        tension: 0,
+        order: 0,
+      });
 
       if (_spendingChart) _spendingChart.destroy();
-
       _spendingChart = new Chart(spendingCtx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Withdrawal rate',
-              data: withdrawalRateData,
-              borderColor: COLOURS.net,
-              backgroundColor: 'rgba(37,99,235,0.08)',
-              borderWidth: 2,
-              pointRadius: 3,
-              pointBackgroundColor: pointColours,
-              pointBorderColor: pointColours,
-              tension: 0.2,
-              fill: true,
-              order: 2,
-            },
-            {
-              label: '4% guideline',
-              data: refLine,
-              borderColor: COLOURS.shortfall,
-              backgroundColor: 'transparent',
-              borderWidth: 1.5,
-              borderDash: [6, 3],
-              pointRadius: 0,
-              tension: 0,
-              order: 1,
-            },
-          ],
-        },
+        type: 'bar',
+        data: { labels, datasets: grossNetSets },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: true },
+            legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
             tooltip: {
               callbacks: {
                 label: ctx => {
-                  if (ctx.dataset.label === '4% guideline') return '4% guideline';
-                  const v   = ctx.parsed.y || 0;
-                  const idx = ctx.dataIndex;
-                  const drawdown = getDrawdown(_rows[idx]);
-                  return [
-                    `Withdrawal rate: ${v.toFixed(2)}%`,
-                    `Drawdown: ${D.formatMoney(drawdown)}`,
-                  ];
+                  const val = (ctx.parsed.y || 0) * 1000;
+                  if (!val) return null;
+                  if (ctx.dataset.label === 'Spending target (gross)') return `Gross target: ${D.formatMoney(val)}`;
+                  if (ctx.dataset.label === 'Net income') return `Net income: ${D.formatMoney(val)}`;
+                  return `${ctx.dataset.label}: ${D.formatMoney(val)}`;
                 },
               },
             },
           },
           scales: {
             x: {
+              stacked: true,
               ticks: { font: { size: 10 }, maxRotation: 45 },
             },
             y: {
+              stacked: true,
               title: {
                 display: true,
-                text: 'Withdrawal rate %',
+                text: _useReal ? 'Real £k' : 'Nominal £k',
                 font: { size: 11 },
               },
               ticks: {
                 font: { size: 11 },
-                callback: v => v + '%',
+                callback: v => v + 'k',
               },
-              suggestedMin: 0,
             },
           },
         },
@@ -461,7 +362,7 @@
 
       // Update chart panel heading if present
       const heading = document.getElementById('spendingChartTitle');
-      if (heading) heading.textContent = 'Withdrawal rate';
+      if (heading) heading.textContent = 'Gross vs net income';
     }
 
     // ─────────────────────────────────────────────
