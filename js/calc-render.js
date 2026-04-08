@@ -316,67 +316,91 @@
     }
 
     // ─────────────────────────────────────────────
-    // NET INCOME vs TARGET SPENDING CHART
-    // Line (target, dashed) + Line (net income) + Bar (gap: green=surplus, red=shortfall)
+    // WITHDRAWAL RATE CHART
+    // Annual portfolio drawdown as % of portfolio value, with 4% reference line
     // ─────────────────────────────────────────────
     const spendingCtx = document.getElementById('spendingChart')?.getContext('2d');
     if (spendingCtx) {
 
-      function getNet(r) {
-        if (_viewPerson === 'p1') return (r.p1NetIncome || 0);
-        if (_viewPerson === 'p2') return (r.p2NetIncome || 0);
-        return (r.householdNetIncome || 0);
+      // Drawdown = everything pulled from invested wrappers (SIPP, ISA, GIA, Cash)
+      // excluding interest account draws (those aren't portfolio drawdown)
+      function getDrawdown(r) {
+        if (_viewPerson === 'p1') {
+          return (r.p1Drawn.SIPP || 0) + (r.p1Drawn.ISA || 0)
+               + (r.p1Drawn.GIA  || 0) + (r.p1Drawn.Cash || 0);
+        }
+        if (_viewPerson === 'p2') {
+          return (r.p2Drawn.SIPP || 0) + (r.p2Drawn.ISA || 0)
+               + (r.p2Drawn.GIA  || 0) + (r.p2Drawn.Cash || 0);
+        }
+        return (r.p1Drawn.SIPP || 0) + (r.p1Drawn.ISA || 0)
+             + (r.p1Drawn.GIA  || 0) + (r.p1Drawn.Cash || 0)
+             + (r.p2Drawn.SIPP || 0) + (r.p2Drawn.ISA || 0)
+             + (r.p2Drawn.GIA  || 0) + (r.p2Drawn.Cash || 0);
       }
 
-      function getTarget(r) {
-        // Per-person view: split household target 50/50 (no separate per-person target field)
-        const t = r.target || 0;
-        return (_viewPerson === 'p1' || _viewPerson === 'p2') ? t / 2 : t;
+      function getPortfolio(r) {
+        const s = r.snap;
+        if (_viewPerson === 'p1') {
+          return (s.p1Cash || 0) + (s.p1IntBal || 0) + (s.p1GIA || 0)
+               + (s.p1SIPP || 0) + (s.p1ISA || 0);
+        }
+        if (_viewPerson === 'p2') {
+          return (s.p2Cash || 0) + (s.p2IntBal || 0) + (s.p2GIA || 0)
+               + (s.p2SIPP || 0) + (s.p2ISA || 0);
+        }
+        return r.totalPortfolio;
       }
 
-      const targetData = _rows.map(r => Math.round(adj(getTarget(r), r) / 1000));
-      const netData    = _rows.map(r => Math.round(adj(getNet(r),    r) / 1000));
+      // Withdrawal rate = drawdown / portfolio at start of year (snap is end-of-year,
+      // so use previous row's snap as opening balance, fall back to current for first year)
+      const withdrawalRateData = _rows.map((r, i) => {
+        const drawdown  = getDrawdown(r);
+        const openingPortfolio = i === 0
+          ? getPortfolio(r) + drawdown   // approximate: add back what was drawn
+          : getPortfolio(_rows[i - 1]);
+        if (openingPortfolio <= 0) return 0;
+        return parseFloat((drawdown / openingPortfolio * 100).toFixed(2));
+      });
 
-      // Single gap bar: positive = surplus (green), negative = shortfall (red)
-      const gapValues  = _rows.map(r => Math.round(adj(getNet(r) - getTarget(r), r) / 1000));
-      const gapColours = gapValues.map(v => v >= 0 ? COLOURS.surplus : COLOURS.shortfall);
+      // Colour each point: green ≤4%, amber 4–6%, red >6%
+      const pointColours = withdrawalRateData.map(v =>
+        v <= 4 ? COLOURS.surplus : v <= 6 ? '#F59E0B' : COLOURS.shortfall
+      );
+
+      // Static 4% reference line
+      const refLine = _rows.map(() => 4);
 
       if (_spendingChart) _spendingChart.destroy();
 
       _spendingChart = new Chart(spendingCtx, {
+        type: 'line',
         data: {
           labels,
           datasets: [
             {
-              type: 'line',
-              label: 'Target spending',
-              data: targetData,
-              borderColor: COLOURS.target,
-              backgroundColor: 'transparent',
+              label: 'Withdrawal rate',
+              data: withdrawalRateData,
+              borderColor: COLOURS.net,
+              backgroundColor: 'rgba(37,99,235,0.08)',
               borderWidth: 2,
+              pointRadius: 3,
+              pointBackgroundColor: pointColours,
+              pointBorderColor: pointColours,
+              tension: 0.2,
+              fill: true,
+              order: 2,
+            },
+            {
+              label: '4% guideline',
+              data: refLine,
+              borderColor: COLOURS.shortfall,
+              backgroundColor: 'transparent',
+              borderWidth: 1.5,
               borderDash: [6, 3],
               pointRadius: 0,
               tension: 0,
               order: 1,
-            },
-            {
-              type: 'line',
-              label: 'Net income',
-              data: netData,
-              borderColor: COLOURS.net,
-              backgroundColor: 'rgba(37,99,235,0.08)',
-              borderWidth: 2,
-              pointRadius: 0,
-              tension: 0,
-              fill: false,
-              order: 2,
-            },
-            {
-              type: 'bar',
-              label: 'Gap (surplus / shortfall)',
-              data: gapValues,
-              backgroundColor: gapColours,
-              order: 3,
             },
           ],
         },
@@ -384,24 +408,18 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: true,
-              onClick: (e, legendItem, legend) => {
-                const index = legendItem.datasetIndex;
-                const chart = legend.chart;
-                chart.setDatasetVisibility(index, !chart.isDatasetVisible(index));
-                chart.update();
-              },
-            },
+            legend: { display: true },
             tooltip: {
               callbacks: {
                 label: ctx => {
-                  const val = ctx.parsed.y || 0;
-                  if (ctx.dataset.label === 'Gap (surplus / shortfall)') {
-                    const sign = val >= 0 ? 'Surplus' : 'Shortfall';
-                    return `${sign}: ${D.formatMoney(Math.abs(val) * 1000)}`;
-                  }
-                  return `${ctx.dataset.label}: ${D.formatMoney(val * 1000)}`;
+                  if (ctx.dataset.label === '4% guideline') return '4% guideline';
+                  const v   = ctx.parsed.y || 0;
+                  const idx = ctx.dataIndex;
+                  const drawdown = getDrawdown(_rows[idx]);
+                  return [
+                    `Withdrawal rate: ${v.toFixed(2)}%`,
+                    `Drawdown: ${D.formatMoney(drawdown)}`,
+                  ];
                 },
               },
             },
@@ -413,17 +431,22 @@
             y: {
               title: {
                 display: true,
-                text: _useReal ? 'Real £k' : 'Nominal £k',
+                text: 'Withdrawal rate %',
                 font: { size: 11 },
               },
               ticks: {
                 font: { size: 11 },
-                callback: v => '£' + v + 'k',
+                callback: v => v + '%',
               },
+              suggestedMin: 0,
             },
           },
         },
       });
+
+      // Update chart panel heading if present
+      const heading = document.getElementById('spendingChartTitle');
+      if (heading) heading.textContent = 'Withdrawal rate';
     }
 
     // ─────────────────────────────────────────────
