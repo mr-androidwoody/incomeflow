@@ -287,6 +287,11 @@
             },
             y: {
               stacked: true,
+            
+              suggestedMax: Math.ceil(
+                Math.max(...sets.flatMap(s => s.data)) * 1.1 / 5
+              ) * 5,
+            
               title: {
                 display: true,
                 text: _useReal ? 'Real £k' : 'Nominal £k',
