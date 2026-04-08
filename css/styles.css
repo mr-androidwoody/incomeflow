@@ -1202,9 +1202,12 @@ input[type="radio"] { accent-color: var(--accent); }
 .split-legend-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 18px;
+
+  /* better spacing */
+  row-gap: 10px;
+  column-gap: 28px;
+
   align-items: center;
-  max-width: 100%;
 }
 
 .split-legend-item {
