@@ -21,15 +21,19 @@
         <h1>Retirement Tax Planner</h1>
         <p>Optimise the sequencing of pension and ISA withdrawals to minimise tax liabilities across your whole retirement portfolio.</p>
       </div>
-      <div class="top-header__controls">
-        <nav class="top-header__tabs">
-          <button data-action="switch-tab" data-tab="setup" class="tab-btn tab-active">Setup</button>
-          <span class="tab-sep" aria-hidden="true"></span>
-          <button data-action="switch-tab" data-tab="assumptions" class="tab-btn">Assumptions</button>
-          <span class="tab-sep" aria-hidden="true"></span>
-          <button data-action="switch-tab" data-tab="results" class="tab-btn">Results</button>
-        </nav>
-      </div>
+        <div class="top-header__controls">
+          <nav class="top-header__tabs">
+            <button data-action="switch-tab" data-tab="setup" class="tab-btn tab-active">Portfolio</button>
+            <span class="tab-sep" aria-hidden="true"></span>
+            <button data-action="switch-tab" data-tab="assumptions" class="tab-btn">Assumptions</button>
+            <span class="tab-sep" aria-hidden="true"></span>
+            <button data-action="switch-tab" data-tab="results" class="tab-btn">Results</button>
+          </nav>
+        
+          <div class="top-header__actions">
+            <button type="button" class="btn btn-secondary" data-action="run-projection">Run simulation</button>
+          </div>
+        </div>
     </div>
   </header>
 
@@ -290,10 +294,6 @@
             <div class="assump-info-row"><span class="assump-info-key">Salary stops age</span><span class="assump-info-val" id="ai-p1salarystop">–</span></div>
             <div class="assump-info-row"><span class="assump-info-key">State pension age</span><span class="assump-info-val" id="ai-p1spage">–</span></div>
             <div class="assump-info-row"><span class="assump-info-key">State pension (£/yr)</span><span class="assump-info-val" id="ai-p1sp">–</span></div>
-            <div class="assump-info-row" style="margin-top:0.5rem">
-              <span class="assump-info-key">Projection</span>
-              <span class="assump-info-val"><span id="ai-startyear">–</span> → <span id="ai-endyear">–</span></span>
-            </div>
 
             <!-- Hidden inputs still needed by gatherInputs() -->
             <input type="hidden" id="p1DOB">
@@ -518,11 +518,12 @@
     ═══════════════════════════════════════════ -->
     <div id="tab-results" class="tab-panel">
 
-      <div style="margin-bottom:1rem">
-        <button type="button" class="run-btn" data-action="run-projection">▶ Run projection</button>
-      </div>
-
-      <div class="controls">
+        <div class="results-intro">
+          <h1>Results</h1>
+          <p class="results-projection">Projection <span id="ai-startyear">–</span> → <span id="ai-endyear">–</span></p>
+        </div>
+        
+        <div class="controls">
         <div>
           <span class="controls-label">Person</span>
           <div class="toggle-group" style="margin-top:4px">
