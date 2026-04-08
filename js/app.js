@@ -5,7 +5,7 @@
   const E  = window.RetireEngine;
   const CR = window.RetireCalcRender;
 
-  const STORAGE_KEY = 'rukRetirementSetup';
+  const STORAGE_KEY     = 'rukRetirementSetup';
   const ASSUMPTIONS_KEY = 'rukRetirementAssumptions';
 
   const state = {
@@ -47,6 +47,63 @@
     toast.style.opacity = 1;
     clearTimeout(toast._timer);
     toast._timer = setTimeout(() => { toast.style.opacity = 0; }, 2500);
+  }
+
+  // ─────────────────────────────
+  // SAVE BUTTON FEEDBACK
+  // Immediately saves, flips button to "Saving…" + green for 800ms,
+  // then resets to original label + original class.
+  // ─────────────────────────────
+  function triggerSaveFeedback(btn, originalLabel, originalClass, saveFn) {
+    try {
+      saveFn();
+    } catch (err) {
+      console.error(err);
+      showToast('Save failed – see console', true);
+      return;
+    }
+    btn.textContent = 'Saving…';
+    btn.className = btn.className.replace(/btn-\w+/, '').trim() + ' btn-success';
+    clearTimeout(btn._saveTimer);
+    btn._saveTimer = window.setTimeout(() => {
+      btn.textContent = originalLabel;
+      btn.className = btn.className.replace(/btn-\w+/, '').trim() + ' ' + originalClass;
+    }, 800);
+  }
+
+  // ─────────────────────────────
+  // DELETE CONFIRM HELPERS
+  // First click: hides trigger button, shows inline confirm.
+  // Cancel: restores. Confirm: executes deleteFn then restores.
+  // ─────────────────────────────
+  function wireDeleteConfirm(triggerId, confirmId, confirmBtnId, cancelBtnId, deleteFn) {
+    const triggerBtn  = safeEl(triggerId);
+    const confirmEl   = safeEl(confirmId);
+    const confirmBtn  = safeEl(confirmBtnId);
+    const cancelBtn   = safeEl(cancelBtnId);
+    if (!triggerBtn || !confirmEl || !confirmBtn || !cancelBtn) return;
+
+    function showConfirm() {
+      triggerBtn.style.display = 'none';
+      confirmEl.style.display  = 'inline-flex';
+    }
+
+    function hideConfirm() {
+      confirmEl.style.display  = 'none';
+      triggerBtn.style.display = '';
+    }
+
+    triggerBtn.addEventListener('click', showConfirm);
+    cancelBtn.addEventListener('click',  hideConfirm);
+    confirmBtn.addEventListener('click', () => {
+      hideConfirm();
+      try {
+        deleteFn();
+      } catch (err) {
+        console.error(err);
+        showToast('Delete failed – see console', true);
+      }
+    });
   }
 
   // ─────────────────────────────
@@ -206,10 +263,7 @@
   function applyAssumptionsInputs(a) {
     if (!a) return;
 
-    const sv = (id, val) => {
-      const el = safeEl(id);
-      if (el && val != null) el.value = val;
-    };
+    const sv = (id, val) => { const el = safeEl(id); if (el && val != null) el.value = val; };
 
     sv('spending',             a.spending);
     sv('stepDownPct',          a.stepDownPct);
@@ -237,10 +291,7 @@
       bni.checked = !!a.bniEnabled;
       ['bniP1GIA','bniP2GIA'].forEach(id => {
         const el = safeEl(id);
-        if (el) {
-          el.disabled = !a.bniEnabled;
-          el.style.opacity = a.bniEnabled ? '' : '0.45';
-        }
+        if (el) { el.disabled = !a.bniEnabled; el.style.opacity = a.bniEnabled ? '' : '0.45'; }
       });
     }
   }
@@ -256,17 +307,12 @@
   }
 
   // ─────────────────────────────
-  // SAVE / LOAD
+  // SAVE / LOAD — core data functions
+  // Button feedback is handled separately via triggerSaveFeedback.
   // ─────────────────────────────
-  function saveSetup() {
+  function saveSetupData() {
     syncAccountsFromDOM();
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(readSetupInputs()));
-      showToast('Portfolio saved ✓');
-    } catch (err) {
-      console.error(err);
-      showToast('Save failed – see console', true);
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(readSetupInputs()));
   }
 
   function loadSetup() {
@@ -281,44 +327,28 @@
     }
   }
 
-  function saveAssumptions() {
-    try {
-      localStorage.setItem(ASSUMPTIONS_KEY, JSON.stringify(readAssumptionsInputs()));
-      showToast('Assumptions saved ✓');
-    } catch (err) {
-      console.error(err);
-      showToast('Save failed – see console', true);
-    }
+  function saveAssumptionsData() {
+    localStorage.setItem(ASSUMPTIONS_KEY, JSON.stringify(readAssumptionsInputs()));
   }
 
-  function deleteAssumptions() {
-    try {
-      localStorage.removeItem(ASSUMPTIONS_KEY);
-      applyAssumptionsInputs({
-        spending: '', stepDownPct: '0', growth: '', inflation: '',
-        thresholdMode: 'frozen', withdrawalMode: 'tax-aware',
-        dividendYield: '1.5', bniEnabled: false,
-      });
-      showToast('Saved assumptions deleted');
-    } catch (err) {
-      console.error(err);
-      showToast('Delete failed – see console', true);
-    }
+  function deleteAssumptionsData() {
+    localStorage.removeItem(ASSUMPTIONS_KEY);
+    applyAssumptionsInputs({
+      spending: '', stepDownPct: '0', growth: '', inflation: '',
+      thresholdMode: 'frozen', withdrawalMode: 'tax-aware',
+      dividendYield: '1.5', bniEnabled: false,
+    });
+    showToast('Assumptions deleted');
   }
 
-  function deletePortfolio() {
-    try {
-      state.portfolioAccounts = [];
-      state.nextId = 1;
-      const tbody = safeEl('acct-tbody');
-      if (tbody) tbody.innerHTML = '';
-      localStorage.removeItem(STORAGE_KEY);
-      refreshSetupSummary();
-      showToast('Portfolio deleted');
-    } catch (err) {
-      console.error(err);
-      showToast('Delete failed – see console', true);
-    }
+  function deletePortfolioData() {
+    state.portfolioAccounts = [];
+    state.nextId = 1;
+    const tbody = safeEl('acct-tbody');
+    if (tbody) tbody.innerHTML = '';
+    localStorage.removeItem(STORAGE_KEY);
+    refreshSetupSummary();
+    showToast('Portfolio deleted');
   }
 
   // ─────────────────────────────
@@ -559,11 +589,6 @@
   }
 
   // ─────────────────────────────
-  // SIDEBAR COLLAPSIBLES (no-op stub)
-  // ─────────────────────────────
-  function toggleAllSections() { /* collapse UI removed */ }
-
-  // ─────────────────────────────
   // GATHER INPUTS
   // ─────────────────────────────
   function gv(id)  { return D.parseCurrency(safeEl(id)?.value || ''); }
@@ -652,9 +677,6 @@
 
   // ─────────────────────────────
   // LIVE INPUT — account table
-  // Fires on every keystroke inside the account table. Updates the Allocation
-  // and Wrappers summary panels in real time. Also reapplies rate/draw field
-  // state whenever the cashlike % field changes on a row.
   // ─────────────────────────────
   document.addEventListener('input', (e) => {
     if (!e.target.closest('#acct-tbody')) return;
@@ -662,20 +684,16 @@
     syncAccountsFromDOM();
     refreshSetupSummary();
 
-    // If the cashlike % field changed, reapply rate/draw enabled state for
-    // that specific row so fields lock/unlock immediately as the user types.
     if (e.target.dataset.field === 'cashlike') {
       const accountId = Number(e.target.dataset.accountId);
       const acc = state.portfolioAccounts.find(a => a.id === accountId);
       if (acc) {
         R.updateRowBadge(acc);
         R.applyWrapperFieldState(acc);
-        // Re-sync to capture any values cleared by applyWrapperFieldState
         syncAccountsFromDOM();
       }
     }
 
-    // Keep the alloc badge live for all alloc field changes
     if (['equities','bonds','cashlike','cash'].includes(e.target.dataset.field)) {
       const accountId = Number(e.target.dataset.accountId);
       const acc = state.portfolioAccounts.find(a => a.id === accountId);
@@ -687,7 +705,6 @@
   // CHANGE — selects and checkboxes
   // ─────────────────────────────
   document.addEventListener('change', (e) => {
-    // Account field changes (wrapper, owner selects)
     const accountId = e.target.dataset?.accountId;
     if (accountId) {
       const field = e.target.dataset.field;
@@ -696,20 +713,14 @@
 
       if (field === 'wrapper') {
         const acc = state.portfolioAccounts.find(a => a.id === Number(accountId));
-        if (acc) {
-          R.applyWrapperFieldState(acc);
-          syncAccountsFromDOM();
-        }
+        if (acc) { R.applyWrapperFieldState(acc); syncAccountsFromDOM(); }
       }
-
       if (field === 'owner') {
         R.refreshOwnerOptions(state.portfolioAccounts, getOwnerNames());
       }
-
       return;
     }
 
-    // BnI toggle
     if (e.target.id === 'bniEnabled') {
       const enabled = e.target.checked;
       ['bniP1GIA', 'bniP2GIA'].forEach(id => {
@@ -719,7 +730,6 @@
       return;
     }
 
-    // P2 toggle
     if (e.target.id === 'p2enabled') {
       state.p2enabled = e.target.checked;
       applyP2State();
@@ -736,15 +746,14 @@
 
     const action = el.dataset.action;
 
-    if (action === 'add-account')        return addAccount();
-    if (action === 'remove-account')     return removeAccount(el);
-    if (action === 'save-setup')         return saveSetup();
-    if (action === 'load-setup')         return loadSetup();
-    if (action === 'save-assumptions')   return saveAssumptions();
-    if (action === 'delete-assumptions') return deleteAssumptions();
-    if (action === 'delete-portfolio')   return deletePortfolio();
-    if (action === 'load-excel')         return window.RetireExcelLoader.openFilePicker();
-    if (action === 'run-projection')     return runProjection();
+    if (action === 'add-account')    return addAccount();
+    if (action === 'remove-account') return removeAccount(el);
+    if (action === 'load-setup')     return loadSetup();
+    if (action === 'load-excel')     return window.RetireExcelLoader.openFilePicker();
+    if (action === 'run-projection') return runProjection();
+
+    // save-setup and save-assumptions are handled by direct ID listeners below
+    // to support the Saving… feedback pattern — intentionally not here.
 
     if (action === 'switch-tab') {
       const tab = el.dataset.tab;
@@ -761,6 +770,58 @@
     if (action === 'tab-charts') return CR.setTab('charts', el);
     if (action === 'tab-tables') return CR.setTab('tables', el);
   });
+
+  // ─────────────────────────────
+  // SAVE PORTFOLIO — feedback pattern
+  // ─────────────────────────────
+  const savePortfolioBtn = safeEl('savePortfolioBtn');
+  if (savePortfolioBtn) {
+    savePortfolioBtn.addEventListener('click', () => {
+      triggerSaveFeedback(
+        savePortfolioBtn,
+        'Save portfolio',
+        'btn-success',
+        saveSetupData
+      );
+    });
+  }
+
+  // ─────────────────────────────
+  // DELETE PORTFOLIO — inline confirm
+  // ─────────────────────────────
+  wireDeleteConfirm(
+    'deletePortfolioBtn',
+    'deletePortfolioConfirm',
+    'confirmDeletePortfolioBtn',
+    'cancelDeletePortfolioBtn',
+    deletePortfolioData
+  );
+
+  // ─────────────────────────────
+  // SAVE ASSUMPTIONS — feedback pattern
+  // ─────────────────────────────
+  const saveAssumptionsBtn = safeEl('saveAssumptionsBtn');
+  if (saveAssumptionsBtn) {
+    saveAssumptionsBtn.addEventListener('click', () => {
+      triggerSaveFeedback(
+        saveAssumptionsBtn,
+        'Save assumptions',
+        'btn-success',
+        saveAssumptionsData
+      );
+    });
+  }
+
+  // ─────────────────────────────
+  // DELETE ASSUMPTIONS — inline confirm
+  // ─────────────────────────────
+  wireDeleteConfirm(
+    'deleteAssumptionsBtn',
+    'deleteAssumptionsConfirm',
+    'confirmDeleteAssumptionsBtn',
+    'cancelDeleteAssumptionsBtn',
+    deleteAssumptionsData
+  );
 
   // ─────────────────────────────
   // EXCEL LOAD
