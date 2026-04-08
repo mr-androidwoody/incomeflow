@@ -125,105 +125,57 @@
     // ─────────────────────────────────────────────
     // INCOME LEGEND
     // ─────────────────────────────────────────────
-    function renderIncomeLegend(chart) {
+    function renderIncomeLegend(chart, recomputeShortfall) {
       const host = document.getElementById('incomeLegend');
       if (!host) return;
       host.innerHTML = '';
-    
-      const datasets = chart.data.datasets || [];
-      const { p1, p2 } = getNames();
-    
-      const p1sets = datasets.map((ds, i) => ({ ds, i }))
-        .filter(x => x.ds.label.endsWith(p1));
 
-      const p2sets = datasets.map((ds, i) => ({ ds, i }))
-        .filter(x => x.ds.label.endsWith(p2));
-    
-      function cleanLabel(label, name) {
-        return label.replace(`– ${name}`, '').trim();
-      }
-    
-      // helper to normalise label lengths
-      function shortLabel(label) {
-        return label
-          .replace('State Pension', 'Pension')
-          .replace('Interest draw', 'Interest')
-          .replace('Cash draw', 'Cash')
-          .replace('Dividends', 'Divs')
-          .trim();
-      }
-    
-      function makeGroup(title, items, personName) {
-        if (!items.length) return null;
-    
-        const group = document.createElement('div');
-        group.className = 'legend-group';
-    
-        const heading = document.createElement('div');
-        heading.className = 'legend-heading';
-        heading.textContent = title;
-    
-        const row = document.createElement('div');
-        row.className = 'split-legend-row';
-    
-        items.forEach(({ ds, i }) => {
-          const item = document.createElement('div');
-          item.className = 'split-legend-item';
-          if (!chart.isDatasetVisible(i)) item.classList.add('is-hidden');
-    
-          const swatch = document.createElement('span');
-          swatch.className = 'split-legend-swatch';
-          swatch.style.background = ds.backgroundColor;
-    
-          const label = document.createElement('span');
-          label.textContent = shortLabel(cleanLabel(ds.label, personName));
-    
-          item.appendChild(swatch);
-          item.appendChild(label);
-    
-          item.addEventListener('click', () => {
-            chart.setDatasetVisibility(i, !chart.isDatasetVisible(i));
-            recomputeShortfall(chart);
-            chart.update();
-            renderIncomeLegend(chart);
-          });
-    
-          row.appendChild(item);
-        });
-    
-        const wrapper = document.createElement('div');
-        wrapper.className = 'legend-line';
-        
-        wrapper.appendChild(heading);
-        wrapper.appendChild(row);
-        
-        group.appendChild(wrapper);
-    
-        return group;
-      }
-    
-      // ✅ THIS WAS MISSING — REQUIRED
-      const g1 = makeGroup(p1, p1sets, p1);
-      const g2 = makeGroup(p2, p2sets, p2);
-    
-      if (g1) host.appendChild(g1);
-      if (g2) host.appendChild(g2);
+      const row = document.createElement('div');
+      row.className = 'split-legend-row';
 
-      // Shortfall indicator — always visible, not toggleable
-      const shortfallIdx = chart.data.datasets.findIndex(d => d.label === 'Spending shortfall');
-      if (shortfallIdx >= 0) {
+      chart.data.datasets.forEach((ds, i) => {
+        // Skip non-income datasets and the shortfall (not toggleable)
+        if (ds.stack !== 'income') return;
+        if (ds.label === 'Spending shortfall') return;
+
         const item = document.createElement('div');
         item.className = 'split-legend-item';
-        item.style.marginTop = '4px';
+        if (!chart.isDatasetVisible(i)) item.classList.add('is-hidden');
+
         const swatch = document.createElement('span');
         swatch.className = 'split-legend-swatch';
-        swatch.style.background = '#DC2626';
+        swatch.style.background = ds.backgroundColor;
+
         const label = document.createElement('span');
-        label.textContent = 'Spending shortfall';
+        label.textContent = ds.label;
+
         item.appendChild(swatch);
         item.appendChild(label);
-        host.appendChild(item);
-      }
+
+        item.addEventListener('click', () => {
+          chart.setDatasetVisibility(i, !chart.isDatasetVisible(i));
+          recomputeShortfall(chart);
+          chart.update();
+          renderIncomeLegend(chart, recomputeShortfall);
+        });
+
+        row.appendChild(item);
+      });
+
+      host.appendChild(row);
+
+      // Shortfall indicator — always visible, not toggleable
+      const sfItem = document.createElement('div');
+      sfItem.className = 'split-legend-item';
+      sfItem.style.marginTop = '4px';
+      const sfSwatch = document.createElement('span');
+      sfSwatch.className = 'split-legend-swatch';
+      sfSwatch.style.background = '#DC2626';
+      const sfLabel = document.createElement('span');
+      sfLabel.textContent = 'Spending shortfall';
+      sfItem.appendChild(sfSwatch);
+      sfItem.appendChild(sfLabel);
+      host.appendChild(sfItem);
     }
 
   // ─────────────────────────────────────────────
@@ -265,38 +217,24 @@
 
     // ─────────────────────────────────────────────
     // INCOME CHART
+    // One dataset per source type; p1+p2 combined gross draws.
+    // Red shortfall recomputed on toggle so hiding a source grows the red bar.
     // ─────────────────────────────────────────────
-    let sets = [];
 
-    if (_viewPerson === 'both' || _viewPerson === 'p1') {
-      sets.push(ds(`State Pension – ${p1}`, r => r.p1SP, COLOURS.p1SP));
-      sets.push(ds(`Salary – ${p1}`, r => r.p1SalInc || 0, COLOURS.salary));
-      sets.push(ds(`SIPP – ${p1}`, r => r.p1Drawn.SIPP, COLOURS.p1SIPP));
-      sets.push(ds(`ISA – ${p1}`, r => r.p1Drawn.ISA, COLOURS.p1ISA));
-      sets.push(ds(`GIA – ${p1}`, r => r.p1Drawn.GIA, COLOURS.p1GIA));
-      sets.push(ds(`Interest draw – ${p1}`, r => r.p1IntDraw, COLOURS.intDraw));
-      sets.push(ds(`Dividends – ${p1}`, r => r.p1Divs || 0, COLOURS.p1Divs));
-      sets.push(ds(`Cash draw – ${p1}`, r => r.p1Drawn.Cash, COLOURS.p1Cash));
-    }
-
-    if (_viewPerson === 'both' || _viewPerson === 'p2') {
-      sets.push(ds(`State Pension – ${p2}`, r => r.p2SP, COLOURS.p2SP));
-      sets.push(ds(`Salary – ${p2}`, r => r.p2SalInc || 0, COLOURS.salary));
-      sets.push(ds(`SIPP – ${p2}`, r => r.p2Drawn.SIPP, COLOURS.p2SIPP));
-      sets.push(ds(`ISA – ${p2}`, r => r.p2Drawn.ISA, COLOURS.p2ISA));
-      sets.push(ds(`GIA – ${p2}`, r => r.p2Drawn.GIA, COLOURS.p2GIA));
-      sets.push(ds(`Interest draw – ${p2}`, r => r.p2IntDraw, COLOURS.intDraw));
-      sets.push(ds(`Dividends – ${p2}`, r => r.p2Divs || 0, COLOURS.p2Divs));
-      sets.push(ds(`Cash draw – ${p2}`, r => r.p2Drawn.Cash, COLOURS.p1Cash));
-    }
-
-    // Pre-compute per-row engine values needed for dynamic shortfall recompute
     const _engineShortfall = _rows.map(r => Math.round(adj(r.spendingShortfall || 0, r) / 1000));
-    const _targetData      = _rows.map(r => Math.round(adj(r.target || 0, r) / 1000));
+    const _targetData      = _rows.map(r => Math.round(adj(r.target            || 0, r) / 1000));
 
-    // Shortfall bar — stacked on top in red.
-    // Data is recomputed dynamically when income source visibility changes,
-    // so hiding sources causes the red bar to grow to fill the gap.
+    let sets = [];
+    sets.push(ds('State Pension', r => (r.p1SP         || 0) + (r.p2SP         || 0), COLOURS.p1SP));
+    sets.push(ds('Salary',        r => (r.p1SalInc     || 0) + (r.p2SalInc     || 0), COLOURS.salary));
+    sets.push(ds('SIPP',          r => (r.p1Drawn.SIPP || 0) + (r.p2Drawn.SIPP || 0), COLOURS.p1SIPP));
+    sets.push(ds('ISA',           r => (r.p1Drawn.ISA  || 0) + (r.p2Drawn.ISA  || 0), COLOURS.p1ISA));
+    sets.push(ds('GIA',           r => (r.p1Drawn.GIA  || 0) + (r.p2Drawn.GIA  || 0), COLOURS.p1GIA));
+    sets.push(ds('Interest',      r => (r.p1IntDraw    || 0) + (r.p2IntDraw    || 0), COLOURS.intDraw));
+    sets.push(ds('Dividends',     r => (r.p1Divs       || 0) + (r.p2Divs       || 0), COLOURS.p1Divs));
+    sets.push(ds('Cash',          r => (r.p1Drawn.Cash || 0) + (r.p2Drawn.Cash || 0), COLOURS.p1Cash));
+
+    // Shortfall — recomputed dynamically on toggle so red grows when sources are hidden
     sets.push({
       label: 'Spending shortfall',
       data: _engineShortfall.slice(),
@@ -304,10 +242,10 @@
       stack: 'income',
     });
 
-    // Target line — dashed, not stacked; flat in Real terms
+    // Target line — dashed, flat in Real terms
     sets.push({
       label: 'Spending target',
-      data: _targetData,
+      data: _targetData.slice(),
       type: 'line',
       stack: undefined,
       backgroundColor: 'transparent',
@@ -319,19 +257,19 @@
       order: 0,
     });
 
-    // Recompute shortfall dataset so hiding income sources causes red to grow.
-    // shortfall[i] = max(engineShortfall[i], target[i] - sum of visible income segments[i])
+    // Recompute shortfall so toggling a source grows the red bar to fill the gap.
+    // Floor is always the engine shortfall (can't show more covered than reality).
     function recomputeShortfall(chart) {
-      const shortfallDs = chart.data.datasets.find(d => d.label === 'Spending shortfall');
-      if (!shortfallDs) return;
-      const incomeSets = chart.data.datasets.filter(
+      const sfIdx = chart.data.datasets.findIndex(d => d.label === 'Spending shortfall');
+      if (sfIdx < 0) return;
+      const sourceSets = chart.data.datasets.filter(
         d => d.stack === 'income' && d.label !== 'Spending shortfall'
       );
-      shortfallDs.data = _targetData.map((target, i) => {
-        const visibleSum = incomeSets.reduce((sum, d) => {
+      chart.data.datasets[sfIdx].data = _targetData.map((tgt, i) => {
+        const visibleGross = sourceSets.reduce((sum, d) => {
           return sum + (chart.isDatasetVisible(chart.data.datasets.indexOf(d)) ? (d.data[i] || 0) : 0);
         }, 0);
-        return Math.max(_engineShortfall[i], target - visibleSum);
+        return Math.max(_engineShortfall[i], tgt - visibleGross);
       });
     }
 
@@ -388,7 +326,7 @@
           },
         },
       });
-      renderIncomeLegend(_incomeChart);
+      renderIncomeLegend(_incomeChart, recomputeShortfall);
     }
 
     // ─────────────────────────────────────────────
