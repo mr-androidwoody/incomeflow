@@ -78,6 +78,33 @@
   }
 
   // ─────────────────────────────
+  // LOAD BUTTON FEEDBACK
+  // Flips button to "Loading…" + ghost blue (btn-loading) immediately.
+  // Resets to original label + btn-secondary after resetMs (default 800ms).
+  // For Load Excel, pass a longer resetMs and call resetLoadBtn() manually
+  // on the excel-loaded event so the button resets when data actually arrives.
+  // ─────────────────────────────
+  function triggerLoadFeedback(btn, originalLabel, resetMs) {
+    btn.textContent = 'Loading…';
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    clearTimeout(btn._loadTimer);
+
+    btn._loadTimer = window.setTimeout(() => {
+      resetLoadBtn(btn, originalLabel);
+    }, resetMs || 800);
+  }
+
+  function resetLoadBtn(btn, originalLabel) {
+    clearTimeout(btn._loadTimer);
+    btn.textContent = originalLabel;
+    btn.classList.remove('btn-loading');
+    btn.classList.add('btn-secondary');
+    btn.disabled = false;
+  }
+
+  // ─────────────────────────────
   // DELETE CONFIRM HELPERS
   // First click: hides trigger button, shows block confirm box.
   // Cancel: restores. Confirm: executes deleteFn then restores.
@@ -751,9 +778,8 @@
 
     if (action === 'add-account')    return addAccount();
     if (action === 'remove-account') return removeAccount(el);
-    if (action === 'load-setup')     return loadSetup();
-    if (action === 'load-excel')     return window.RetireExcelLoader.openFilePicker();
     if (action === 'run-projection') return runProjection();
+    // load-setup and load-excel handled by direct ID listeners below
 
     if (action === 'switch-tab') {
       const tab = el.dataset.tab;
@@ -778,6 +804,42 @@
   if (savePortfolioBtn) {
     savePortfolioBtn.addEventListener('click', () => {
       triggerSaveFeedback(savePortfolioBtn, 'Save portfolio', saveSetupData);
+    });
+  }
+
+  // ─────────────────────────────
+  // LOAD SAVED — ghost blue feedback, resets after 800ms
+  // ─────────────────────────────
+  const loadSetupBtn = safeEl('loadSetupBtn');
+  if (loadSetupBtn) {
+    loadSetupBtn.addEventListener('click', () => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        showToast('No saved data found.', true);
+        return;
+      }
+      triggerLoadFeedback(loadSetupBtn, 'Load saved', 800);
+      try {
+        applySetupInputs(JSON.parse(raw));
+        showToast('Portfolio loaded ✓');
+      } catch (err) {
+        console.error(err);
+        showToast('Load failed – see console', true);
+        resetLoadBtn(loadSetupBtn, 'Load saved');
+      }
+    });
+  }
+
+  // ─────────────────────────────
+  // LOAD EXCEL — ghost blue while file picker is open.
+  // Resets on excel-loaded event (success) or after 8s fallback
+  // (user cancelled the picker or load took too long).
+  // ─────────────────────────────
+  const loadExcelBtn = safeEl('loadExcelBtn');
+  if (loadExcelBtn) {
+    loadExcelBtn.addEventListener('click', () => {
+      triggerLoadFeedback(loadExcelBtn, 'Load Excel', 8000);
+      window.RetireExcelLoader.openFilePicker();
     });
   }
 
@@ -817,6 +879,9 @@
   // EXCEL LOAD
   // ─────────────────────────────
   document.addEventListener('excel-loaded', (e) => {
+    // Reset the Load Excel button immediately when data arrives
+    const loadExcelBtn = safeEl('loadExcelBtn');
+    if (loadExcelBtn) resetLoadBtn(loadExcelBtn, 'Load Excel');
     const { accounts, params } = e.detail;
 
     state.portfolioAccounts = [];
