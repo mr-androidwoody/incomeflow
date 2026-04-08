@@ -1386,6 +1386,19 @@ input[type="radio"] { accent-color: var(--accent); }
   gap: 6px 12px;
 }
 
+.legend-line {
+  display: flex;
+  align-items: flex-start; /* key: top align */
+  gap: 16px;
+}
+
+.legend-heading {
+  min-width: 70px;   /* fixed label column */
+  margin: 0;         /* remove bottom spacing */
+  line-height: 1.2;
+  padding-top: 2px;  /* fine tune vertical alignment */
+}
+
 /* ========================================
    Shared / utility
    ======================================== */
