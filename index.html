@@ -87,13 +87,13 @@
     
             <div>
               <label>State Pension £</label>
-              <input type="text" id="p1SP" class="currency-input"/>
+              <input type="text" id="p1SP" class="currency-input" value="12,547"/>
             </div>
     
             <div>
               <label>State Pension Age</label>
               <div class="stepper-input">
-                <input type="number" id="p1SPAge"/>
+                <input type="number" id="p1SPAge" value="67"/>
                 <button class="stepper-btn" data-step-for="p1SPAge" data-step-direction="1" type="button">&#x25B2;</button>
                 <button class="stepper-btn" data-step-for="p1SPAge" data-step-direction="-1" type="button">&#x25BC;</button>
               </div>
@@ -126,12 +126,12 @@
           </div>
         
           <div class="people-grid" id="p2-setup-fields">
-        
+
             <div>
               <label>Name</label>
               <input data-action="setup-summary-input" id="sp-p2name" type="text" placeholder="Person 2"/>
             </div>
-        
+
             <div>
               <label>Birth Year</label>
               <div class="stepper-input">
@@ -140,26 +140,26 @@
                 <button class="stepper-btn" data-step-for="sp-p2dob" data-step-direction="-1" type="button">&#x25BC;</button>
               </div>
             </div>
-        
+
             <div>
               <label>State Pension £</label>
-              <input type="text" id="p2SP" class="currency-input"/>
+              <input type="text" id="p2SP" class="currency-input" value="12,547"/>
             </div>
-        
+
             <div>
               <label>State Pension Age</label>
               <div class="stepper-input">
-                <input type="number" id="p2SPAge"/>
+                <input type="number" id="p2SPAge" value="67"/>
                 <button class="stepper-btn" data-step-for="p2SPAge" data-step-direction="1" type="button">&#x25B2;</button>
                 <button class="stepper-btn" data-step-for="p2SPAge" data-step-direction="-1" type="button">&#x25BC;</button>
               </div>
             </div>
-        
+
             <div>
               <label>Gross Salary £/yr</label>
               <input type="text" id="p2Salary" class="currency-input"/>
             </div>
-        
+
             <div>
               <label>Salary Stop Age</label>
               <div class="stepper-input">
@@ -168,7 +168,7 @@
                 <button class="stepper-btn" data-step-for="p2SalaryStopAge" data-step-direction="-1" type="button">&#x25BC;</button>
               </div>
             </div>
-        
+
           </div>
         </div>
     
@@ -288,10 +288,6 @@
                 Continue to assumptions →
               </button>
 
-              <button class="btn btn-secondary" data-action="delete-portfolio">
-                Delete portfolio
-              </button>
-
             </div>
           </div>
 
@@ -318,6 +314,12 @@
 
           <tbody id="acct-tbody"></tbody>
         </table>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:12px">
+          <button class="btn btn-secondary" data-action="delete-portfolio">
+            Delete portfolio
+          </button>
+        </div>
 
       </div>
     
