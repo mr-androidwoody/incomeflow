@@ -310,6 +310,15 @@ canvas { display: block; width: 100%; height: auto; }
 }
 .btn-saving:hover { background: #f0fdf4; }
 
+/* ── Loading state: ghost blue (white bg, blue border + text) ── */
+.btn-loading {
+  background: #fff;
+  color: #3460e8;
+  border: 1.5px solid #4a78ff;
+  box-shadow: none;
+}
+.btn-loading:hover { background: #f0f4ff; }
+
 /* ── Delete confirm box: red-bordered alert replacing the delete button ── */
 .delete-confirm-box {
   display: flex;
