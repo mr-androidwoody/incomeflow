@@ -1346,6 +1346,47 @@ input[type="radio"] { accent-color: var(--accent); }
   white-space: nowrap;
 }
 
+.sidebar-legend__info {
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: default;
+  flex: 0 0 auto;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 120ms ease;
+}
+
+.sidebar-legend__info:hover {
+  opacity: 1;
+}
+
+/* ─────────────────────────────
+   Legend tooltip
+   ───────────────────────────── */
+
+#legend-tooltip {
+  position: absolute;
+  z-index: 9999;
+  max-width: 260px;
+  padding: 10px 13px;
+  background: #1a2236;
+  color: #f0f4ff;
+  font-size: 0.78rem;
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.45;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.28);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+#legend-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ─────────────────────────────
    Sidebar table selector (Tables tab)
    ───────────────────────────── */
