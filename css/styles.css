@@ -685,21 +685,22 @@ input[type="radio"] { accent-color: var(--accent); }
 .wrapper-row:last-child { margin-bottom: 0; }
 .wrapper-val { color: var(--text); font-weight: 700; }
 
-/* Wrapper total footer — aligned to portfolio-footer pattern */
+/* Wrapper total footer — right-aligned, assump pattern */
 .wrapper-total-footer {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
 .wrapper-total-footer .meta-label {
-  display: block;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--muted);
   text-transform: uppercase;
-  margin-bottom: 4px;
 }
 
 .wrapper-total-footer .meta-value {
@@ -772,7 +773,7 @@ input[type="radio"] { accent-color: var(--accent); }
 .accounts-toolbar-top p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   line-height: 1.42;
 }
 
