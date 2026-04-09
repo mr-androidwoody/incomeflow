@@ -565,15 +565,16 @@
             <div class="assump-section">
               <p class="assump-section__label">GIA dividends</p>
               <div class="assump-section__body">
-                <div class="field" style="margin-bottom:6px">
-                  <label>Dividend yield on GIA equities (%)</label>
-                  <div class="stepper-input">
-                    <input type="number" id="dividendYield" value="1.5" min="0" max="10" step="0.1">
-                    <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="1" type="button">&#x25B2;</button>
-                    <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="-1" type="button">&#x25BC;</button>
+                <div class="assump-inline-field">
+                  <div class="assump-inline-field__input">
+                    <div class="stepper-input">
+                      <input type="number" id="dividendYield" value="1.5" min="0" max="10" step="0.1">
+                      <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="1" type="button">&#x25B2;</button>
+                      <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="-1" type="button">&#x25BC;</button>
+                    </div>
                   </div>
+                  <span class="assump-inline-field__hint">Dividends treated as taxable income each year (not reinvested).</span>
                 </div>
-                <div class="hint">Dividends treated as taxable income each year (not reinvested).</div>
               </div>
             </div>
           </div>
@@ -627,14 +628,26 @@
               </div>
               <div class="assump-section__body">
                 <p class="assump-section__label" data-p1 style="margin-bottom:4px">Person 1</p>
-                <div class="field" style="margin-bottom:8px">
-                  <label>GIA → ISA (£/yr)</label>
-                  <input type="text" id="bniP1GIA" class="currency-input" placeholder="e.g. 20,000">
+                <div class="assump-inline-field" style="margin-bottom:8px">
+                  <div class="assump-inline-field__input">
+                    <div class="currency-stepper">
+                      <input type="text" id="bniP1GIA" class="currency-input" placeholder="e.g. 20,000">
+                      <button class="stepper-btn" data-step-for="bniP1GIA" data-step-direction="1" data-step-amount="1000" type="button">&#x25B2;</button>
+                      <button class="stepper-btn" data-step-for="bniP1GIA" data-step-direction="-1" data-step-amount="1000" type="button">&#x25BC;</button>
+                    </div>
+                  </div>
+                  <span class="assump-inline-field__hint">GIA → ISA transfer per year</span>
                 </div>
-                <p class="assump-section__label p2-field" data-p2 style="margin-top:6px;margin-bottom:4px">Person 2</p>
-                <div class="field p2-field" style="margin-bottom:0">
-                  <label>GIA → ISA (£/yr)</label>
-                  <input type="text" id="bniP2GIA" class="currency-input" placeholder="e.g. 5,000">
+                <p class="assump-section__label p2-field" data-p2 style="margin-bottom:4px">Person 2</p>
+                <div class="assump-inline-field p2-field">
+                  <div class="assump-inline-field__input">
+                    <div class="currency-stepper">
+                      <input type="text" id="bniP2GIA" class="currency-input" placeholder="e.g. 5,000">
+                      <button class="stepper-btn" data-step-for="bniP2GIA" data-step-direction="1" data-step-amount="1000" type="button">&#x25B2;</button>
+                      <button class="stepper-btn" data-step-for="bniP2GIA" data-step-direction="-1" data-step-amount="1000" type="button">&#x25BC;</button>
+                    </div>
+                  </div>
+                  <span class="assump-inline-field__hint">GIA → ISA transfer per year</span>
                 </div>
               </div>
               <div class="hint" style="margin-top:6px">Each transfer capped at source balance and £20k ISA allowance per person per year.</div>
