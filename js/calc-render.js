@@ -137,21 +137,26 @@
       return s + (gross > 0 ? tax / gross : 0);
     }, 0) / _rows.length;
 
-    let peakYear = _rows[0].year, peakTax = 0;
-    _rows.forEach(r => {
-      const t = _viewPerson === 'p1' ? r.p1Tax : _viewPerson === 'p2' ? r.p2Tax : r.p1Tax + r.p2Tax;
-      if (t > peakTax) { peakTax = t; peakYear = r.year; }
-    });
+    const spending    = parseFloat(document.getElementById('spending')?.value)    || 0;
+    const stepDownPct = parseFloat(document.getElementById('stepDownPct')?.value) || 0;
+    const fmtK = n => '£' + Math.round(n).toLocaleString('en-GB');
+    let incomeTargetStr;
+    if (stepDownPct > 0) {
+      const reduced = spending * (1 - stepDownPct / 100);
+      incomeTargetStr = fmtK(spending) + ' \u2192 ' + fmtK(reduced) + ' at 75';
+    } else {
+      incomeTargetStr = fmtK(spending) + '/yr';
+    }
 
     const last = _rows[_rows.length - 1];
-    const mTax  = document.getElementById('m-tax');
-    const mRate = document.getElementById('m-rate');
-    const mPeak = document.getElementById('m-peak');
-    const mPort = document.getElementById('m-port');
-    if (mTax)  mTax.textContent  = fmt(totalTax);
-    if (mRate) mRate.textContent = (avgRate * 100).toFixed(1) + '%';
-    if (mPeak) mPeak.textContent = peakYear;
-    if (mPort) mPort.textContent = fmt(adj(last.totalPortfolio, last));
+    const mTax    = document.getElementById('m-tax');
+    const mRate   = document.getElementById('m-rate');
+    const mTarget = document.getElementById('m-income-target');
+    const mPort   = document.getElementById('m-port');
+    if (mTax)    mTax.textContent    = fmt(totalTax);
+    if (mRate)   mRate.textContent   = (avgRate * 100).toFixed(1) + '%';
+    if (mTarget) mTarget.textContent = incomeTargetStr;
+    if (mPort)   mPort.textContent   = fmt(adj(last.totalPortfolio, last));
   }
 
   // ─────────────────────────────────────────────
