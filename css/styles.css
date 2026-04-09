@@ -691,8 +691,8 @@ input[type="radio"] { accent-color: var(--accent); }
   border-bottom: none;
   border-radius: 0;
 }
-.alloc-total-row .alloc-total-label { font-weight: 700; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.alloc-balanced { font-size: 1.2rem; font-weight: 800; color: #0c8a5c; }
+.alloc-total-row .alloc-total-label { font-weight: 700; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.alloc-balanced { font-size: 0.95rem; font-weight: 800; color: #0c8a5c; letter-spacing: -0.01em; white-space: nowrap; }
 
 /* Wrapper total footer — label left, value right */
 .wrapper-total-footer {
@@ -713,7 +713,7 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .wrapper-total-footer .meta-value {
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: var(--text);
   line-height: 1;
