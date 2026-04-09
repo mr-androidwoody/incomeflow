@@ -138,6 +138,9 @@
 
       // How much of the target is already covered before interest draws
       const preIntGuaranteed = p1SP + p2SP + p1SalInc + p2SalInc + p1Divs + p2Divs;
+      // Surplus salary/SP above target goes to p1 cash buffer
+      const preIntSurplus    = Math.max(0, preIntGuaranteed - target);
+      if (preIntSurplus > 0) p1Bal.Cash = (p1Bal.Cash || 0) + preIntSurplus;
       let intBudget = Math.max(0, target - preIntGuaranteed);
 
       intAccts.forEach(a => {
@@ -397,7 +400,7 @@
         p1SP +
         p1SalInc +
         p1IntDraw +
-        p1Divs +
+        p1DivsUsed +
         (p1Drawn.Cash || 0) +
         (p1Drawn.GIA || 0) +
         (p1Drawn.SIPP || 0) +
@@ -407,7 +410,7 @@
         p2SP +
         p2SalInc +
         p2IntDraw +
-        p2Divs +
+        p2DivsUsed +
         (p2Drawn.Cash || 0) +
         (p2Drawn.GIA || 0) +
         (p2Drawn.SIPP || 0) +
