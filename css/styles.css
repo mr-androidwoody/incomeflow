@@ -1141,7 +1141,7 @@ input[type="radio"] { accent-color: var(--accent); }
 
 .metric {
   padding: 16px 18px;
-  background: #2f5494;
+  background: #45546e;
   border: none;
   border-radius: 10px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
