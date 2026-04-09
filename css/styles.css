@@ -1127,7 +1127,7 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .metrics-band {
-  background: #1e2d45;
+  background: #384d6e;
   border-radius: 16px;
   padding: 10px;
   margin-bottom: 16px;
@@ -1141,7 +1141,7 @@ input[type="radio"] { accent-color: var(--accent); }
 
 .metric {
   padding: 16px 18px;
-  background: #243656;
+  background: #2f5494;
   border: none;
   border-radius: 10px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
