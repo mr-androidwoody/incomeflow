@@ -1237,9 +1237,18 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .chart-sidebar__divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 10px 0 14px;
+  display: none;
+}
+
+.chart-intro {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted);
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
 }
 
 /* Two-column Person / Chart mode control row */
