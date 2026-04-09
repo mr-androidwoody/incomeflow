@@ -593,17 +593,76 @@ input[type="radio"] { accent-color: var(--accent); }
 .people-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 12px;
+  gap: 10px 12px;
 }
 
 .people-grid > div {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 
 .people-grid > div.full { grid-column: 1 / -1; }
+
+/* Smaller inputs inside assump cards — match setup-panel / acct-table sizing */
+.assump-card input[type=text],
+.assump-card input[type=number] {
+  height: 32px;
+  min-height: 32px;
+  font-size: 0.78rem;
+  padding: 0 9px;
+  border-radius: 7px;
+  border-color: #bcc7d7;
+}
+
+.assump-card .stepper-input input,
+.assump-card .currency-stepper input {
+  height: 32px;
+  min-height: 32px;
+}
+
+.assump-card .currency-stepper {
+  grid-template-rows: 16px 16px;
+}
+
+.assump-card .stepper-btn {
+  font-size: 9px;
+}
+
+.assump-card select {
+  height: 32px;
+  min-height: 32px;
+  font-size: 0.78rem;
+}
+
+
+.setup-panel input[type=text],
+.setup-panel input[type=number] {
+  height: 32px;
+  min-height: 32px;
+  font-size: 0.78rem;
+  padding: 0 9px;
+  border-radius: 7px;
+  border-color: #bcc7d7;
+}
+
+.setup-panel .stepper-input input {
+  height: 32px;
+}
+
+.setup-panel .stepper-btn {
+  font-size: 9px;
+}
+
+.setup-panel select {
+  height: 32px;
+  min-height: 32px;
+  font-size: 0.78rem;
+  padding: 0 26px 0 9px;
+  border-radius: 7px;
+  border-color: #bcc7d7;
+}
 
 /* Field labels — assump pattern */
 .people-grid label,
