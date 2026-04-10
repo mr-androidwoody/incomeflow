@@ -175,24 +175,39 @@
       const total = D.ALLOC_CLASSES.reduce((s, c) => s + (acc.alloc[c] || 0), 0);
       const pct = Math.round(total);
     
-      let cls = 'total-warn';
-      let label = pct + '%';
-    
+      // ✅ Balanced
       if (pct === 100) {
         el.innerHTML = `
           <div class="status status-ok">
-            <span class="total-badge">100%</span>
-            <span class="status-label">Ready</span>
+            <span class="value">${pct}%</span>
+            <span class="status-text">Ready</span>
           </div>
         `;
         return;
       }
     
-      if (pct > 100) {
-        cls = 'total-err';
+      // ⚠️ Under-allocated
+      if (pct < 100) {
+        const diff = 100 - pct;
+    
+        el.innerHTML = `
+          <div class="status status-warn">
+            <span class="value">${pct}%</span>
+            <span class="status-text">Allocate ${diff}% more</span>
+          </div>
+        `;
+        return;
       }
     
-      el.innerHTML = `<span class="total-badge ${cls}">${label}</span>`;
+      // ❌ Over-allocated
+      const diff = pct - 100;
+    
+      el.innerHTML = `
+        <div class="status status-err">
+          <span class="value">${pct}%</span>
+          <span class="status-text">Reduce ${diff}%</span>
+        </div>
+      `;
     }
 
   function refreshOwnerOptions(accounts, ownerNames) {
