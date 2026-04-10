@@ -103,11 +103,15 @@
     const allocInputs = D.ALLOC_CLASSES.map(
       (cls) => `
       <td class="col-alloc">
-        <input type="number" min="0" max="100" step="1"
-          data-account-id="${acc.id}"
-          data-field="${cls}"
-          value="${acc.alloc[cls]}"
-          ${fixed ? 'disabled' : ''}>
+        <div class="stepper-input">
+          <input type="number" min="0" max="100" step="5"
+            data-account-id="${acc.id}"
+            data-field="${cls}"
+            value="${acc.alloc[cls]}"
+            ${fixed ? 'disabled' : ''}>
+          <button class="stepper-btn" data-step-direction="1" type="button">&#x25B2;</button>
+          <button class="stepper-btn" data-step-direction="-1" type="button">&#x25BC;</button>
+        </div>
       </td>
     `
     ).join('');
@@ -140,10 +144,14 @@
       ${allocInputs}
 
       <td class="col-rate">
-        <input type="number" min="0" max="20" step="0.01"
-          value="${rateValue}" placeholder="–"
-          data-account-id="${acc.id}" data-field="rate"
-          ${interestDisabledAttr}>
+        <div class="stepper-input">
+          <input type="number" min="0" max="20" step="0.1"
+            value="${rateValue}" placeholder="–"
+            data-account-id="${acc.id}" data-field="rate"
+            ${interestDisabledAttr}>
+          <button class="stepper-btn" data-step-direction="1" type="button" ${noInterest ? 'disabled style="opacity:0.35"' : ''}>&#x25B2;</button>
+          <button class="stepper-btn" data-step-direction="-1" type="button" ${noInterest ? 'disabled style="opacity:0.35"' : ''}>&#x25BC;</button>
+        </div>
       </td>
 
       <td class="col-draw">
@@ -260,6 +268,15 @@
       drawInp.style.opacity = noInterest ? '0.35' : '';
       if (noInterest) drawInp.value = '';
     }
+
+    // Also disable the stepper buttons in the rate cell
+    const rateCell = row.querySelector('[data-field="rate"]')?.closest('.stepper-input');
+    if (rateCell) {
+      rateCell.querySelectorAll('.stepper-btn').forEach((btn) => {
+        btn.disabled      = noInterest;
+        btn.style.opacity = noInterest ? '0.35' : '';
+      });
+    }
   }
 
   window.RetireRender = {
@@ -272,31 +289,4 @@
     initialiseCurrencyInputs,
     applyCurrencyFormattingToInput,
   };
-
-    // ─────────────────────────────
-    // CURRENCY INPUT FORMATTING
-    // ─────────────────────────────
-    document.addEventListener('focusout', (e) => {
-      if (!e.target.classList.contains('currency-input')) return;
-      applyCurrencyFormattingToInput(e.target);
-    });
-    
-    document.addEventListener('focusin', (e) => {
-      if (!e.target.classList.contains('currency-input')) return;
-      const val = e.target.value;
-      if (!val) return;
-    
-      // remove commas while editing
-      e.target.value = D.parseCurrency(val);
-    });
-
-    // ─────────────────────────────
-    // INITIAL FORMAT ON LOAD (ADD THIS)
-    // ─────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.currency-input').forEach(el => {
-        applyCurrencyFormattingToInput(el);
-      });
-    });
-    
 })();
