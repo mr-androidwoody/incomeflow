@@ -887,66 +887,81 @@
     applyP2State();
   });
 
-  // ─────────────────────────────
-  // STEPPER BUTTONS
-  // ─────────────────────────────
-  document.addEventListener('click', function (e) {
-    const btn = e.target.closest('.stepper-btn');
-    if (!btn) return;
-
-    const targetId = btn.dataset.stepFor;
-    const dir      = Number(btn.dataset.stepDirection);
-    const input    = targetId
-      ? document.getElementById(targetId)
-      : btn.closest('.stepper-input')?.querySelector('input');
-    if (!input) return;
-
-    const step = Number(input.step) || 1;
+    // ─────────────────────────────
+    // STEPPER BUTTONS
+    // ─────────────────────────────
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.stepper-btn');
+      if (!btn) return;
     
-    let val;
+      const targetId = btn.dataset.stepFor;
+      const dir      = Number(btn.dataset.stepDirection) || 0;
     
-    if (input.classList.contains('currency-input')) {
-      val = D.parseCurrency(input.value || 0);
-    } else {
-      val = Number(input.value);
+      const input = targetId
+        ? document.getElementById(targetId)
+        : btn.closest('.stepper-input')?.querySelector('input');
+    
+      if (!input) return;
+    
+      // FIX: use button-defined step amount first
+      const step =
+        Number(btn.dataset.stepAmount) ||
+        Number(input.step) ||
+        1;
+    
+      let val;
+    
+      // FIX: correctly parse currency inputs
+      if (input.classList.contains('currency-input')) {
+        val = D.parseCurrency(input.value || 0);
+      } else {
+        val = Number(input.value);
+      }
+    
+      if (isNaN(val)) val = 0;
+    
+      const min = input.min !== '' ? Number(input.min) : -Infinity;
+      const max = input.max !== '' ? Number(input.max) :  Infinity;
+    
+      const next = Math.min(max, Math.max(min, val + (dir * step)));
+    
+      // FIX: preserve formatting for currency fields
+      if (input.classList.contains('currency-input')) {
+        input.value = D.formatCurrency(next);
+      } else {
+        input.value = next;
+      }
+    
+      input.dispatchEvent(new Event('input',  { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    
+    
+    // ─────────────────────────────
+    // INIT
+    // ─────────────────────────────
+    refreshSetupSummary();
+    R.initialiseCurrencyInputs();
+    RetireTabs.init();
+    CR.initResultsTabs();
+    CR.initTableSelector();
+    
+    const savedPortfolio = localStorage.getItem(STORAGE_KEY);
+    if (savedPortfolio) {
+      try {
+        applySetupInputs(JSON.parse(savedPortfolio));
+      } catch (e) {
+        console.error(e);
+      }
     }
     
-    if (isNaN(val)) val = 0;
-
-      
-    const min  = input.min !== '' ? Number(input.min) : -Infinity;
-    const max  = input.max !== '' ? Number(input.max) :  Infinity;
-
-    input.value = Math.min(max, Math.max(min, val + (dir * step)));
-    input.dispatchEvent(new Event('input',  { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-
-  // ─────────────────────────────
-  // INIT
-  // ─────────────────────────────
-  refreshSetupSummary();
-  R.initialiseCurrencyInputs();
-  RetireTabs.init();
-  CR.initResultsTabs();
-  CR.initTableSelector();
-
-  const savedPortfolio = localStorage.getItem(STORAGE_KEY);
-  if (savedPortfolio) {
-    try {
-      applySetupInputs(JSON.parse(savedPortfolio));
-    } catch (e) {
-      console.error(e);
+    const savedAssumptions = localStorage.getItem(ASSUMPTIONS_KEY);
+    if (savedAssumptions) {
+      try {
+        applyAssumptionsInputs(JSON.parse(savedAssumptions));
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }
-
-  const savedAssumptions = localStorage.getItem(ASSUMPTIONS_KEY);
-  if (savedAssumptions) {
-    try {
-      applyAssumptionsInputs(JSON.parse(savedAssumptions));
-    } catch (e) {
-      console.error(e);
-    }
-  }
 
 })();
