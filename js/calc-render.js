@@ -1221,4 +1221,13 @@
     renderCharts,
     renderTables,
   };
+
+    window.RetireRender = window.RetireRender || {};
+
+    Object.assign(window.RetireRender, {
+      setResults,
+      renderCharts,
+      renderMetrics,
+      renderAlerts
+    });
 })();
