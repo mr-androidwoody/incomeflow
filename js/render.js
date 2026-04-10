@@ -149,8 +149,8 @@
             value="${rateValue}" placeholder="–"
             data-account-id="${acc.id}" data-field="rate"
             ${interestDisabledAttr}>
-          <button class="stepper-btn" data-step-direction="1" type="button">&#x25B2;</button>
-          <button class="stepper-btn" data-step-direction="-1" type="button">&#x25BC;</button>
+          <button class="stepper-btn" data-step-direction="1" type="button" ${noInterest ? 'disabled style="opacity:0.35"' : ''}>&#x25B2;</button>
+          <button class="stepper-btn" data-step-direction="-1" type="button" ${noInterest ? 'disabled style="opacity:0.35"' : ''}>&#x25BC;</button>
         </div>
       </td>
 
@@ -267,6 +267,15 @@
       drawInp.disabled      = noInterest;
       drawInp.style.opacity = noInterest ? '0.35' : '';
       if (noInterest) drawInp.value = '';
+    }
+
+    // Also disable the stepper buttons in the rate cell
+    const rateCell = row.querySelector('[data-field="rate"]')?.closest('.stepper-input');
+    if (rateCell) {
+      rateCell.querySelectorAll('.stepper-btn').forEach((btn) => {
+        btn.disabled      = noInterest;
+        btn.style.opacity = noInterest ? '0.35' : '';
+      });
     }
   }
 
