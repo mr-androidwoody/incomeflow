@@ -466,48 +466,61 @@
     const householdNaturalNet = p1NaturalNet + p2NaturalNet;
         
     // Final push
-        rows.push({
-          year, p1Age, p2Age,
-        
-          target,
-        
-          p1SP, p2SP, p1SalInc, p2SalInc,
-          intDrawTotal, p1IntDraw, p2IntDraw,
-          p1IntTaxable, p2IntTaxable,
-          p1Divs, p2Divs,
-          p1DivsUsed, p2DivsUsed,
-          p1Drawn, p2Drawn,
-        
-          p1IncomeTax: p1IncomeTaxTotal,
-          p2IncomeTax: p2IncomeTaxTotal,
-          p1CGT,
-          p2CGT,
-          p1NI,
-          p2NI,
-        
-          p1Tax: p1TaxTotal,
-          p2Tax: p2TaxTotal,
-        
-          p1GrossIncome,
-          p2GrossIncome,
-          householdGrossIncome,
-          householdTax,
-          householdNetCashflow,
-        
-          p1NaturalNet,
-          p2NaturalNet,
-          householdNaturalNet,
-        
-          p1TaxInc: p1SalInc + p1SP + p1Drawn.sippTaxable + p1IntTaxable + p1DivsUsed,
-          p2TaxInc: p2SalInc + p2SP + p2Drawn.sippTaxable + p2IntTaxable + p2DivsUsed,
-        
-          p1AnnualGains,
-          p2AnnualGains,
-        
-          totalPortfolio:
-            C.totalBal(p1Bal) +
-            C.totalBal(p2Bal)
-        });
+    rows.push({
+      year, p1Age, p2Age,
+    
+      target,
+    
+      p1SP, p2SP, p1SalInc, p2SalInc,
+      intDrawTotal, p1IntDraw, p2IntDraw,
+      p1IntTaxable, p2IntTaxable,
+      p1Divs, p2Divs,
+      p1DivsUsed, p2DivsUsed,
+      p1Drawn, p2Drawn,
+    
+      p1IncomeTax: p1IncomeTaxTotal,
+      p2IncomeTax: p2IncomeTaxTotal,
+      p1CGT,
+      p2CGT,
+      p1NI,
+      p2NI,
+    
+      p1Tax: p1TaxTotal,
+      p2Tax: p2TaxTotal,
+    
+      p1GrossIncome,
+      p2GrossIncome,
+      householdGrossIncome,
+      householdTax,
+      householdNetCashflow,
+    
+      p1NaturalNet,
+      p2NaturalNet,
+      householdNaturalNet,
+    
+      p1TaxInc: p1SalInc + p1SP + p1Drawn.sippTaxable + p1IntTaxable + p1DivsUsed,
+      p2TaxInc: p2SalInc + p2SP + p2Drawn.sippTaxable + p2IntTaxable + p2DivsUsed,
+    
+      p1AnnualGains,
+      p2AnnualGains,
+    
+      // ✅ REQUIRED FOR RENDERER
+      p1Cash: p1Bal.Cash || 0,
+      p2Cash: p2Bal.Cash || 0,
+    
+      p1ISA: p1Bal.ISA || 0,
+      p2ISA: p2Bal.ISA || 0,
+    
+      p1SIPP: p1Bal.SIPP || 0,
+      p2SIPP: p2Bal.SIPP || 0,
+    
+      p1GIA: p1Bal.GIA || 0,
+      p2GIA: p2Bal.GIA || 0,
+    
+      totalPortfolio:
+        C.totalBal(p1Bal) +
+        C.totalBal(p2Bal)
+    });
 
       } // end for loop
 
