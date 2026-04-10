@@ -465,7 +465,7 @@
     
     const householdNaturalNet = p1NaturalNet + p2NaturalNet;
         
-        // Final push
+    // Final push
         rows.push({
           year, p1Age, p2Age,
         
@@ -508,3 +508,17 @@
             C.totalBal(p1Bal) +
             C.totalBal(p2Bal)
         });
+
+      } // end for loop
+
+      return {
+        rows,
+        depletions
+      };
+    }
+
+    window.RetireEngine = {
+      runProjection
+    };
+
+})();

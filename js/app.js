@@ -2,9 +2,8 @@
   const D  = window.RetireData;
   const C  = window.RetireCalc;
   const R  = window.RetireRender;
-  const E  = window.RetireEngine;
+  const E = () => window.RetireEngine;  
   const CR = window.RetireCalcRender;
-
   const STORAGE_KEY     = 'rukRetirementSetup';
   const ASSUMPTIONS_KEY = 'rukRetirementAssumptions';
 
@@ -657,8 +656,14 @@
   // ─────────────────────────────
   function runProjection() {
     syncSetupToAssumptions();
-    const result = E.runProjection(gatherInputs(), state.portfolioAccounts);
-    if (!result) return;
+      
+    if (!E()) {
+      console.error('RetireEngine not loaded');
+      return;
+    }
+    
+    const result = E().runProjection(gatherInputs(), state.portfolioAccounts);
+      
     CR.setResults(result.rows);
     CR.renderAlerts(result.depletions);
     CR.renderMetrics();
