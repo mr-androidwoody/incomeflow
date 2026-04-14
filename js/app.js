@@ -751,6 +751,16 @@
     }
 
     try {
+      // ── Diagnostic: log key inputs to verify SP is reaching the worker ──
+      console.log('[MC diagnostic]', {
+        p1SPAmt: inputs.p1SPAmt, p1SPAge: inputs.p1SPAge,
+        p2SPAmt: inputs.p2SPAmt, p2SPAge: inputs.p2SPAge,
+        spending: inputs.spending,
+        p1Bal: inputs.p1Bal, p2Bal: inputs.p2Bal,
+        p1DOB: inputs.p1DOB, p2DOB: inputs.p2DOB,
+        startYear: inputs.startYear,
+      });
+
       // ── Main run: 10,000 paths at current spending ─────────────────────
       const result = await MCE.run({
         inputs,
