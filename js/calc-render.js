@@ -337,7 +337,11 @@
     });
 
     // Shortfall — always shown, not toggleable
-    const sfRaw = _engineShortfall.reduce((s, v) => s + v * 1000, 0);
+    // Read from the live chart dataset so the value updates when items are toggled
+    const sfDataset = chart.data.datasets.find(d => d.label === 'Shortfall');
+    const sfRaw = sfDataset
+      ? sfDataset.data.reduce((s, v) => s + (v || 0) * 1000, 0)
+      : _engineShortfall.reduce((s, v) => s + v * 1000, 0);
     const sfItem = document.createElement('div');
     sfItem.className = 'sidebar-legend__item sidebar-legend__item--fixed';
     const sfSwatch = document.createElement('span');

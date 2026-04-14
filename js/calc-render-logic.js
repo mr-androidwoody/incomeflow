@@ -134,19 +134,12 @@
    * @returns {number[]} shortfall in £k, ≥ 0
    */
   function buildEngineShortfall(rows, viewPerson, useReal, targetData) {
+    // Use the engine's own cashflowShortfall field — this is authoritative and
+    // avoids false positives from recomputing gross income independently.
     return rows.map((r, i) => {
-      const p1Gross = (r.p1SP               ?? 0) + (r.p1SalInc          ?? 0) +
-                      (r.p1Drawn?.SIPP     ?? 0) + (r.p1Drawn?.ISA       ?? 0) +
-                      (r.p1Drawn?.GIA      ?? 0) + (r.p1IntDraw          ?? 0) +
-                      (r.p1DivsUsed        ?? 0) + (r.p1Drawn?.Cash      ?? 0);
-      const p2Gross = (r.p2SP               ?? 0) + (r.p2SalInc          ?? 0) +
-                      (r.p2Drawn?.SIPP     ?? 0) + (r.p2Drawn?.ISA       ?? 0) +
-                      (r.p2Drawn?.GIA      ?? 0) + (r.p2IntDraw          ?? 0) +
-                      (r.p2DivsUsed        ?? 0) + (r.p2Drawn?.Cash      ?? 0);
-      const visibleGross = viewPerson === 'p1' ? p1Gross
-                         : viewPerson === 'p2' ? p2Gross
-                         : p1Gross + p2Gross;
-      return adj(Math.max(0, (r.target || 0) - visibleGross), r, useReal) / 1000;
+      const sf = r.cashflowShortfall ?? 0;
+      if (sf <= 0) return 0;
+      return adj(sf, r, useReal) / 1000;
     });
   }
 
