@@ -266,9 +266,10 @@
     }
 
     if (label === 'Shortfall') {
-      const sfRows = rows.filter(r => (r.cashflowShortfall || 0) >= 20000);
-      if (!sfRows.length) return 'Portfolio fully meets the spending target across all years — no shortfall';
-      return `Spending target unmet in ${sfRows.length} year${sfRows.length !== 1 ? 's' : ''}, first occurring in ${sfRows[0].year}`;
+      const sfCount = _engineShortfall.filter(v => v * 1000 >= 20000).length;
+      if (!sfCount) return 'Portfolio fully meets the spending target across all years — no shortfall';
+      const firstSfIdx = _engineShortfall.findIndex(v => v * 1000 >= 20000);
+      return `Spending target unmet in ${sfCount} year${sfCount !== 1 ? 's' : ''}, first occurring in ${rows[firstSfIdx]?.year ?? '–'}`;
     }
 
     return null;
@@ -625,16 +626,20 @@
 
   function buildShortfallInsight() {
     const NEAR_DEPLETION = 20000;
-    const allSfRows  = _rows.filter(r => (r.cashflowShortfall || 0) >= 20000);
+    // _engineShortfall is in £k, parallel to _rows by index
+    const sfIndices = _engineShortfall.map((v, i) => v * 1000 >= 20000 ? i : -1).filter(i => i >= 0);
     const frag = document.createDocumentFragment();
-    if (!allSfRows.length) return frag;
+    if (!sfIndices.length) return frag;
 
-    const total    = allSfRows.reduce((s, r) => s + (r.cashflowShortfall || 0), 0);
-    const peak     = Math.max(...allSfRows.map(r => r.cashflowShortfall || 0));
-    const peakRow  = allSfRows.find(r => (r.cashflowShortfall || 0) === peak);
+    const allSfRows = sfIndices.map(i => _rows[i]);
+    const sfValues  = sfIndices.map(i => _engineShortfall[i] * 1000); // convert £k → £
+    const total    = sfValues.reduce((s, v) => s + v, 0);
+    const peak     = Math.max(...sfValues);
+    const peakIdx  = sfValues.indexOf(peak);
+    const peakRow  = allSfRows[peakIdx];
     const first    = allSfRows[0];
     const last     = allSfRows[allSfRows.length - 1];
-    const sfRows   = allSfRows; // alias kept for items block below
+    const sfRows   = allSfRows; // alias for items block below
 
     // Determine severity from minimum portfolio value across all shortfall years
     const minPortfolio = Math.min(...allSfRows.map(r => r.totalPortfolio || 0));
@@ -874,7 +879,7 @@
         },
       });
       renderIncomeLegend(_incomeChart, recomputeShortfall);
-      const hasGenuineShortfall = _rows.some(r => (r.cashflowShortfall || 0) >= 20000);
+      const hasGenuineShortfall = _engineShortfall.some(v => v * 1000 >= 20000);
       renderInsightButton('income', hasGenuineShortfall);
     }
 
