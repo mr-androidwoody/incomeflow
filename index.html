@@ -276,12 +276,13 @@
 
           <div class="accounts-toolbar-actions">
 
-            <!-- Left: alert (when invalid) OR add-account button (when valid) -->
+            <!-- Left: alert when invalid, empty when valid -->
             <div id="portAlertBox" class="port-alert" style="display:none"></div>
-            <button class="btn-add" id="addAccountBtn" data-action="add-account">+ Add account</button>
 
-            <!-- Right -->
+            <!-- Right: Add account always here, plus save/continue -->
             <div class="accounts-toolbar-right">
+
+              <button class="btn-add" id="addAccountBtn" data-action="add-account">+ Add account</button>
 
               <!-- Save portfolio: gets Saving… feedback on click -->
               <button class="btn btn-success" id="savePortfolioBtn" data-action="save-setup">
