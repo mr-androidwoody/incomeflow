@@ -2667,3 +2667,37 @@ input[type="radio"] { accent-color: var(--accent); }
   font-weight: 700;
   text-align: right;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   RISK OUTCOMES — sustainable spending section
+   ═══════════════════════════════════════════════════════════════ */
+
+.mc-sustain { border-left-width: 4px; }
+
+.mc-sustain--safe {
+  background: #f0fdf4;
+  border-color: #86efac;
+  border-left-color: #16a34a;
+}
+.mc-sustain--safe .mc-section-heading { color: #15803d; }
+
+.mc-sustain--warn {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #d97706;
+}
+.mc-sustain--warn .mc-section-heading { color: #b45309; }
+
+.mc-sustain--danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  border-left-color: #dc2626;
+}
+.mc-sustain--danger .mc-section-heading { color: #b91c1c; }
+
+.mc-sustain__note {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+  color: var(--muted, #9ca3af) !important;
+  font-style: italic;
+}
