@@ -1936,7 +1936,7 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .chart-canvas-area h2 {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 0.94rem;
   font-weight: 700;
   color: var(--text);
@@ -2189,4 +2189,239 @@ input[type="radio"] { accent-color: var(--accent); }
   .accounts-panel {
     overflow-x: auto;
   }
+}
+/* ========================================
+   Chart Insight Button + Pane
+   ======================================== */
+
+/* ========================================
+   Chart Canvas Area Header
+   ======================================== */
+
+.chart-canvas-area__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.chart-canvas-area__header h2 {
+  margin: 0;
+}
+
+/* ⓘ button — sits in chart header, right-hand side */
+.chart-insight-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: linear-gradient(180deg, #4a78ff 0%, #3460e8 100%);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(49,92,232,0.25);
+  transition: box-shadow 140ms ease, transform 140ms ease, opacity 140ms ease;
+  white-space: nowrap;
+}
+
+.chart-insight-btn:hover {
+  box-shadow: 0 5px 16px rgba(49,92,232,0.35);
+  transform: translateY(-1px);
+}
+
+.chart-insight-btn.is-active {
+  background: linear-gradient(180deg, #1a3fbf 0%, #1230b0 100%);
+  box-shadow: 0 3px 10px rgba(18,48,176,0.30);
+}
+
+.chart-insight-btn__icon {
+  font-size: 0.82rem;
+  color: #fff;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.chart-insight-btn__label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #fff;
+  pointer-events: none;
+}
+
+/* Insight pane — floats inside .chart-wrap */
+.chart-insight-pane {
+  position: absolute;
+  top: 44px;
+  right: 10px;
+  z-index: 20;
+  width: min(320px, calc(100% - 20px));
+  background: var(--panel-solid);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 32px rgba(18,30,52,0.14);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: insightPaneIn 180ms ease;
+}
+
+@keyframes insightPaneIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chart-insight-pane__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #4a78ff 0%, #3460e8 100%);
+  border-bottom: 1px solid #2a50c8;
+}
+
+.chart-insight-pane__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.chart-insight-pane__close {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: #fff;
+  padding: 0;
+  line-height: 1;
+  transition: color 120ms ease;
+}
+
+.chart-insight-pane__close:hover { color: rgba(255,255,255,0.7); }
+
+.chart-insight-pane__close:hover { color: var(--danger); }
+
+.chart-insight-pane__body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Shortfall stat rows */
+.chart-insight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.8rem;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-insight-row:last-of-type { border-bottom: none; }
+
+.chart-insight-row__label {
+  color: var(--muted);
+  flex: 1;
+}
+
+.chart-insight-row__value {
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-insight-note {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.45;
+  font-style: italic;
+}
+
+/* Wealth annotation groups */
+.chart-insight-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chart-insight-group__heading {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.chart-insight-summary {
+  font-size: 0.79rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.chart-insight-year {
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+/* Shortfall severity banner inside insight pane */
+.chart-insight-banner {
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.chart-insight-banner--warn {
+  background: #fff8e6;
+  border-left: 3px solid var(--warning);
+  color: #7a4f00;
+}
+
+.chart-insight-banner--danger {
+  background: #fff1f1;
+  border-left: 3px solid var(--danger);
+  color: #7f1d1d;
+}
+
+/* ── Accounts toolbar top — title + help button row ── */
+.accounts-toolbar-top {
+  margin-bottom: 12px;
+}
+
+.accounts-toolbar-top__left h2 { margin: 0 0 4px; }
+.accounts-toolbar-top__left p  { margin: 0; }
+
+.accounts-toolbar-top__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.accounts-toolbar-top__title-row h2 {
+  margin: 0;
+}
+
+/* Accounts help pane — fixed, centred on page */
+.acct-help-pane {
+  position: fixed;
+  top: calc(100px + 8px);   /* header height + small gap */
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, 90vw);
+  max-height: 75vh;
+  z-index: 300;             /* above header */
+  box-shadow: 0 16px 48px rgba(18,30,52,0.22);
 }
