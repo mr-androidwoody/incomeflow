@@ -77,8 +77,6 @@
 
     const targetData = rows.map(r => adj(r.target || 0, r, useReal) / 1000);
 
-    const engineShortfall = buildEngineShortfall(rows, viewPerson, useReal, targetData);
-
     const sets = [];
     sets.push(ds('State Pension', r => r.p1SP               ?? 0, r => r.p2SP               ?? 0, COLOURS.p1SP));
     sets.push(ds('Salary',        r => r.p1SalInc           ?? 0, r => r.p2SalInc           ?? 0, COLOURS.salary));
@@ -113,6 +111,13 @@
       sets[s]._lifetimeValue = sets[s].data.reduce((sum, v) => sum + (v || 0) * 1000, 0);
     }
 
+    // Compute shortfall AFTER capping — gap between target and capped visible sources.
+    // This is authoritative: if capped income fills the target, shortfall is 0.
+    const engineShortfall = targetData.map((tgt, i) => {
+      const filled = sets.reduce((s, d) => s + (d.data[i] || 0), 0);
+      return Math.max(0, tgt - filled);
+    });
+
     sets.push({
       label: 'Shortfall',
       data: engineShortfall.slice(),
@@ -134,9 +139,13 @@
    * @returns {number[]} shortfall in £k, ≥ 0
    */
   function buildEngineShortfall(rows, viewPerson, useReal, targetData) {
-    // Returns zeros — the real shortfall baseline is computed in renderCharts()
-    // from the capped source datasets vs _targetData, after the capping loop.
-    return rows.map(() => 0);
+    // Use the engine's own cashflowShortfall field — this is authoritative and
+    // avoids false positives from recomputing gross income independently.
+    return rows.map((r, i) => {
+      const sf = r.cashflowShortfall ?? 0;
+      if (sf <= 0) return 0;
+      return adj(sf, r, useReal) / 1000;
+    });
   }
 
   // ─────────────────────────────────────────────
