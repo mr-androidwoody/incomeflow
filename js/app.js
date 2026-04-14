@@ -694,6 +694,9 @@
       CR.renderCharts();
       RetireTabs.switchTab('results');
       state.activeTab = 'results';
+      // Always land on Sources of income sub-tab
+      const incomeBtn = document.querySelector('.results-tab[data-results-tab="income"]');
+      if (incomeBtn) incomeBtn.click();
 
       // Mark Risk Outcomes stale and re-enable the Run risk outcomes button.
       _setRiskReady(false);

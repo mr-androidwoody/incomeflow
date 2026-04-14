@@ -38,36 +38,7 @@
   // ── Public: render everything ─────────────────────────────────────────────
   function render() {
     if (!_result) return;
-    _renderStatCards();
     _renderNarrative();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // STAT CARDS
-  // ─────────────────────────────────────────────────────────────────────────
-  function _renderStatCards() {
-    const r    = _result;
-    const last = r.years.length - 1;
-
-    _setText('mc-sim-count',    r.simCount.toLocaleString('en-GB'));
-    _setText('mc-success-rate', fmtPct(r.successRate));
-    _setText('mc-median-final', fmt(r.p50Portfolio[last]));
-    _setText('mc-p10-final',    fmt(r.p10Portfolio[last]));
-    _setText('mc-p90-final',    fmt(r.p90Portfolio[last]));
-
-    // Colour the success rate by severity
-    const srEl = document.getElementById('mc-success-rate');
-    if (srEl) {
-      srEl.style.color =
-        r.successRate >= 0.90 ? 'var(--color-success, #16a34a)' :
-        r.successRate >= 0.75 ? 'var(--color-warn,    #d97706)' :
-                                'var(--color-danger,  #dc2626)';
-    }
-  }
-
-  function _setText(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -97,6 +68,10 @@
       return { value: maxVal, year: r.years[maxIdx] };
     }
 
+    // Update sim count in subtitle
+    const simCountEl = document.getElementById('mc-sim-count');
+    if (simCountEl) simCountEl.textContent = r.simCount.toLocaleString('en-GB');
+
     // ── 1. VERDICT ────────────────────────────────────────────────────────
     const successPaths = Math.round(r.successRate * r.simCount);
     const verdictClass =
@@ -116,7 +91,27 @@
         (${fmtPct(r.successRate)}). ${verdictLabel}</p>
       </section>`;
 
-    // ── 2. MEDIAN OUTCOME ─────────────────────────────────────────────────
+    // ── 2. KEY FIGURES ────────────────────────────────────────────────────
+    const keyFiguresHTML = `
+      <div class="mc-key-figures">
+        <div class="mc-key-figure">
+          <span class="mc-key-figure__label">10th percentile</span>
+          <span class="mc-key-figure__value">${fmt(r.p10Portfolio[lastIdx])}</span>
+          <span class="mc-key-figure__sub">final portfolio</span>
+        </div>
+        <div class="mc-key-figure">
+          <span class="mc-key-figure__label">Median</span>
+          <span class="mc-key-figure__value">${fmt(r.p50Portfolio[lastIdx])}</span>
+          <span class="mc-key-figure__sub">final portfolio</span>
+        </div>
+        <div class="mc-key-figure">
+          <span class="mc-key-figure__label">90th percentile</span>
+          <span class="mc-key-figure__value">${fmt(r.p90Portfolio[lastIdx])}</span>
+          <span class="mc-key-figure__sub">final portfolio</span>
+        </div>
+      </div>`;
+
+    // ── 3. MEDIAN OUTCOME ─────────────────────────────────────────────────
     const p50Peak     = peak(r.p50Portfolio);
     const p50Depletes = depletionYear(r.p50Portfolio);
     let medianBody;
@@ -225,7 +220,7 @@
         ${r.years.length}-year projection.</p>
       </section>`;
 
-    el.innerHTML = verdictHTML + medianHTML + stressHTML + optimisticHTML + taxHTML + assumHTML;
+    el.innerHTML = verdictHTML + keyFiguresHTML + medianHTML + stressHTML + optimisticHTML + taxHTML + assumHTML;
   }
 
   // ── Register global ───────────────────────────────────────────────────────
