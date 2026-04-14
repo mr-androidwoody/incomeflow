@@ -935,6 +935,10 @@
       });
       MCR.render();
 
+      // Reveal the Risk Outcomes tab now that results are available
+      const _riskTab = document.querySelector('.results-tab[data-results-tab="risk"]');
+      if (_riskTab) _riskTab.style.display = '';
+
       // Switch to Results → Risk Outcomes sub-tab and mark ready (red).
       RetireTabs.switchTab('results');
       state.activeTab = 'results';
@@ -1223,6 +1227,10 @@
   RetireTabs.init();
   CR.initResultsTabs();
   CR.initTableSelector();
+
+  // Risk Outcomes tab is hidden until the simulation has been run
+  const _riskTabBtn = document.querySelector('.results-tab[data-results-tab="risk"]');
+  if (_riskTabBtn) _riskTabBtn.style.display = 'none';
 
   // ── Hide metrics band when Risk Outcomes sub-tab is active ────────────────
   document.querySelectorAll('.results-tab').forEach(btn => {
