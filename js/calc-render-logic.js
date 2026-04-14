@@ -460,9 +460,30 @@
    * @throws {Error} if any required field is missing
    */
   function validateRow(r) {
-    if (!r || !r.year)             throw new Error(`validateRow: row missing 'year' — got ${JSON.stringify(r)}`);
-    if (!r.p1Drawn || !r.p2Drawn)  throw new Error(`validateRow: row ${r.year} missing p1Drawn or p2Drawn`);
-    if (!r.snap)                   throw new Error(`validateRow: row ${r.year} missing snap`);
+    if (!r || !r.year)
+      throw new Error(`validateRow: row missing 'year' — got ${JSON.stringify(r)}`);
+
+    // Drawn objects must exist and contain every sub-field the renderer touches.
+    // Check !== undefined (not truthiness) — zero is a valid value for all of these.
+    const DRAWN_FIELDS = ['Cash', 'GIA', 'ISA', 'SIPP', 'sippTaxable'];
+    for (const person of ['p1Drawn', 'p2Drawn']) {
+      if (!r[person] || typeof r[person] !== 'object')
+        throw new Error(`validateRow: row ${r.year} missing ${person}`);
+      for (const f of DRAWN_FIELDS) {
+        if (r[person][f] === undefined)
+          throw new Error(`validateRow: row ${r.year} ${person}.${f} is undefined`);
+      }
+    }
+
+    // Snap object must exist and contain all ten wrapper balance fields.
+    const SNAP_FIELDS = ['p1Cash','p1IntBal','p1GIA','p1SIPP','p1ISA',
+                         'p2Cash','p2IntBal','p2GIA','p2SIPP','p2ISA'];
+    if (!r.snap || typeof r.snap !== 'object')
+      throw new Error(`validateRow: row ${r.year} missing snap`);
+    for (const f of SNAP_FIELDS) {
+      if (r.snap[f] === undefined)
+        throw new Error(`validateRow: row ${r.year} snap.${f} is undefined`);
+    }
   }
 
   // ─────────────────────────────────────────────
