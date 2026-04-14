@@ -320,10 +320,12 @@
   function saveAssumptionsData() {
     syncSetupToAssumptions();
     localStorage.setItem(ASSUMPTIONS_KEY, JSON.stringify(readAssumptionsInputs()));
+    refreshTabGating(_isPortfolioValid());
   }
 
   function deleteAssumptionsData() {
     localStorage.removeItem(ASSUMPTIONS_KEY);
+    refreshTabGating(_isPortfolioValid());
     applyAssumptionsInputs({
       spending: '', stepDownPct: '0', growth: '', inflation: '',
       thresholdMode: 'frozen', withdrawalMode: 'tax-aware',
@@ -368,6 +370,15 @@
   // ─────────────────────────────
   // PORTFOLIO VALIDATION UI
   // ─────────────────────────────
+  function _isPortfolioValid() {
+    const accounts = state.portfolioAccounts;
+    if (accounts.length === 0) return false;
+    return accounts.every(acc => {
+      const total = D.ALLOC_CLASSES.reduce((s, c) => s + (acc.alloc[c] || 0), 0);
+      return Math.round(total) === 100;
+    });
+  }
+
   function refreshPortfolioUI() {
     const alertBox    = safeEl('portAlertBox');
     const addBtn      = safeEl('addAccountBtn');
@@ -395,14 +406,34 @@
       alertBox.style.display = message ? '' : 'none';
     }
 
-    // Add account button: visible only when no alert is showing
-    if (addBtn) {
-      addBtn.style.display = message ? 'none' : '';
-    }
+    // Add account button always visible — no toggling needed
 
     // Continue button: disabled when invalid
     if (continueBtn) {
       continueBtn.disabled = !isValid;
+    }
+
+    // Gate nav tabs
+    refreshTabGating(isValid);
+  }
+
+  // ─────────────────────────────
+  // TAB GATING
+  // ─────────────────────────────
+  function refreshTabGating(portfolioValid) {
+    const assumptionsSaved = !!localStorage.getItem(ASSUMPTIONS_KEY);
+
+    const tabAssumptions = document.querySelector('.tab-btn[data-tab="assumptions"]');
+    const tabResults     = document.querySelector('.tab-btn[data-tab="results"]');
+
+    if (tabAssumptions) {
+      tabAssumptions.disabled = !portfolioValid;
+      tabAssumptions.classList.toggle('tab-btn--disabled', !portfolioValid);
+    }
+    if (tabResults) {
+      const resultsEnabled = portfolioValid && assumptionsSaved;
+      tabResults.disabled = !resultsEnabled;
+      tabResults.classList.toggle('tab-btn--disabled', !resultsEnabled);
     }
   }
 
@@ -989,6 +1020,7 @@
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-action]');
     if (!el) return;
+    if (el.disabled || el.classList.contains('tab-btn--disabled')) return;
 
     const action = el.dataset.action;
 
