@@ -760,15 +760,13 @@
       });
 
       // ── Bracketing runs: 2,000 paths at 85% and 115% of spending ───────
-      // Run in parallel for speed. Clone inputs with modified spending.
+      // Run sequentially — mc-engine.js only supports one active worker at a time.
       const TARGET_CONFIDENCE = 0.95;
       const inputsLow  = { ...inputs, spending: inputs.spending * 0.85 };
       const inputsHigh = { ...inputs, spending: inputs.spending * 1.15 };
 
-      const [resultLow, resultHigh] = await Promise.all([
-        MCE.run({ inputs: inputsLow,  simCount: 2_000, equityVol: 0.16, inflationVol: 0.015 }),
-        MCE.run({ inputs: inputsHigh, simCount: 2_000, equityVol: 0.16, inflationVol: 0.015 }),
-      ]);
+      const resultLow  = await MCE.run({ inputs: inputsLow,  simCount: 2_000, equityVol: 0.16, inflationVol: 0.015 });
+      const resultHigh = await MCE.run({ inputs: inputsHigh, simCount: 2_000, equityVol: 0.16, inflationVol: 0.015 });
 
       // ── Interpolate to find spending level at TARGET_CONFIDENCE ─────────
       // Three data points: (spendingLow, rateA), (spending, rate), (spendingHigh, rateB)
