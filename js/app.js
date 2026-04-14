@@ -219,6 +219,8 @@
       bniP2GIA:          safeValue('bniP2GIA'),
       dividendYield:     safeValue('dividendYield'),
       dividendMode:      document.querySelector('input[name="dividendMode"]:checked')?.value ?? 'payout',
+      startYear:         safeValue('sp-startYear'),
+      endYear:           safeValue('sp-endYear'),
     };
   }
 
@@ -294,6 +296,9 @@
     const bniRadio = document.querySelector(`input[name="bniEnabled"][value="${a.bniEnabled ? 'true' : 'false'}"]`);
     if (bniRadio) bniRadio.checked = true;
     applyBniState(!!a.bniEnabled);
+
+    if (a.startYear) { const el = safeEl('sp-startYear'); if (el) el.value = a.startYear; }
+    if (a.endYear)   { const el = safeEl('sp-endYear');   if (el) el.value = a.endYear;   }
 
     updateSidebarNames();
     applyP2State();
@@ -1166,8 +1171,10 @@
       applyBniState(!!params.bniEnabled);
     }
 
-    if (params.p1DOB && safeEl('sp-p1dob')) safeEl('sp-p1dob').value = params.p1DOB;
-    if (params.p2DOB && safeEl('sp-p2dob')) safeEl('sp-p2dob').value = params.p2DOB;
+    if (params.p1DOB     && safeEl('sp-p1dob'))     safeEl('sp-p1dob').value     = params.p1DOB;
+    if (params.p2DOB     && safeEl('sp-p2dob'))     safeEl('sp-p2dob').value     = params.p2DOB;
+    if (params.startYear && safeEl('sp-startYear')) safeEl('sp-startYear').value = params.startYear;
+    if (params.endYear   && safeEl('sp-endYear'))   safeEl('sp-endYear').value   = params.endYear;
 
     showToast(`Loaded ${accounts.length} accounts from Excel ✓`);
     updateSidebarNames();
