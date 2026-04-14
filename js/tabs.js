@@ -1,5 +1,5 @@
 (function () {
-  const TABS = ['setup', 'assumptions', 'results'];
+  const TABS = ['setup', 'assumptions', 'results', 'outcomes'];
 
   function switchTab(name) {
     TABS.forEach(function (t) {
@@ -15,13 +15,13 @@
       runBtn.classList.remove('btn-run--hidden', 'btn-run--disabled');
       if (name === 'setup') {
         runBtn.classList.add('btn-run--hidden');
-      } else if (name === 'results') {
+      } else if (name === 'results' || name === 'outcomes') {
         runBtn.classList.add('btn-run--disabled');
       }
     }
 
-    // Chart.js: resize all registered charts when Results becomes visible
-    if (name === 'results' && window.Chart && Chart.instances) {
+    // Chart.js: resize all registered charts when a chart tab becomes visible
+    if ((name === 'results' || name === 'outcomes') && window.Chart && Chart.instances) {
       Object.values(Chart.instances).forEach(function (chart) {
         try { chart.resize(); } catch (e) { /* ignore */ }
       });
