@@ -338,10 +338,14 @@
 
     // Shortfall — always shown, not toggleable
     // Read from the live chart dataset so the value updates when items are toggled
-    const sfDataset = chart.data.datasets.find(d => d.label === 'Shortfall');
-    const sfRaw = sfDataset
-      ? sfDataset.data.reduce((s, v) => (v || 0) * 1000 >= 20000 ? s + (v || 0) * 1000 : s, 0)
-      : _engineShortfall.reduce((s, v) => v * 1000 >= 20000 ? s + v * 1000 : s, 0);
+    // Base shortfall: engine values filtered to >=20k (real/nominal-adj'd)
+    const sfBase = _engineShortfall.reduce((s, v) => (v || 0) * 1000 >= 20000 ? s + (v || 0) * 1000 : s, 0);
+    // Add lifetime value of any hidden sources — toggling them off increases the gap
+    const sfHidden = chart.data.datasets.reduce((s, d, i) => {
+      if (d.stack !== 'income' || d.label === 'Shortfall') return s;
+      return s + (chart.isDatasetVisible(i) ? 0 : (d._lifetimeValue || 0));
+    }, 0);
+    const sfRaw = sfBase + sfHidden;
     const sfItem = document.createElement('div');
     sfItem.className = 'sidebar-legend__item sidebar-legend__item--fixed';
     const sfSwatch = document.createElement('span');
