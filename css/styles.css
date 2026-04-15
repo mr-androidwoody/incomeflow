@@ -2724,3 +2724,155 @@ input[type="radio"] { accent-color: var(--accent); }
   color: var(--muted, #9ca3af) !important;
   font-style: italic;
 }
+
+/* ─────────────────────────────────────────────
+   SPLIT BUTTON  (Load Excel + Download template)
+───────────────────────────────────────────── */
+.btn-split {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 12px;
+  border: 1px solid rgba(77,105,153,0.2);
+  background: rgba(255,255,255,0.72);
+  box-shadow: none;
+  overflow: visible;
+  transition: box-shadow 160ms ease;
+}
+
+.btn-split:focus-within {
+  box-shadow: 0 0 0 3px rgba(74,120,255,0.18);
+}
+
+/* left action zone */
+.btn-split__main {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-radius: 12px 0 0 12px;
+  padding: 0 14px;
+  min-height: 40px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2a40;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.btn-split__main svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.btn-split__main:hover {
+  background: rgba(255,255,255,0.9);
+  transform: translateY(-1px);
+}
+
+/* divider */
+.btn-split::after {
+  content: '';
+  display: block;
+  width: 1px;
+  background: rgba(77,105,153,0.2);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+/* chevron zone */
+.btn-split__chevron {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-radius: 0 12px 12px 0;
+  padding: 0 10px;
+  min-height: 40px;
+  cursor: pointer;
+  color: #1f2a40;
+  display: inline-flex;
+  align-items: center;
+  transition: background 160ms ease;
+}
+
+.btn-split__chevron svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  transition: transform 200ms ease;
+}
+
+.btn-split__chevron:hover {
+  background: rgba(255,255,255,0.9);
+}
+
+/* rotate chevron when open */
+.btn-split--open .btn-split__chevron svg {
+  transform: rotate(180deg);
+}
+
+/* dropdown card */
+.btn-split__dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid rgba(77,105,153,0.15);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(31,42,64,0.12), 0 2px 6px rgba(31,42,64,0.06);
+  z-index: 200;
+  overflow: hidden;
+  animation: splitDropIn 140ms ease;
+}
+
+@keyframes splitDropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.btn-split--open .btn-split__dropdown {
+  display: block;
+}
+
+/* dropdown item */
+.btn-split__item {
+  appearance: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1f2a40;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 120ms ease;
+}
+
+.btn-split__item svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+  color: #4a78ff;
+}
+
+.btn-split__item:hover {
+  background: #f0f4ff;
+}
