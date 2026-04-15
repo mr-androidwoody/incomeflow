@@ -64,10 +64,21 @@
         </div>
     
         <div class="setup-intro-actions">
-          <button class="btn btn-secondary" id="loadExcelBtn" data-action="load-excel" type="button">
-            <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 9l4-4 4 4"/><path d="M4 15v4h16v-4"/></svg>
-            Load Excel
-          </button>
+          <div class="btn-split" id="excelSplitBtn">
+            <button class="btn-split__main" id="loadExcelBtn" data-action="load-excel" type="button">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 9l4-4 4 4"/><path d="M4 15v4h16v-4"/></svg>
+              Load Excel
+            </button>
+            <button class="btn-split__chevron" id="excelSplitChevron" type="button" aria-label="More Excel options" aria-expanded="false" aria-haspopup="true">
+              <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="btn-split__dropdown" id="excelSplitDropdown" role="menu">
+              <button class="btn-split__item" id="downloadTemplateBtn" type="button" role="menuitem">
+                <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+                Download template
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     
@@ -921,6 +932,38 @@
 <script src="js/excel-loader.js"></script>
 <script src="js/tabs.js"></script>
 <script src="js/app.js"></script>
+<script>
+  (function () {
+    const splitBtn  = document.getElementById('excelSplitBtn');
+    const chevron   = document.getElementById('excelSplitChevron');
+    const dropdown  = document.getElementById('excelSplitDropdown');
+    const dlBtn     = document.getElementById('downloadTemplateBtn');
+
+    function openMenu()  { splitBtn.classList.add('btn-split--open');    chevron.setAttribute('aria-expanded', 'true');  }
+    function closeMenu() { splitBtn.classList.remove('btn-split--open'); chevron.setAttribute('aria-expanded', 'false'); }
+    function toggleMenu() { splitBtn.classList.contains('btn-split--open') ? closeMenu() : openMenu(); }
+
+    chevron.addEventListener('click', function (e) { e.stopPropagation(); toggleMenu(); });
+
+    // Close on outside click
+    document.addEventListener('click', function (e) {
+      if (!splitBtn.contains(e.target)) closeMenu();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    // Download template action
+    dlBtn.addEventListener('click', function () {
+      closeMenu();
+      if (window.RetireExcelLoader && window.RetireExcelLoader.downloadTemplate) {
+        window.RetireExcelLoader.downloadTemplate();
+      }
+    });
+  })();
+</script>
 
     <!-- Account help pane — placed at body level so fixed positioning is not broken by ancestor transforms -->
     <div id="acct-help-pane" class="chart-insight-pane acct-help-pane" style="display:none">
