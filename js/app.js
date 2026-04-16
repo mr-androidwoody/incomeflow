@@ -209,13 +209,7 @@
       inflation:         safeValue('inflation'),
       thresholdMode:     document.querySelector('input[name="thresholdMode"]:checked')?.value || 'frozen',
       thresholdFromYear: safeValue('thresholdFromYearVal'),
-      withdrawalMode:    document.querySelector('input[name="withdrawalMode"]:checked')?.value || 'tax-aware',
-      p1Order1:          safeValue('p1Order1'),
-      p1Order2:          safeValue('p1Order2'),
-      p1Order3:          safeValue('p1Order3'),
-      p2Order1:          safeValue('p2Order1'),
-      p2Order2:          safeValue('p2Order2'),
-      p2Order3:          safeValue('p2Order3'),
+      withdrawalStrategy: document.querySelector('input[name="withdrawalStrategy"]:checked')?.value || 'balanced',
       bniEnabled:        document.querySelector('input[name="bniEnabled"]:checked')?.value === 'true',
       bniP1GIA:          safeValue('bniP1GIA'),
       bniP2GIA:          safeValue('bniP2GIA'),
@@ -290,13 +284,10 @@
       const r = document.querySelector(`input[name="thresholdMode"][value="${a.thresholdMode}"]`);
       if (r) r.checked = true;
     }
-    if (a.withdrawalMode) {
-      const r = document.querySelector(`input[name="withdrawalMode"][value="${a.withdrawalMode}"]`);
+    if (a.withdrawalStrategy) {
+      const r = document.querySelector(`input[name="withdrawalStrategy"][value="${a.withdrawalStrategy}"]`);
       if (r) r.checked = true;
     }
-
-    ['p1Order1','p1Order2','p1Order3','p2Order1','p2Order2','p2Order3']
-      .forEach(id => sv(id, a[id]));
 
     const bniRadio = document.querySelector(`input[name="bniEnabled"][value="${a.bniEnabled ? 'true' : 'false'}"]`);
     if (bniRadio) bniRadio.checked = true;
@@ -338,7 +329,7 @@
     refreshTabGating(_isPortfolioValid());
     applyAssumptionsInputs({
       spending: '', stepDownPct: '0', growth: '', inflation: '',
-      thresholdMode: 'frozen', withdrawalMode: 'tax-aware',
+      thresholdMode: 'frozen', withdrawalStrategy: 'balanced',
       dividendYield: '1.5', bniEnabled: false,
     });
     showToast('Assumptions deleted');
@@ -492,7 +483,7 @@
   const P2_FIELD_IDS = [
     'p2DOB', 'p2Salary', 'p2SalaryStopAge', 'p2SPAge', 'p2SP',
     'p2Cash', 'p2SIPP', 'p2ISA', 'p2GIA',
-    'p2Order1', 'p2Order2', 'p2Order3', 'bniP2GIA',
+    'bniP2GIA',
   ];
 
   function applyBniState(enabled) {
@@ -716,12 +707,6 @@
   function gvi(id) { return parseInt(String(D.parseCurrency(safeEl(id)?.value || '')), 10) || 0; }
   function gvs(id) { return safeEl(id)?.value || ''; }
 
-  function getOrder(prefix, slots) {
-    const o = [];
-    for (let i = 1; i <= slots; i++) o.push(gvs(prefix + 'Order' + i));
-    return o;
-  }
-
   function gatherInputs() {
     const bniEnabled   = document.querySelector('input[name="bniEnabled"]:checked')?.value === 'true';
     const growthRaw    = gv('growth');
@@ -754,7 +739,7 @@
       bniP2GIA:          (bniEnabled && state.p2enabled) ? gv('bniP2GIA') : 0,
       dividendYield:     (parseFloat(safeEl('dividendYield')?.value) || 1.5) / 100,
       dividendMode:      document.querySelector('input[name="dividendMode"]:checked')?.value ?? 'payout',
-      withdrawalMode:    document.querySelector('input[name="withdrawalMode"]:checked')?.value || '50/50',
+      strategy:          document.querySelector('input[name="withdrawalStrategy"]:checked')?.value || 'balanced',
       p1Bal: {
         Cash:    gv('p1Cash'),
         GIAeq:   gv('p1GIAeq'),
@@ -769,8 +754,8 @@
         SIPP:    state.p2enabled ? gv('p2SIPP')    : 0,
         ISA:     state.p2enabled ? gv('p2ISA')     : 0,
       },
-      p1Order: getOrder('p1', 3),
-      p2Order: getOrder('p2', 3),
+      p1Order: ['GIA', 'SIPP', 'ISA'],
+      p2Order: ['GIA', 'SIPP', 'ISA'],
     };
   }
 

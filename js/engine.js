@@ -2,6 +2,7 @@
   const D = window.RetireData;
   const C = window.RetireCalc;
   const T = window.RetireTax;
+  const L = window.RetireLedger;
 
   // inputs  — plain object built by gatherInputs() in app.js
   // accounts — interest-bearing accounts array (may be empty)
@@ -20,7 +21,7 @@
       bniEnabled, bniP1GIA, bniP2GIA,
       dividendYield,
       dividendMode,
-      withdrawalMode,
+      strategy,
       p1Order, p2Order,
     } = inputs;
 
@@ -263,24 +264,40 @@
       }
 
       // Priority 3: wrapper draws — delegated to withdrawal strategy layer.
+      // Ledgers track remaining allowances per person at this point in the year.
+      // Already consumed upstream: SP + salary (non-savings), interest (savings), dividends.
+      const p1Ledger = L.initialiseLedger(effThresholds);
+      const p2Ledger = L.initialiseLedger(effThresholds);
+
+      // Consume guaranteed non-savings income (SP + salary)
+      L.consumeNonSavings(p1Ledger, p1SP + p1SalInc);
+      L.consumeNonSavings(p2Ledger, p2SP + p2SalInc);
+
+      // Consume taxable savings interest
+      L.consumeSavings(p1Ledger, p1IntTaxable);
+      L.consumeSavings(p2Ledger, p2IntTaxable);
+
+      // Consume GIA dividends (taxed on arising basis regardless of draw)
+      L.consumeDividends(p1Ledger, p1Divs);
+      L.consumeDividends(p2Ledger, p2Divs);
+
+      // Consume B&I gains accumulated so far this year
+      L.consumeGains(p1Ledger, p1AnnualGains);
+      L.consumeGains(p2Ledger, p2AnnualGains);
+
       const p1WrapperOrder = p1Order.filter(w => w !== 'Cash' && !(w === 'SIPP' && p1SIPPLocked));
       const p2WrapperOrder = p2Order.filter(w => w !== 'Cash' && !(w === 'SIPP' && p2SIPPLocked));
 
-      // PA headroom: how much more taxable income each person can absorb before paying tax.
-      // Required by the tax-aware strategy to size the SIPP draw correctly.
-      // Non-savings (SP, salary), interest, and dividends all consume PA first.
-      const p1GuaranteedNS = p1SP + p1SalInc;
-      const p2GuaranteedNS = p2SP + p2SalInc;
-      const p1PAHeadroom   = Math.max(0, effThresholds.PA - p1GuaranteedNS - p1IntTaxable - p1Divs);
-      const p2PAHeadroom   = Math.max(0, effThresholds.PA - p2GuaranteedNS - p2IntTaxable - p2Divs);
-
       const { p1Drawn, p2Drawn } = window.RetireWithdrawalStrategy.withdrawalStrategy({
-        mode:           withdrawalMode,
+        strategy,
         shortfall,
         p1Bal,          p2Bal,
         p1WrapperOrder, p2WrapperOrder,
         p1SIPPLocked,   p2SIPPLocked,
-        p1PAHeadroom,   p2PAHeadroom,
+        p1Ledger,       p2Ledger,
+        dividendYield,
+        p1GainRatio:    p1GainRatio,
+        p2GainRatio:    p2GainRatio,
       });
 
       p1Drawn.Cash += p1CashDrawn;
