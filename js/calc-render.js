@@ -38,7 +38,7 @@
     if (strategy) _strategy = strategy;
 
     // Update the Results page h1 to show active strategy
-    const strategyLabels = { balanced: 'Balanced', isaFirst: 'ISA-first', sippFirst: 'SIPP-first' };
+    const strategyLabels = { balanced: 'Blended', isaFirst: 'ISA Shield', sippFirst: 'Pension Drain' };
     document.querySelectorAll('h1').forEach(el => {
       if (el.textContent.startsWith('Projection')) {
         el.textContent = 'Projection: ' + (strategyLabels[_strategy] || _strategy);
@@ -818,7 +818,7 @@
     }
 
     // Update Sources of income chart title with active strategy
-    const strategyLabels = { balanced: 'Balanced', isaFirst: 'ISA-first', sippFirst: 'SIPP-first' };
+    const strategyLabels = { balanced: 'Blended', isaFirst: 'ISA Shield', sippFirst: 'Pension Drain' };
     const titleEl = document.getElementById('income-chart-title');
     if (titleEl) titleEl.textContent = 'Sources of income: ' + (strategyLabels[_strategy] || _strategy);
 
