@@ -1248,8 +1248,8 @@
       dTbl.innerHTML = `<thead>
         <tr>
           <th rowspan="2" style="background:#444;color:#fff">Year</th>
-          <th rowspan="2" style="background:#444;color:#fff">${p1} age</th>
-          <th rowspan="2" style="background:#444;color:#fff">${p2} age</th>
+          <th rowspan="2" style="background:#444;color:#fff">${p1}<br>age</th>
+          <th rowspan="2" style="background:#444;color:#fff">${p2}<br>age</th>
           ${th(COL.sp,  'State Pension', 'colspan="2"')}
           ${th(COL.sal, 'Salary',        'colspan="2"')}
           ${th(COL.int, 'Interest',      'colspan="2"')}
