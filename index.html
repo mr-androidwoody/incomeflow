@@ -9,6 +9,35 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <link href="css/styles.css" rel="stylesheet"/>
+  <style>
+    .assump-subtab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: 10px;
+      padding: 4px;
+      width: fit-content;
+    }
+    .assump-subtab {
+      padding: 6px 18px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 400;
+      transition: background 0.15s;
+    }
+    .assump-subtab:hover { background: var(--color-background-secondary); }
+    .assump-subtab--active {
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+  </style>
   <link href="css/home-btn.css" rel="stylesheet"/>
 
 </head>
@@ -375,6 +404,14 @@
         </div>
       </div>
 
+      <!-- Assumptions sub-tabs -->
+      <div class="assump-subtab-bar">
+        <button class="assump-subtab assump-subtab--active" data-assump-tab="core" type="button">Assumptions</button>
+        <button class="assump-subtab" data-assump-tab="lifecycle" type="button">Lifecycle Events</button>
+      </div>
+
+      <!-- Panel: core assumptions -->
+      <div id="assump-panel-core" class="assump-panel assump-panel--active">
       <div class="assump-layout">
         <div class="assump-row-top">
 
@@ -682,6 +719,105 @@
         </div><!-- /.assump-row-bottom -->
 
       </div><!-- /.assump-layout -->
+      </div><!-- /#assump-panel-core -->
+
+      <!-- Panel: lifecycle events -->
+      <div id="assump-panel-lifecycle" class="assump-panel" style="display:none">
+        <div class="assump-layout">
+          <div class="assump-row-top">
+
+            <!-- Gift planning -->
+            <div class="assump-card">
+              <div class="assump-card-title">Gift planning</div>
+              <div class="assump-section">
+                <p class="assump-inline-field__hint" style="margin-bottom:10px">Model lump-sum outflows in specific years — for example, a house deposit contribution for a child. The amount is deducted from the portfolio in the year it occurs.</p>
+                <p class="assump-section__label">Gift 1</p>
+                <div class="assump-section__body">
+                  <div class="two-col" style="margin-bottom:8px">
+                    <div class="field">
+                      <label>Year</label>
+                      <input type="number" id="gift1Year" placeholder="e.g. 2027" min="2025" max="2060" disabled>
+                    </div>
+                    <div class="field">
+                      <label>Amount (£)</label>
+                      <input type="text" id="gift1Amount" class="currency-input" placeholder="e.g. 250,000" disabled>
+                    </div>
+                  </div>
+                </div>
+                <p class="assump-section__label" style="margin-top:10px">Gift 2</p>
+                <div class="assump-section__body">
+                  <div class="two-col">
+                    <div class="field">
+                      <label>Year</label>
+                      <input type="number" id="gift2Year" placeholder="e.g. 2030" min="2025" max="2060" disabled>
+                    </div>
+                    <div class="field">
+                      <label>Amount (£)</label>
+                      <input type="text" id="gift2Amount" class="currency-input" placeholder="e.g. 250,000" disabled>
+                    </div>
+                  </div>
+                </div>
+                <p class="assump-inline-field__hint" style="margin-top:12px">⚠ Not yet wired to the engine — coming soon.</p>
+              </div>
+            </div>
+
+            <!-- Inheritance windfall -->
+            <div class="assump-card">
+              <div class="assump-card-title">Inheritance windfall</div>
+              <div class="assump-section">
+                <p class="assump-inline-field__hint" style="margin-bottom:10px">Model a one-off lump-sum inflow in a specific year — for example, an expected inheritance. The amount is added to the portfolio in the year it occurs.</p>
+                <div class="two-col" style="margin-bottom:8px">
+                  <div class="field">
+                    <label>Year</label>
+                    <input type="number" id="windfall1Year" placeholder="e.g. 2032" min="2025" max="2060" disabled>
+                  </div>
+                  <div class="field">
+                    <label>Amount (£)</label>
+                    <input type="text" id="windfall1Amount" class="currency-input" placeholder="e.g. 400,000" disabled>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:8px">
+                  <label>Added to wrapper</label>
+                  <select id="windfall1Wrapper" disabled>
+                    <option value="Cash">Cash</option>
+                    <option value="ISA">ISA</option>
+                    <option value="GIA" selected>GIA</option>
+                  </select>
+                </div>
+                <p class="assump-inline-field__hint" style="margin-top:4px">⚠ Not yet wired to the engine — coming soon.</p>
+              </div>
+            </div>
+
+            <!-- Second step-down -->
+            <div class="assump-card">
+              <div class="assump-card-title">Second spending step-down</div>
+              <div class="assump-section">
+                <p class="assump-inline-field__hint" style="margin-bottom:10px">Apply a second reduction to the spending target at age 80, in addition to the step-down already modelled at age 75. Useful for modelling reduced mobility or activity in later retirement.</p>
+                <div class="assump-radio-group" style="margin-bottom:10px">
+                  <label class="assump-radio-label">
+                    <input type="radio" name="stepDown2Enabled" value="true" disabled> Enabled
+                  </label>
+                  <label class="assump-radio-label">
+                    <input type="radio" name="stepDown2Enabled" value="false" checked disabled> Disabled
+                  </label>
+                </div>
+                <div class="two-col">
+                  <div class="field">
+                    <label>Age</label>
+                    <input type="number" id="stepDown2Age" value="80" min="75" max="95" disabled>
+                  </div>
+                  <div class="field">
+                    <label>Reduction (%)</label>
+                    <input type="number" id="stepDown2Pct" value="10" min="1" max="50" disabled>
+                  </div>
+                </div>
+                <p class="assump-inline-field__hint" style="margin-top:12px">⚠ Not yet wired to the engine — coming soon.</p>
+              </div>
+            </div>
+
+          </div><!-- /.assump-row-top -->
+        </div><!-- /.assump-layout -->
+      </div><!-- /#assump-panel-lifecycle -->
 
     </div><!-- /#tab-assumptions -->
 
@@ -1069,5 +1205,18 @@
     </div>
 </div>
 
+<script>
+  document.querySelectorAll('.assump-subtab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var target = btn.dataset.assumpTab;
+      document.querySelectorAll('.assump-subtab').forEach(function(b) {
+        b.classList.toggle('assump-subtab--active', b === btn);
+      });
+      document.querySelectorAll('.assump-panel').forEach(function(p) {
+        p.style.display = p.id === 'assump-panel-' + target ? '' : 'none';
+      });
+    });
+  });
+</script>
 </body>
 </html>
