@@ -1120,6 +1120,17 @@
     if (taxTbl) {
       const taxRows = L.buildTableTaxRows(_rows, _useReal);
       let grandWI = 0, grandWC = 0, grandWN = 0, grandHI = 0, grandHC = 0, grandHN = 0;
+
+      const TCOL = {
+        meta:  { bg: '#F2F2F2', hdr: '#444444', txt: '#222' },
+        p1:    { bg: '#FEF3EC', hdr: '#ED7D31', txt: '#7e3a0a' },
+        p2:    { bg: '#EBF5FB', hdr: '#2E86C1', txt: '#1a4a6e' },
+        total: { bg: '#F8F9FA', hdr: '#555555', txt: '#222'    },
+      };
+      const tcs  = col => `style="background:${col.bg};color:${col.txt}"`;
+      const tth  = (col, content, extra = '') =>
+        `<th ${extra} style="background:${col.hdr};color:#fff;border-color:${col.hdr}">${content}</th>`;
+
       let body = '<tbody>';
       taxRows.forEach(row => {
         const { year, p1Age, p2Age, wi, wc, wn, wt, hi, hc, hn, ht, hh, cumTax } = row;
@@ -1127,24 +1138,33 @@
         grandHI += hi; grandHC += hc; grandHN += hn;
         body += `<tr>
           <td>${year}</td><td>${p1Age}</td><td>${p2Age}</td>
-          <td>${f(wi)}</td><td>${f(wc)}</td><td>${f(wn)}</td><td>${f(wt)}</td>
-          <td>${f(hi)}</td><td>${f(hc)}</td><td>${f(hn)}</td><td>${f(ht)}</td>
-          <td>${f(hh)}</td><td>${f(cumTax)}</td>
+          <td ${tcs(TCOL.p1)}>${f(wi)}</td><td ${tcs(TCOL.p1)}>${f(wc)}</td><td ${tcs(TCOL.p1)}>${f(wn)}</td><td ${tcs(TCOL.p1)}><strong>${f(wt)}</strong></td>
+          <td ${tcs(TCOL.p2)}>${f(hi)}</td><td ${tcs(TCOL.p2)}>${f(hc)}</td><td ${tcs(TCOL.p2)}>${f(hn)}</td><td ${tcs(TCOL.p2)}><strong>${f(ht)}</strong></td>
+          <td ${tcs(TCOL.total)}><strong>${f(hh)}</strong></td><td ${tcs(TCOL.total)}>${f(cumTax)}</td>
         </tr>`;
       });
       const grand = grandWI + grandWC + grandWN + grandHI + grandHC + grandHN;
       body += `<tr class="total-row">
         <td colspan="3">Total</td>
-        <td>${f(grandWI)}</td><td>${f(grandWC)}</td><td>${f(grandWN)}</td><td>${f(grandWI+grandWC+grandWN)}</td>
-        <td>${f(grandHI)}</td><td>${f(grandHC)}</td><td>${f(grandHN)}</td><td>${f(grandHI+grandHC+grandHN)}</td>
-        <td>${f(grand)}</td><td>${f(grand)}</td>
+        <td ${tcs(TCOL.p1)}>${f(grandWI)}</td><td ${tcs(TCOL.p1)}>${f(grandWC)}</td><td ${tcs(TCOL.p1)}>${f(grandWN)}</td><td ${tcs(TCOL.p1)}><strong>${f(grandWI+grandWC+grandWN)}</strong></td>
+        <td ${tcs(TCOL.p2)}>${f(grandHI)}</td><td ${tcs(TCOL.p2)}>${f(grandHC)}</td><td ${tcs(TCOL.p2)}>${f(grandHN)}</td><td ${tcs(TCOL.p2)}><strong>${f(grandHI+grandHC+grandHN)}</strong></td>
+        <td ${tcs(TCOL.total)}><strong>${f(grand)}</strong></td><td ${tcs(TCOL.total)}>${f(grand)}</td>
       </tr></tbody>`;
-      taxTbl.innerHTML = `<thead><tr>
-        <th>Year</th><th>${p1}'s age</th><th>${p2}'s age</th>
-        <th>${p1}'s income tax</th><th>${p1}'s CGT</th><th>${p1}'s NI</th><th>${p1}'s total</th>
-        <th>${p2}'s income tax</th><th>${p2}'s CGT</th><th>${p2}'s NI</th><th>${p2}'s total</th>
-        <th>Household tax</th><th>Cumulative tax</th>
-      </tr></thead>` + body;
+      taxTbl.innerHTML = `<thead>
+        <tr>
+          ${tth(TCOL.meta, 'Year',     'rowspan="2"')}
+          ${tth(TCOL.meta, p1 + '<br>age', 'rowspan="2"')}
+          ${tth(TCOL.meta, p2 + '<br>age', 'rowspan="2"')}
+          ${tth(TCOL.p1,   p1 + "'s tax", 'colspan="4"')}
+          ${tth(TCOL.p2,   p2 + "'s tax", 'colspan="4"')}
+          ${tth(TCOL.total,'Household',   'rowspan="2"')}
+          ${tth(TCOL.total,'Cumulative',  'rowspan="2"')}
+        </tr>
+        <tr>
+          ${tth(TCOL.p1, 'Income tax')}${tth(TCOL.p1, 'CGT')}${tth(TCOL.p1, 'NI')}${tth(TCOL.p1, 'Total')}
+          ${tth(TCOL.p2, 'Income tax')}${tth(TCOL.p2, 'CGT')}${tth(TCOL.p2, 'NI')}${tth(TCOL.p2, 'Total')}
+        </tr>
+      </thead>` + body;
     }
 
     // Wealth table
@@ -1152,30 +1172,48 @@
     if (wTbl) {
       const wealthRows = L.buildTableWealthRows(_rows, _useReal);
       const rowByYear  = Object.fromEntries(_rows.map(r => [r.year, r]));
+
+      const WCOL = {
+        meta:  { bg: '#F2F2F2', hdr: '#444444', txt: '#222' },
+        p1:    { bg: '#FEF3EC', hdr: '#ED7D31', txt: '#7e3a0a' },
+        p2:    { bg: '#EBF5FB', hdr: '#2E86C1', txt: '#1a4a6e' },
+        total: { bg: '#F8F9FA', hdr: '#555555', txt: '#222'    },
+      };
+      const wcs  = col => `style="background:${col.bg};color:${col.txt}"`;
+      const wth  = (col, content, extra = '') =>
+        `<th ${extra} style="background:${col.hdr};color:#fff;border-color:${col.hdr}">${content}</th>`;
+
       let body = '<tbody>';
       wealthRows.forEach(row => {
         const { year, p1Age, p2Age,
                 p1Cash, p1IntBal, p1GIA, p1SIPP, p1ISA,
                 p2Cash, p2IntBal, p2GIA, p2SIPP, p2ISA, total } = row;
-        // Depleted marker: cell value rounds to zero but underlying snap was positive
-        const cell = (adjVal, snapVal) =>
-          `<td${adjVal < 1 && snapVal > 0 ? ' class="depleted"' : ''}>${f(adjVal)}</td>`;
         const rawRow = rowByYear[year];
         const s = rawRow?.snap ?? {};
+        const cell = (col, adjVal, snapVal) =>
+          `<td ${wcs(col)}${adjVal < 1 && snapVal > 0 ? ' class="depleted"' : ''}>${f(adjVal)}</td>`;
         body += `<tr>
           <td>${year}</td><td>${p1Age}</td><td>${p2Age}</td>
-          ${cell(p1Cash, s.p1Cash ?? 0)}${cell(p1IntBal, s.p1IntBal ?? 0)}${cell(p1GIA, s.p1GIA ?? 0)}${cell(p1SIPP, s.p1SIPP ?? 0)}${cell(p1ISA, s.p1ISA ?? 0)}
-          ${cell(p2Cash, s.p2Cash ?? 0)}${cell(p2IntBal, s.p2IntBal ?? 0)}${cell(p2GIA, s.p2GIA ?? 0)}${cell(p2SIPP, s.p2SIPP ?? 0)}${cell(p2ISA, s.p2ISA ?? 0)}
-          <td>${f(total)}</td>
+          ${cell(WCOL.p1, p1Cash,   s.p1Cash   ?? 0)}${cell(WCOL.p1, p1IntBal, s.p1IntBal ?? 0)}${cell(WCOL.p1, p1GIA,   s.p1GIA   ?? 0)}${cell(WCOL.p1, p1SIPP, s.p1SIPP ?? 0)}${cell(WCOL.p1, p1ISA, s.p1ISA ?? 0)}
+          ${cell(WCOL.p2, p2Cash,   s.p2Cash   ?? 0)}${cell(WCOL.p2, p2IntBal, s.p2IntBal ?? 0)}${cell(WCOL.p2, p2GIA,   s.p2GIA   ?? 0)}${cell(WCOL.p2, p2SIPP, s.p2SIPP ?? 0)}${cell(WCOL.p2, p2ISA, s.p2ISA ?? 0)}
+          <td ${wcs(WCOL.total)}><strong>${f(total)}</strong></td>
         </tr>`;
       });
       body += '</tbody>';
-      wTbl.innerHTML = `<thead><tr>
-        <th>Year</th><th>${p1}'s age</th><th>${p2}'s age</th>
-        <th>${p1}'s Cash</th><th>${p1}'s Interest</th><th>${p1}'s GIA</th><th>${p1}'s SIPP</th><th>${p1}'s ISA</th>
-        <th>${p2}'s Cash</th><th>${p2}'s Interest</th><th>${p2}'s GIA</th><th>${p2}'s SIPP</th><th>${p2}'s ISA</th>
-        <th>Total</th>
-      </tr></thead>` + body;
+      wTbl.innerHTML = `<thead>
+        <tr>
+          ${wth(WCOL.meta, 'Year',         'rowspan="2"')}
+          ${wth(WCOL.meta, p1 + '<br>age', 'rowspan="2"')}
+          ${wth(WCOL.meta, p2 + '<br>age', 'rowspan="2"')}
+          ${wth(WCOL.p1,   p1 + "'s wealth", 'colspan="5"')}
+          ${wth(WCOL.p2,   p2 + "'s wealth", 'colspan="5"')}
+          ${wth(WCOL.total,'Total',         'rowspan="2"')}
+        </tr>
+        <tr>
+          ${wth(WCOL.p1, 'Cash')}${wth(WCOL.p1, 'Interest')}${wth(WCOL.p1, 'GIA')}${wth(WCOL.p1, 'SIPP')}${wth(WCOL.p1, 'ISA')}
+          ${wth(WCOL.p2, 'Cash')}${wth(WCOL.p2, 'Interest')}${wth(WCOL.p2, 'GIA')}${wth(WCOL.p2, 'SIPP')}${wth(WCOL.p2, 'ISA')}
+        </tr>
+      </thead>` + body;
     }
 
     // Drawdown table
