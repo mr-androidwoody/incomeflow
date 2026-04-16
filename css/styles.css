@@ -3061,6 +3061,13 @@ input[type="radio"] { accent-color: var(--accent); }
   margin-bottom: 0;
 }
 
+.wiz-col-intro {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 10px 0 12px;
+}
+
 /* ── Table layout ── */
 .wiz-table {
   width: 100%;
