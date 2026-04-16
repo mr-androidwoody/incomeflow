@@ -3252,8 +3252,12 @@ input[type="radio"] { accent-color: var(--accent); }
 .wiz-val .currency-stepper {
   width: 100%;
   max-width: 130px;
+  margin-left: auto;
 }
 
+/* ── Inputs inside wiz-table right-aligned ── */
+.wiz-table input[type="number"],
+.wiz-table input[type="text"],
 .wiz-table select {
   max-width: 130px;
   margin-left: auto;
@@ -3262,13 +3266,6 @@ input[type="radio"] { accent-color: var(--accent); }
 
 .wiz-val .assump-radio-group {
   text-align: left;
-}
-
-/* ── Input sizing inside tables ── */
-.wiz-table input[type="number"],
-.wiz-table input[type="text"],
-.wiz-table select {
-  width: 100%;
 }
 
 .wiz-grid--2-1 {
