@@ -376,420 +376,492 @@
         </div>
       </div>
 
-      <!-- Assumptions sub-tabs -->
-      <div class="results-tab-bar assump-subtab-bar">
-        <button class="results-tab results-tab--active" data-assump-tab="core" type="button">Assumptions</button>
-        <button class="results-tab results-tab--inactive" data-assump-tab="lifecycle" type="button">Lifecycle Events</button>
+      <!-- ── Wizard tab bar ── -->
+      <div class="wiz-tab-bar">
+        <button class="wiz-tab wiz-tab--active" data-wiz="0" type="button"><span class="wiz-step">1</span>Who &amp; when</button>
+        <button class="wiz-tab" data-wiz="1" type="button"><span class="wiz-step">2</span>Money</button>
+        <button class="wiz-tab" data-wiz="2" type="button"><span class="wiz-step">3</span>Growth</button>
+        <button class="wiz-tab" data-wiz="3" type="button"><span class="wiz-step">4</span>Strategy</button>
+        <button class="wiz-tab" data-wiz="4" type="button"><span class="wiz-step">5</span>Lifecycle events</button>
       </div>
 
-      <!-- Panel: core assumptions -->
-      <div id="assump-panel-core" class="assump-panel" style="display:block">
-      <div class="assump-layout">
-        <div class="assump-row-top">
+      <!-- ══ PANEL 0 — Who & When ══ -->
+      <div class="wiz-panel wiz-panel--active" id="wiz-panel-0">
+        <div class="wiz-grid wiz-grid--3">
 
-          <!-- Person 1 -->
-          <div class="assump-card">
-            <div class="assump-card-title">Person 1</div>
-            <div class="assump-section">
-              <p class="assump-section__label">Summary</p>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Name</span><span class="assump-info-val" id="ai-p1name">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Birth year</span><span class="assump-info-val" id="ai-p1dob">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Salary (£/yr)</span><span class="assump-info-val" id="ai-p1salary">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Salary stops age</span><span class="assump-info-val" id="ai-p1salarystop">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">State pension age</span><span class="assump-info-val" id="ai-p1spage">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">State pension (£/yr)</span><span class="assump-info-val" id="ai-p1sp">–</span></div>
-            </div>
-            <!-- Hidden inputs needed by gatherInputs() -->
-            <input type="hidden" id="p1DOB">
-            <input type="hidden" id="p2DOB">
-            <input type="hidden" id="startYear">
-            <input type="hidden" id="endYear">
-            <input type="hidden" id="p1Cash">
-            <input type="hidden" id="p2Cash">
-            <input type="hidden" id="p1SIPP">
-            <input type="hidden" id="p2SIPP">
-            <input type="hidden" id="p1ISA">
-            <input type="hidden" id="p2ISA">
-            <input type="hidden" id="p1GIA">
-            <input type="hidden" id="p2GIA">
-            <input type="hidden" id="p1GIAeq">
-            <input type="hidden" id="p2GIAeq">
-            <input type="hidden" id="p1GIAcash">
-            <input type="hidden" id="p2GIAcash">
-            <input type="hidden" id="p1Salary">
-            <input type="hidden" id="p1SalaryStopAge">
-            <input type="hidden" id="p2Salary">
-            <input type="hidden" id="p2SalaryStopAge">
-            <input type="hidden" id="p1SPAge">
-            <input type="hidden" id="p1SP">
-            <input type="hidden" id="p2SPAge">
-            <input type="hidden" id="p2SP">
+          <!-- Person 1 column -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading" data-p1>Person 1</div>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Name</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1name">–</span></td></tr>
+              <tr><td class="wiz-label">Birth year</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1dob">–</span></td></tr>
+              <tr><td class="wiz-label">State pension age</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1spage">–</span></td></tr>
+              <tr><td class="wiz-label">State pension (£/yr)</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1sp">–</span></td></tr>
+              <tr><td class="wiz-label">Salary (£/yr)</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1salary">–</span></td></tr>
+              <tr><td class="wiz-label">Salary stops age</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1salarystop">–</span></td></tr>
+            </table>
+            <p class="wiz-hint">Edit in <a class="wiz-link" data-action="switch-tab" data-tab="setup">Setup →</a></p>
           </div>
 
-          <!-- Person 2 -->
-          <div class="assump-card p2-field">
-            <div class="assump-card-title">Person 2</div>
-            <div class="assump-section">
-              <p class="assump-section__label">Summary</p>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Name</span><span class="assump-info-val" id="ai-p2name">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Birth year</span><span class="assump-info-val" id="ai-p2dob">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Salary (£/yr)</span><span class="assump-info-val" id="ai-p2salary">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">Salary stops age</span><span class="assump-info-val" id="ai-p2salarystop">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">State pension age</span><span class="assump-info-val" id="ai-p2spage">–</span></div>
-              <div class="assump-info-row--boxed"><span class="assump-info-key">State pension (£/yr)</span><span class="assump-info-val" id="ai-p2sp">–</span></div>
+          <!-- Person 2 column -->
+          <div class="wiz-col p2-field">
+            <div class="wiz-col-heading" data-p2>Person 2</div>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Name</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2name">–</span></td></tr>
+              <tr><td class="wiz-label">Birth year</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2dob">–</span></td></tr>
+              <tr><td class="wiz-label">State pension age</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2spage">–</span></td></tr>
+              <tr><td class="wiz-label">State pension (£/yr)</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2sp">–</span></td></tr>
+              <tr><td class="wiz-label">Salary (£/yr)</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2salary">–</span></td></tr>
+              <tr><td class="wiz-label">Salary stops age</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2salarystop">–</span></td></tr>
+            </table>
+            <p class="wiz-hint">Edit in <a class="wiz-link" data-action="switch-tab" data-tab="setup">Setup →</a></p>
+          </div>
+
+          <!-- Projection range column -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Projection range</div>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label">Start year</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input data-action="setup-summary-input" id="sp-startYear" type="number" placeholder="e.g. 2026"/>
+                    <button class="stepper-btn" data-step-for="sp-startYear" data-step-direction="1" type="button">&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="sp-startYear" data-step-direction="-1" type="button">&#x25BC;</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label">End year</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input data-action="setup-summary-input" id="sp-endYear" type="number" placeholder="e.g. 2060"/>
+                    <button class="stepper-btn" data-step-for="sp-endYear" data-step-direction="1" type="button">&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="sp-endYear" data-step-direction="-1" type="button">&#x25BC;</button>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+        </div><!-- /.wiz-grid -->
+
+        <!-- Hidden inputs needed by gatherInputs() — wallet values synced from Setup -->
+        <input type="hidden" id="p1DOB">
+        <input type="hidden" id="p2DOB">
+        <input type="hidden" id="startYear">
+        <input type="hidden" id="endYear">
+        <input type="hidden" id="p1Cash">
+        <input type="hidden" id="p2Cash">
+        <input type="hidden" id="p1SIPP">
+        <input type="hidden" id="p2SIPP">
+        <input type="hidden" id="p1ISA">
+        <input type="hidden" id="p2ISA">
+        <input type="hidden" id="p1GIA">
+        <input type="hidden" id="p2GIA">
+        <input type="hidden" id="p1GIAeq">
+        <input type="hidden" id="p2GIAeq">
+        <input type="hidden" id="p1GIAcash">
+        <input type="hidden" id="p2GIAcash">
+
+        <div class="wiz-footer">
+          <div class="wiz-progress">
+            <div class="wiz-progress-bar"><div class="wiz-progress-fill" style="width:20%"></div></div>
+            <span class="wiz-progress-label">Step 1 of 5</span>
+          </div>
+          <button class="btn btn-primary wiz-next" data-wiz-next>Next →</button>
+        </div>
+      </div><!-- /#wiz-panel-0 -->
+
+      <!-- ══ PANEL 1 — Money ══ -->
+      <div class="wiz-panel" id="wiz-panel-1">
+        <div class="wiz-grid wiz-grid--3">
+
+          <!-- P1 balances -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading" data-p1>Person 1 — balances</div>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Cash</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1cash">–</span></td></tr>
+              <tr><td class="wiz-label">SIPP / WP</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1sipp">–</span></td></tr>
+              <tr><td class="wiz-label">ISA</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1isa">–</span></td></tr>
+              <tr><td class="wiz-label">GIA</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p1gia">–</span></td></tr>
+            </table>
+            <p class="wiz-hint">Edit in <a class="wiz-link" data-action="switch-tab" data-tab="setup">Setup →</a></p>
+          </div>
+
+          <!-- P2 balances -->
+          <div class="wiz-col p2-field">
+            <div class="wiz-col-heading" data-p2>Person 2 — balances</div>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Cash</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2cash">–</span></td></tr>
+              <tr><td class="wiz-label">SIPP / WP</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2sipp">–</span></td></tr>
+              <tr><td class="wiz-label">ISA</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2isa">–</span></td></tr>
+              <tr><td class="wiz-label">GIA</td><td class="wiz-val"><span class="wiz-readonly" id="ai-p2gia">–</span></td></tr>
+            </table>
+            <div class="wiz-total-row">
+              <span class="wiz-total-label">Total investments</span>
+              <span class="wiz-total-val" id="ai-total">–</span>
             </div>
           </div>
 
-          <!-- Portfolio Balances -->
-          <div class="assump-card">
-            <div class="assump-card-title">Investment Balances</div>
-            <div class="assump-section">
-              <div class="assump-info-grid">
-                <div class="assump-info-block">
-                  <p class="assump-section__label" data-p1>Person 1</p>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">Cash</span><span class="assump-info-val" id="ai-p1cash">–</span></div>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">SIPP/WP</span><span class="assump-info-val" id="ai-p1sipp">–</span></div>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">ISA</span><span class="assump-info-val" id="ai-p1isa">–</span></div>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">GIA</span><span class="assump-info-val" id="ai-p1gia">–</span></div>
-                </div>
-                <div class="assump-info-block p2-field">
-                  <p class="assump-section__label" data-p2>Person 2</p>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">Cash</span><span class="assump-info-val" id="ai-p2cash">–</span></div>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">SIPP/WP</span><span class="assump-info-val" id="ai-p2sipp">–</span></div>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">ISA</span><span class="assump-info-val" id="ai-p2isa">–</span></div>
-                  <div class="assump-info-row--boxed"><span class="assump-info-key">GIA</span><span class="assump-info-val" id="ai-p2gia">–</span></div>
-                </div>
-              </div>
-            </div>
-            <div class="assump-section" id="int-accts-section" style="display:none">
-              <p class="assump-section__label">Interest-bearing accounts</p>
-              <div class="assump-section__body" id="int-accts-list"></div>
-            </div>
-
-            <div class="portfolio-footer">
-              <span class="portfolio-footer__label">Total investments</span>
-              <span class="portfolio-footer__value" id="ai-total">–</span>
-            </div>
-          </div>
-
-          <!-- Spending -->
-          <div class="assump-card">
-            <div class="assump-card-title">
+          <!-- Income target -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">
               <span class="assump-tooltip-anchor">Income target<span class="assump-tooltip">Set your annual pre-tax income target, which the projection will meet by calculating optimal withdrawals from your accounts.</span></span>
             </div>
-            <div class="assump-section">
-              <p class="assump-section__label">Target</p>
-              <div class="assump-section__body">
-                <div class="two-col">
-                  <div class="field">
-                    <label><span class="assump-tooltip-anchor">Annual income (£)<span class="assump-tooltip">The gross household income you need each year, before tax - based on your previous salary and cost of living. The engine works backwards from this figure to determine how much to withdraw from each wrapper to meet your needs after tax.</span></span></label>
-                    <div class="currency-stepper">
-                      <input type="text" id="spending" class="currency-input" placeholder="e.g. 45,000">
-                      <button class="stepper-btn" data-step-for="spending" data-step-direction="1" data-step-amount="1000" type="button">&#x25B2;</button>
-                      <button class="stepper-btn" data-step-for="spending" data-step-direction="-1" data-step-amount="1000" type="button">&#x25BC;</button>
-                    </div>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label"><span class="assump-tooltip-anchor">Annual income (£)<span class="assump-tooltip">The gross household income you need each year, before tax. The engine works backwards from this to determine how much to withdraw from each wrapper.</span></span></td>
+                <td class="wiz-val">
+                  <div class="currency-stepper">
+                    <input type="text" id="spending" class="currency-input" placeholder="e.g. 45,000">
+                    <button class="stepper-btn" data-step-for="spending" data-step-direction="1" data-step-amount="1000" type="button">&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="spending" data-step-direction="-1" data-step-amount="1000" type="button">&#x25BC;</button>
                   </div>
-                  <div class="field">
-                    <label data-p1-stepdown title="Reduces the household spending target from the year Person 1 reaches age 75.">Reduced at 75</label>
-                    <select id="stepDownPct">
-                      <option value="0">No step-down</option>
-                      <option value="5">5%</option>
-                      <option value="10">10%</option>
-                      <option value="15">15%</option>
-                      <option value="20">20%</option>
-                      <option value="25">25%</option>
-                    </select>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label" data-p1-stepdown>Reduced spending at 75</td>
+                <td class="wiz-val">
+                  <select id="stepDownPct">
+                    <option value="0">No step-down</option>
+                    <option value="5">5%</option>
+                    <option value="10">10%</option>
+                    <option value="15">15%</option>
+                    <option value="20">20%</option>
+                    <option value="25">25%</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label wiz-muted" colspan="2" data-p1-stepdown-hint>Reduces the gross spending target from the year Person 1 turns 75.</td>
+              </tr>
+            </table>
+            <div class="wiz-section-divider"></div>
+            <div class="wiz-col-heading wiz-col-heading--sub">Second step-down <span class="wiz-badge-soon">coming soon</span></div>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label">Enable</td>
+                <td class="wiz-val">
+                  <div class="assump-radio-group">
+                    <label class="assump-radio-label"><input type="radio" name="stepDown2Enabled" value="true" disabled> Enabled</label>
+                    <label class="assump-radio-label"><input type="radio" name="stepDown2Enabled" value="false" checked disabled> Disabled</label>
                   </div>
-                </div>
-                <div class="hint" data-p1-stepdown-hint>Reduces spending target when Person 1 turns 75.</div>
-              </div>
-            </div>
-            <div class="assump-section">
-              <p class="assump-section__label">Projection range</p>
-              <div class="assump-section__body">
-                <div class="two-col">
-                  <div class="field" style="margin-bottom:0">
-                    <label>Start Year</label>
-                    <div class="stepper-input">
-                      <input data-action="setup-summary-input" id="sp-startYear" type="number" placeholder="e.g. 2026"/>
-                      <button class="stepper-btn" data-step-for="sp-startYear" data-step-direction="1" type="button">&#x25B2;</button>
-                      <button class="stepper-btn" data-step-for="sp-startYear" data-step-direction="-1" type="button">&#x25BC;</button>
-                    </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label">Age</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" id="stepDown2Age" value="80" min="75" max="95" disabled>
+                    <button class="stepper-btn" data-step-for="stepDown2Age" data-step-direction="1" type="button" disabled>&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="stepDown2Age" data-step-direction="-1" type="button" disabled>&#x25BC;</button>
                   </div>
-                  <div class="field" style="margin-bottom:0">
-                    <label>End Year</label>
-                    <div class="stepper-input">
-                      <input data-action="setup-summary-input" id="sp-endYear" type="number" placeholder="e.g. 2060"/>
-                      <button class="stepper-btn" data-step-for="sp-endYear" data-step-direction="1" type="button">&#x25B2;</button>
-                      <button class="stepper-btn" data-step-for="sp-endYear" data-step-direction="-1" type="button">&#x25BC;</button>
-                    </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label">Reduction (%)</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" id="stepDown2Pct" value="10" min="1" max="50" disabled>
+                    <button class="stepper-btn" data-step-for="stepDown2Pct" data-step-direction="1" type="button" disabled>&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="stepDown2Pct" data-step-direction="-1" type="button" disabled>&#x25BC;</button>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /.assump-row-top -->
-
-        <div class="assump-row-bottom">
-
-          <!-- Growth & Inflation -->
-          <div class="assump-card">
-            <div class="assump-card-title">Growth &amp; Inflation</div>
-            <div class="assump-section">
-              <p class="assump-inline-field__hint" style="margin-bottom:10px">Sets the assumed growth and inflation rates for all projections. Real return ≈ growth minus inflation (e.g. 5% growth, 2.5% inflation → ~2.5% real return)..</p>
-              <p class="assump-section__label">Rates</p>
-              <div class="assump-section__body">
-                <div class="two-col">
-                  <div class="field" style="margin-bottom:0">
-                    <label>Investments (%/yr)</label>
-                    <div class="stepper-input">
-                      <input type="number" id="growth" step="0.1" placeholder="e.g. 4">
-                      <button class="stepper-btn" data-step-for="growth" data-step-direction="1" type="button">&#x25B2;</button>
-                      <button class="stepper-btn" data-step-for="growth" data-step-direction="-1" type="button">&#x25BC;</button>
-                    </div>
-                  </div>
-                  <div class="field" style="margin-bottom:0">
-                    <label>Inflation (%/yr)</label>
-                    <div class="stepper-input">
-                      <input type="number" id="inflation" step="0.1" placeholder="e.g. 2.5">
-                      <button class="stepper-btn" data-step-for="inflation" data-step-direction="1" type="button">&#x25B2;</button>
-                      <button class="stepper-btn" data-step-for="inflation" data-step-direction="-1" type="button">&#x25BC;</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="hint">Growth is nominal. Real return ≈ growth − inflation.</div>
-              </div>
-            </div>
-            <div class="assump-section">
-              <p class="assump-section__label"><span class="assump-tooltip-anchor">Growth presets<span class="assump-tooltip">Sets the nominal portfolio growth rate. Real return equals growth minus inflation.</span></span></p>
-              <div class="assump-radio-group">
-                <label class="assump-radio-label">
-                  <input type="radio" name="growthPreset" value="3" onchange="document.getElementById('growth').value='3'"> <strong>Conservative</strong> <span class="assump-inline-field__hint">3%, ~0.5% real return</span>
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="growthPreset" value="4" onchange="document.getElementById('growth').value='4'"> <strong>Moderate</strong> <span class="assump-inline-field__hint">4%, ~1.5% real return</span>
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="growthPreset" value="5" onchange="document.getElementById('growth').value='5'"> <strong>Optimistic</strong> <span class="assump-inline-field__hint">5%, ~2.5% real return</span>
-                </label>
-              </div>
+                </td>
+              </tr>
+            </table>
+            <div id="int-accts-section" style="display:none">
+              <div class="wiz-section-divider"></div>
+              <div class="wiz-col-heading wiz-col-heading--sub">Interest-bearing accounts</div>
+              <div id="int-accts-list"></div>
             </div>
           </div>
 
-                    <!-- Tax -->
-          <div class="assump-card">
-            <div class="assump-card-title">
+        </div><!-- /.wiz-grid -->
+        <div class="wiz-footer">
+          <button class="btn btn-secondary wiz-back" data-wiz-back>← Back</button>
+          <div class="wiz-progress">
+            <div class="wiz-progress-bar"><div class="wiz-progress-fill" style="width:40%"></div></div>
+            <span class="wiz-progress-label">Step 2 of 5</span>
+          </div>
+          <button class="btn btn-primary wiz-next" data-wiz-next>Next →</button>
+        </div>
+      </div><!-- /#wiz-panel-1 -->
+
+      <!-- ══ PANEL 2 — Growth ══ -->
+      <div class="wiz-panel" id="wiz-panel-2">
+        <div class="wiz-grid wiz-grid--2">
+
+          <!-- Rates + presets -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Rates</div>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label">Investments (%/yr)</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" id="growth" step="0.1" placeholder="e.g. 4">
+                    <button class="stepper-btn" data-step-for="growth" data-step-direction="1" type="button">&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="growth" data-step-direction="-1" type="button">&#x25BC;</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label">Inflation (%/yr)</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" id="inflation" step="0.1" placeholder="e.g. 2.5">
+                    <button class="stepper-btn" data-step-for="inflation" data-step-direction="1" type="button">&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="inflation" data-step-direction="-1" type="button">&#x25BC;</button>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <div class="wiz-section-divider"></div>
+            <div class="wiz-col-heading wiz-col-heading--sub">
+              <span class="assump-tooltip-anchor">Presets<span class="assump-tooltip">Sets the nominal portfolio growth rate. Real return equals growth minus inflation.</span></span>
+            </div>
+            <div class="assump-radio-group">
+              <label class="assump-radio-label">
+                <input type="radio" name="growthPreset" value="3" onchange="document.getElementById('growth').value='3'"> <strong>Conservative</strong> <span class="assump-inline-field__hint">3%, ~0.5% real return</span>
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="growthPreset" value="4" onchange="document.getElementById('growth').value='4'"> <strong>Moderate</strong> <span class="assump-inline-field__hint">4%, ~1.5% real return</span>
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="growthPreset" value="5" onchange="document.getElementById('growth').value='5'"> <strong>Optimistic</strong> <span class="assump-inline-field__hint">5%, ~2.5% real return</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Real return explainer -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">What this means</div>
+            <p class="wiz-body-text">Growth is nominal — it includes inflation. Your money's real purchasing power grows at the difference between these two rates.</p>
+            <p class="wiz-body-text">At 4% growth and 2.5% inflation, your portfolio grows at roughly <strong>1.5% per year in real terms</strong>.</p>
+            <p class="wiz-body-text">A conservative assumption protects against disappointment; an optimistic one may leave the plan short if markets underperform.</p>
+            <div class="hint" style="margin-top:8px">Growth is nominal. Real return ≈ growth − inflation.</div>
+          </div>
+
+        </div><!-- /.wiz-grid -->
+        <div class="wiz-footer">
+          <button class="btn btn-secondary wiz-back" data-wiz-back>← Back</button>
+          <div class="wiz-progress">
+            <div class="wiz-progress-bar"><div class="wiz-progress-fill" style="width:60%"></div></div>
+            <span class="wiz-progress-label">Step 3 of 5</span>
+          </div>
+          <button class="btn btn-primary wiz-next" data-wiz-next>Next →</button>
+        </div>
+      </div><!-- /#wiz-panel-2 -->
+
+      <!-- ══ PANEL 3 — Strategy ══ -->
+      <div class="wiz-panel" id="wiz-panel-3">
+        <div class="wiz-grid wiz-grid--3">
+
+          <!-- Withdrawal strategy -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Withdrawal strategy</div>
+            <p class="wiz-body-text">Choose how investments are drawn down each year. Run the projection with each option to compare lifetime tax and final portfolio value.</p>
+            <div class="assump-radio-group">
+              <label class="assump-radio-label">
+                <input type="radio" name="withdrawalStrategy" value="balanced" checked>
+                <span><strong>Blended</strong> <span class="assump-inline-field__hint">Draws pension to fill tax-free allowances; balances GIA and ISA in the basic-rate band.</span></span>
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="withdrawalStrategy" value="isaFirst">
+                <span><strong>ISA Shield</strong> <span class="assump-inline-field__hint">Spends ISA and GIA first; preserves pension for IHT or when State Pension fills your allowance.</span></span>
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="withdrawalStrategy" value="sippFirst">
+                <span><strong>Pension Drain</strong> <span class="assump-inline-field__hint">Maximises pension draw each year; surplus recycled into ISA. Best pre-State Pension.</span></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tax -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">
               <span class="assump-tooltip-anchor">Tax<span class="assump-tooltip">Controls how UK tax thresholds are uprated over the projection. Frozen means fiscal drag erodes real allowances each year; uprating preserves them in line with inflation.</span></span>
             </div>
-            <div class="assump-section">
-                <p class="assump-inline-field__hint" style="margin-bottom:6px">Controls tax drag by setting threshold uprating and how GIA dividends are taxed or compounded.</p> 
-              <div class="assump-radio-group">
-                <label class="assump-radio-label">
-                  <input type="radio" name="thresholdMode" id="thresholdFrozen" value="frozen" checked> <strong>Frozen</strong> <span class="assump-inline-field__hint">fiscal drag applies</span>
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="thresholdMode" id="thresholdFromYear" value="fromYear"> <strong>Uprated from year</strong>
-                  <input type="number" id="thresholdFromYearVal" value="2028" min="2026" max="2060"
-                    onfocus="document.getElementById('thresholdFromYear').checked=true">
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="thresholdMode" id="thresholdAlways" value="always"> <strong>Always uprated</strong> <span class="assump-inline-field__hint">with inflation</span>
-                </label>
-              </div>
+            <p class="wiz-body-text">Controls tax drag by setting whether allowances grow with inflation or stay frozen.</p>
+            <div class="assump-radio-group" style="margin-bottom:16px">
+              <label class="assump-radio-label">
+                <input type="radio" name="thresholdMode" id="thresholdFrozen" value="frozen" checked> <strong>Frozen</strong> <span class="assump-inline-field__hint">fiscal drag applies</span>
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="thresholdMode" id="thresholdFromYear" value="fromYear"> <strong>Uprated from year</strong>
+                <input type="number" id="thresholdFromYearVal" value="2028" min="2026" max="2060" onfocus="document.getElementById('thresholdFromYear').checked=true">
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="thresholdMode" id="thresholdAlways" value="always"> <strong>Always uprated</strong> <span class="assump-inline-field__hint">with inflation</span>
+              </label>
             </div>
-            <div class="assump-section">
-              <p class="assump-section__label"><span class="assump-tooltip-anchor">GIA dividends<span class="assump-tooltip">Pay out: dividends are taxable income each year, always paid regardless of whether they breach the spending target — any excess goes to cash. <br><br>Reinvest: dividends reinvested avoid immediate tax triggers and keep the entire balance compounding.</span></span></p>
-              <div class="assump-section__body">
-                <div class="assump-inline-field">
-                  <div class="assump-inline-field__input">
-                    <div class="stepper-input">
-                      <input type="number" id="dividendYield" value="1.5" min="0" max="10" step="0.1">
-                      <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="1" type="button">&#x25B2;</button>
-                      <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="-1" type="button">&#x25BC;</button>
-                    </div>
+            <div class="wiz-section-divider"></div>
+            <div class="wiz-col-heading wiz-col-heading--sub">
+              <span class="assump-tooltip-anchor">GIA dividends<span class="assump-tooltip">Pay out: dividends are taxable income each year. Reinvest: dividends compound inside GIA avoiding immediate tax.</span></span>
+            </div>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label">Dividend yield (%/yr)</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" id="dividendYield" value="1.5" min="0" max="10" step="0.1">
+                    <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="1" type="button">&#x25B2;</button>
+                    <button class="stepper-btn" data-step-for="dividendYield" data-step-direction="-1" type="button">&#x25BC;</button>
                   </div>
-                  <span class="assump-inline-field__hint">% annual dividend yield on GIA balance</span>
-                </div>
-                <div class="assump-radio-group" style="margin-top:8px">
-                  <label class="assump-radio-label">
-                    <input type="radio" name="dividendMode" id="dividendPayout" value="payout" checked> <strong>Pay out</strong> <span class="assump-inline-field__hint">taxable income each year</span>
-                  </label>
-                  <label class="assump-radio-label">
-                    <input type="radio" name="dividendMode" id="dividendReinvest" value="reinvest"> <strong>Reinvest</strong> <span class="assump-inline-field__hint">compound inside GIA (accumulation)</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Withdrawal Strategy -->
-          <div class="assump-card">
-            <div class="assump-card-title">Withdrawal Strategy</div>
-            <div class="assump-section">
-              <p class="assump-inline-field__hint" style="margin-bottom:6px">Choose how your investments are drawn down each year. The best strategy depends on your wrapper mix, when State Pension starts, and your IHT goals.</p>
-              <p class="assump-inline-field__hint" style="margin-bottom:10px">Run the projection with each strategy to compare lifetime tax and final value of your investments.</p>
-              <div class="assump-radio-group">
-                <label class="assump-radio-label">
-                  <input type="radio" name="withdrawalStrategy" value="balanced" checked>
-                  <span>
-                    <strong>Blended</strong> <span class="assump-inline-field__hint">Draws SIPP / Workplace Pension to fill tax-free allowances each year; balances GIA and ISA within the basic-rate band. Suits a mixed wrapper portfolio.</span>
-                  </span>
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="withdrawalStrategy" value="isaFirst">
-                  <span>
-                    <strong>ISA Shield</strong> <span class="assump-inline-field__hint">Spends ISA and GIA first; preserves pension for IHT planning or when State Pension will soon fill your personal allowance.</span>
-                  </span>
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="withdrawalStrategy" value="sippFirst">
-                  <span>
-                    <strong>Pension Drain</strong> <span class="assump-inline-field__hint">Maximises SIPP / Workplace Pension draw each year; surplus recycled into ISA. Best used pre-State Pension when the basic-rate band is wide open.</span>
-                  </span>
-                </label>
-              </div>
+                </td>
+              </tr>
+            </table>
+            <div class="assump-radio-group" style="margin-top:8px">
+              <label class="assump-radio-label">
+                <input type="radio" name="dividendMode" id="dividendPayout" value="payout" checked> <strong>Pay out</strong> <span class="assump-inline-field__hint">taxable income each year</span>
+              </label>
+              <label class="assump-radio-label">
+                <input type="radio" name="dividendMode" id="dividendReinvest" value="reinvest"> <strong>Reinvest</strong> <span class="assump-inline-field__hint">compound inside GIA</span>
+              </label>
             </div>
           </div>
 
           <!-- Bed & ISA -->
-          <div class="assump-card">
-            <div class="assump-card-title">Bed &amp; ISA</div>
-            <div class="assump-section">
-              <p class="assump-inline-field__hint" style="margin-bottom:10px">Moves GIA assets into an ISA each year to eliminate future CGT and dividend tax. Limited to £20,000 per person annually.</p>
-              <p class="assump-section__label">Strategy</p>
-              <div class="assump-radio-group" style="margin-bottom:10px">
-                <label class="assump-radio-label">
-                  <input type="radio" name="bniEnabled" id="bniEnabled" value="true"> Enabled <span class="assump-inline-field__hint" style="margin-left:4px">Transfer GIA to ISA annually</span>
-                </label>
-                <label class="assump-radio-label">
-                  <input type="radio" name="bniEnabled" id="bniDisabled" value="false" checked> Disabled <span class="assump-inline-field__hint" style="margin-left:4px">No transfers made</span>
-                </label>
-              </div>
-              <p class="assump-section__label" style="margin-top:10px;margin-bottom:6px">Annual Transfer Amount</p>
-              <div class="assump-section__body">
-                <p class="assump-section__label" data-p1 style="margin-bottom:4px">Person 1</p>
-                <div class="order-row bni-field" style="margin-bottom:8px">
-                  <div class="currency-stepper">
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Bed &amp; ISA</div>
+            <p class="wiz-body-text">Moves GIA assets into an ISA each year to eliminate future CGT and dividend tax. Limited to £20,000 per person annually.</p>
+            <table class="wiz-table" style="margin-bottom:10px">
+              <tr>
+                <td class="wiz-label">Strategy</td>
+                <td class="wiz-val">
+                  <div class="assump-radio-group">
+                    <label class="assump-radio-label"><input type="radio" name="bniEnabled" id="bniEnabled" value="true"> Enabled <span class="assump-inline-field__hint">Transfer GIA to ISA</span></label>
+                    <label class="assump-radio-label"><input type="radio" name="bniEnabled" id="bniDisabled" value="false" checked> Disabled</label>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <div class="wiz-section-divider"></div>
+            <div class="wiz-col-heading wiz-col-heading--sub">Annual transfer amount</div>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label" data-p1>Person 1</td>
+                <td class="wiz-val">
+                  <div class="currency-stepper bni-field">
                     <input type="text" id="bniP1GIA" class="currency-input" placeholder="e.g. 20,000">
                     <button class="stepper-btn" data-step-for="bniP1GIA" data-step-direction="1" data-step-amount="1000" type="button">&#x25B2;</button>
                     <button class="stepper-btn" data-step-for="bniP1GIA" data-step-direction="-1" data-step-amount="1000" type="button">&#x25BC;</button>
                   </div>
-                </div>
-                <p class="assump-section__label p2-field" data-p2 style="margin-top:8px;margin-bottom:4px">Person 2</p>
-                <div class="order-row bni-field p2-field">
-                  <div class="currency-stepper">
+                </td>
+              </tr>
+              <tr class="p2-field">
+                <td class="wiz-label" data-p2>Person 2</td>
+                <td class="wiz-val">
+                  <div class="currency-stepper bni-field">
                     <input type="text" id="bniP2GIA" class="currency-input" placeholder="e.g. 5,000">
                     <button class="stepper-btn" data-step-for="bniP2GIA" data-step-direction="1" data-step-amount="1000" type="button">&#x25B2;</button>
                     <button class="stepper-btn" data-step-for="bniP2GIA" data-step-direction="-1" data-step-amount="1000" type="button">&#x25BC;</button>
                   </div>
-                </div>
-              </div>
-            </div>
+                </td>
+              </tr>
+            </table>
           </div>
 
-        </div><!-- /.assump-row-bottom -->
+        </div><!-- /.wiz-grid -->
+        <div class="wiz-footer">
+          <button class="btn btn-secondary wiz-back" data-wiz-back>← Back</button>
+          <div class="wiz-progress">
+            <div class="wiz-progress-bar"><div class="wiz-progress-fill" style="width:80%"></div></div>
+            <span class="wiz-progress-label">Step 4 of 5</span>
+          </div>
+          <button class="btn btn-primary wiz-next" data-wiz-next>Next →</button>
+        </div>
+      </div><!-- /#wiz-panel-3 -->
 
-      </div><!-- /.assump-layout -->
-      </div><!-- /#assump-panel-core -->
+      <!-- ══ PANEL 4 — Lifecycle events ══ -->
+      <div class="wiz-panel" id="wiz-panel-4">
+        <div class="wiz-grid wiz-grid--3">
 
-      <!-- Panel: lifecycle events -->
-      <div id="assump-panel-lifecycle" class="assump-panel" style="display:none">
-        <div class="assump-layout">
-          <div class="assump-row-top">
+          <!-- Gift planning -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Gift planning <span class="wiz-badge-soon">coming soon</span></div>
+            <p class="wiz-body-text">Model lump-sum outflows — for example, a house deposit contribution for a child. Deducted from the portfolio in the year it occurs.</p>
+            <div class="wiz-col-heading wiz-col-heading--sub">Gift 1</div>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Year</td><td class="wiz-val"><input type="number" id="gift1Year" placeholder="e.g. 2027" min="2025" max="2060" disabled></td></tr>
+              <tr><td class="wiz-label">Amount (£)</td><td class="wiz-val"><input type="text" id="gift1Amount" class="currency-input" placeholder="e.g. 250,000" disabled></td></tr>
+            </table>
+            <div class="wiz-section-divider"></div>
+            <div class="wiz-col-heading wiz-col-heading--sub">Gift 2</div>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Year</td><td class="wiz-val"><input type="number" id="gift2Year" placeholder="e.g. 2030" min="2025" max="2060" disabled></td></tr>
+              <tr><td class="wiz-label">Amount (£)</td><td class="wiz-val"><input type="text" id="gift2Amount" class="currency-input" placeholder="e.g. 250,000" disabled></td></tr>
+            </table>
+          </div>
 
-            <!-- Gift planning -->
-            <div class="assump-card">
-              <div class="assump-card-title">Gift planning</div>
-              <div class="assump-section">
-                <p class="assump-inline-field__hint" style="margin-bottom:10px">Model lump-sum outflows in specific years — for example, a house deposit contribution for a child. The amount is deducted from the portfolio in the year it occurs.</p>
-                <p class="assump-section__label">Gift 1</p>
-                <div class="assump-section__body">
-                  <div class="two-col" style="margin-bottom:8px">
-                    <div class="field">
-                      <label>Year</label>
-                      <input type="number" id="gift1Year" placeholder="e.g. 2027" min="2025" max="2060" disabled>
-                    </div>
-                    <div class="field">
-                      <label>Amount (£)</label>
-                      <input type="text" id="gift1Amount" class="currency-input" placeholder="e.g. 250,000" disabled>
-                    </div>
-                  </div>
-                </div>
-                <p class="assump-section__label" style="margin-top:10px">Gift 2</p>
-                <div class="assump-section__body">
-                  <div class="two-col">
-                    <div class="field">
-                      <label>Year</label>
-                      <input type="number" id="gift2Year" placeholder="e.g. 2030" min="2025" max="2060" disabled>
-                    </div>
-                    <div class="field">
-                      <label>Amount (£)</label>
-                      <input type="text" id="gift2Amount" class="currency-input" placeholder="e.g. 250,000" disabled>
-                    </div>
-                  </div>
-                </div>
-                <p class="assump-inline-field__hint" style="margin-top:12px">⚠ Not yet wired to the engine — coming soon.</p>
-              </div>
-            </div>
-
-            <!-- Inheritance windfall -->
-            <div class="assump-card">
-              <div class="assump-card-title">Inheritance windfall</div>
-              <div class="assump-section">
-                <p class="assump-inline-field__hint" style="margin-bottom:10px">Model a one-off lump-sum inflow in a specific year — for example, an expected inheritance. The amount is added to the portfolio in the year it occurs.</p>
-                <div class="two-col" style="margin-bottom:8px">
-                  <div class="field">
-                    <label>Year</label>
-                    <input type="number" id="windfall1Year" placeholder="e.g. 2032" min="2025" max="2060" disabled>
-                  </div>
-                  <div class="field">
-                    <label>Amount (£)</label>
-                    <input type="text" id="windfall1Amount" class="currency-input" placeholder="e.g. 400,000" disabled>
-                  </div>
-                </div>
-                <div class="field" style="margin-bottom:8px">
-                  <label>Added to wrapper</label>
+          <!-- Inheritance windfall -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Inheritance windfall <span class="wiz-badge-soon">coming soon</span></div>
+            <p class="wiz-body-text">Model a one-off lump-sum inflow — for example, an expected inheritance. Added to the portfolio in the year it occurs.</p>
+            <table class="wiz-table">
+              <tr><td class="wiz-label">Year</td><td class="wiz-val"><input type="number" id="windfall1Year" placeholder="e.g. 2032" min="2025" max="2060" disabled></td></tr>
+              <tr><td class="wiz-label">Amount (£)</td><td class="wiz-val"><input type="text" id="windfall1Amount" class="currency-input" placeholder="e.g. 400,000" disabled></td></tr>
+              <tr>
+                <td class="wiz-label">Added to wrapper</td>
+                <td class="wiz-val">
                   <select id="windfall1Wrapper" disabled>
                     <option value="Cash">Cash</option>
                     <option value="ISA">ISA</option>
                     <option value="GIA" selected>GIA</option>
                   </select>
-                </div>
-                <p class="assump-inline-field__hint" style="margin-top:4px">⚠ Not yet wired to the engine — coming soon.</p>
-              </div>
-            </div>
+                </td>
+              </tr>
+            </table>
+          </div>
 
-            <!-- Second step-down -->
-            <div class="assump-card">
-              <div class="assump-card-title">Second spending step-down</div>
-              <div class="assump-section">
-                <p class="assump-inline-field__hint" style="margin-bottom:10px">Apply a second reduction to the spending target at age 80, in addition to the step-down already modelled at age 75. Useful for modelling reduced mobility or activity in later retirement.</p>
-                <div class="assump-radio-group" style="margin-bottom:10px">
-                  <label class="assump-radio-label">
-                    <input type="radio" name="stepDown2Enabled" value="true" disabled> Enabled
-                  </label>
-                  <label class="assump-radio-label">
-                    <input type="radio" name="stepDown2Enabled" value="false" checked disabled> Disabled
-                  </label>
-                </div>
-                <div class="two-col">
-                  <div class="field">
-                    <label>Age</label>
-                    <input type="number" id="stepDown2Age" value="80" min="75" max="95" disabled>
+          <!-- Second step-down -->
+          <div class="wiz-col">
+            <div class="wiz-col-heading">Second spending step-down <span class="wiz-badge-soon">coming soon</span></div>
+            <p class="wiz-body-text">Apply a further reduction at a later age — useful for modelling reduced mobility or activity in later retirement.</p>
+            <table class="wiz-table">
+              <tr>
+                <td class="wiz-label">Enable</td>
+                <td class="wiz-val">
+                  <div class="assump-radio-group">
+                    <label class="assump-radio-label"><input type="radio" name="stepDown2Enabled" value="true" disabled> Enabled</label>
+                    <label class="assump-radio-label"><input type="radio" name="stepDown2Enabled" value="false" checked disabled> Disabled</label>
                   </div>
-                  <div class="field">
-                    <label>Reduction (%)</label>
-                    <input type="number" id="stepDown2Pct" value="10" min="1" max="50" disabled>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label">Age</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" value="80" min="75" max="95" disabled>
+                    <button class="stepper-btn" data-step-direction="1" type="button" disabled>&#x25B2;</button>
+                    <button class="stepper-btn" data-step-direction="-1" type="button" disabled>&#x25BC;</button>
                   </div>
-                </div>
-                <p class="assump-inline-field__hint" style="margin-top:12px">⚠ Not yet wired to the engine — coming soon.</p>
-              </div>
-            </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="wiz-label">Reduction (%)</td>
+                <td class="wiz-val">
+                  <div class="stepper-input">
+                    <input type="number" value="10" min="1" max="50" disabled>
+                    <button class="stepper-btn" data-step-direction="1" type="button" disabled>&#x25B2;</button>
+                    <button class="stepper-btn" data-step-direction="-1" type="button" disabled>&#x25BC;</button>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
 
-          </div><!-- /.assump-row-top -->
-        </div><!-- /.assump-layout -->
-      </div><!-- /#assump-panel-lifecycle -->
+        </div><!-- /.wiz-grid -->
+        <div class="wiz-footer">
+          <button class="btn btn-secondary wiz-back" data-wiz-back>← Back</button>
+          <div class="wiz-progress">
+            <div class="wiz-progress-bar"><div class="wiz-progress-fill" style="width:100%"></div></div>
+            <span class="wiz-progress-label">Step 5 of 5</span>
+          </div>
+          <button class="btn btn-run btn-run--visible" data-action="run-projection">Run projection</button>
+        </div>
+      </div><!-- /#wiz-panel-4 -->
 
     </div><!-- /#tab-assumptions -->
 
@@ -1178,18 +1250,30 @@
 </div>
 
 <script>
-  document.querySelectorAll('.assump-subtab-bar .results-tab').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var target = btn.dataset.assumpTab;
-      document.querySelectorAll('.assump-subtab-bar .results-tab').forEach(function(b) {
-        b.classList.toggle('results-tab--active', b === btn);
-        b.classList.toggle('results-tab--inactive', b !== btn);
-      });
-      document.querySelectorAll('.assump-panel').forEach(function(p) {
-        p.style.display = p.id === 'assump-panel-' + target ? 'block' : 'none';
-      });
+(function() {
+  var panels = document.querySelectorAll('.wiz-panel');
+  var tabs   = document.querySelectorAll('.wiz-tab');
+  var cur    = 0;
+
+  function showStep(i) {
+    i = Math.max(0, Math.min(panels.length - 1, i));
+    cur = i;
+    panels.forEach(function(p, j) { p.classList.toggle('wiz-panel--active', j === i); });
+    tabs.forEach(function(t, j) {
+      t.classList.toggle('wiz-tab--active', j === i);
+      t.classList.toggle('wiz-tab--done', j < i);
     });
+  }
+
+  document.querySelector('#tab-assumptions').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-wiz-next]');
+    if (btn) { showStep(cur + 1); return; }
+    btn = e.target.closest('[data-wiz-back]');
+    if (btn) { showStep(cur - 1); return; }
+    btn = e.target.closest('.wiz-tab[data-wiz]');
+    if (btn) { showStep(parseInt(btn.dataset.wiz, 10)); }
   });
+})();
 </script>
 </body>
 </html>
