@@ -26,7 +26,7 @@
       </div>
         <div class="top-header__controls">
           <nav class="top-header__tabs">
-            <button data-action="switch-tab" data-tab="setup" class="tab-btn tab-active">Portfolio</button>
+            <button data-action="switch-tab" data-tab="setup" class="tab-btn tab-active">Setup</button>
             <span class="tab-sep" aria-hidden="true"></span>
             <button data-action="switch-tab" data-tab="assumptions" class="tab-btn">Assumptions</button>
             <span class="tab-sep" aria-hidden="true"></span>
@@ -60,7 +60,7 @@
       <!-- Top intro -->
       <div class="setup-intro-row">
         <div class="setup-intro__text">
-          <h1>Portfolio setup</h1>
+          <h1>Investments setup</h1>
         </div>
     
         <div class="setup-intro-actions">
@@ -252,7 +252,7 @@
         
           <!-- Total -->
           <div class="wrapper-total-footer">
-            <span class="meta-label">Total Portfolio Value</span>
+            <span class="meta-label">Total Investments Value</span>
             <div class="meta-value" id="sp-total">£0</div>
           </div>
         </div>
@@ -333,10 +333,10 @@
         <!-- Delete portfolio — inline confirm pattern -->
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px">
           <button class="btn btn-secondary" id="deletePortfolioBtn">
-            Delete portfolio
+            Delete accounts
           </button>
           <div id="deletePortfolioConfirm" class="delete-confirm-box" style="display:none">
-            <span class="delete-confirm-box__label">Delete entire portfolio? This cannot be undone.</span>
+            <span class="delete-confirm-box__label">Delete all accounts? This cannot be undone.</span>
             <div class="delete-confirm-box__actions">
               <button type="button" class="btn btn-primary" id="confirmDeletePortfolioBtn">Confirm delete</button>
               <button type="button" class="btn btn-secondary" id="cancelDeletePortfolioBtn">Cancel</button>
@@ -433,7 +433,7 @@
 
           <!-- Portfolio Balances -->
           <div class="assump-card">
-            <div class="assump-card-title">Portfolio Balances</div>
+            <div class="assump-card-title">Investment Balances</div>
             <div class="assump-section">
               <div class="assump-info-grid">
                 <div class="assump-info-block">
@@ -458,7 +458,7 @@
             </div>
 
             <div class="portfolio-footer">
-              <span class="portfolio-footer__label">Total portfolio</span>
+              <span class="portfolio-footer__label">Total investments</span>
               <span class="portfolio-footer__value" id="ai-total">–</span>
             </div>
           </div>
@@ -533,7 +533,7 @@
               <div class="assump-section__body">
                 <div class="two-col">
                   <div class="field" style="margin-bottom:0">
-                    <label>Portfolio (%/yr)</label>
+                    <label>Investments (%/yr)</label>
                     <div class="stepper-input">
                       <input type="number" id="growth" step="0.1" placeholder="e.g. 4">
                       <button class="stepper-btn" data-step-for="growth" data-step-direction="1" type="button">&#x25B2;</button>
@@ -618,8 +618,8 @@
           <div class="assump-card">
             <div class="assump-card-title">Withdrawal Strategy</div>
             <div class="assump-section">
-              <p class="assump-inline-field__hint" style="margin-bottom:6px">Choose how your portfolio is drawn down each year. The best strategy depends on your wrapper mix, when State Pension starts, and your IHT goals.</p>
-              <p class="assump-inline-field__hint" style="margin-bottom:10px">Run the projection with each strategy to compare lifetime tax and final portfolio value.</p>
+              <p class="assump-inline-field__hint" style="margin-bottom:6px">Choose how your investments are drawn down each year. The best strategy depends on your wrapper mix, when State Pension starts, and your IHT goals.</p>
+              <p class="assump-inline-field__hint" style="margin-bottom:10px">Run the projection with each strategy to compare lifetime tax and final value of your investments.</p>
               <div class="assump-radio-group">
                 <label class="assump-radio-label">
                   <input type="radio" name="withdrawalStrategy" value="balanced" checked>
@@ -869,7 +869,7 @@
             <div style="overflow-x:auto"><table id="tax-table" class="data-table"></table></div>
           </div>
           <div id="tables-wealth-view" style="display:none">
-            <h2>Portfolio values by year</h2>
+            <h2>Investment values by year</h2>
             <div style="overflow-x:auto"><table id="wealth-table" class="data-table"></table></div>
           </div>
           <div id="tables-drawdown-view" style="display:none">
