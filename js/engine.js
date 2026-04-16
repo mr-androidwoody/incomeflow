@@ -295,7 +295,6 @@
         p1WrapperOrder, p2WrapperOrder,
         p1SIPPLocked,   p2SIPPLocked,
         p1Ledger,       p2Ledger,
-        dividendYield,
         p1GainRatio:    p1GainRatio,
         p2GainRatio:    p2GainRatio,
       });

@@ -30,7 +30,6 @@
   //   p2SIPPLocked,
   //   p1Ledger,        — allowance ledger per person (from RetireLedger)
   //   p2Ledger,
-  //   dividendYield,   — GIA dividend yield as fraction (e.g. 0.015)
   //   p1GainRatio,     — unrealised gain fraction of p1 GIA balance (0-1)
   //   p2GainRatio,     — unrealised gain fraction of p2 GIA balance (0-1)
   // }
@@ -63,14 +62,14 @@
 
   // Draw from GIA or ISA depending on tax efficiency under the given strategy.
   // Tries GIA first if efficient; falls back to ISA otherwise.
-  function drawGIAorISA(bal, amount, ledger, strategy, gainRatio, dividendYield) {
+  function drawGIAorISA(bal, amount, ledger, strategy, gainRatio) {
     if (amount <= 0) return zero();
 
     const giaAvail = bal.GIA || 0;
     const isaAvail = bal.ISA || 0;
     const drawn    = zero();
 
-    if (L.giaIsEfficient(ledger, strategy, gainRatio, dividendYield) && giaAvail > 0) {
+    if (L.giaIsEfficient(ledger, strategy, gainRatio, amount) && giaAvail > 0) {
       const fromGIA = Math.min(giaAvail, amount);
       drawn.GIA     = fromGIA;
       bal.GIA      -= fromGIA;
@@ -166,7 +165,7 @@
     p1WrapperOrder, p2WrapperOrder,
     p1SIPPLocked, p2SIPPLocked,
     p1Ledger, p2Ledger,
-    dividendYield, p1GainRatio, p2GainRatio,
+    p1GainRatio, p2GainRatio,
   }) {
     if (shortfall <= 0) return { p1Drawn: zero(), p2Drawn: zero() };
 
@@ -193,8 +192,8 @@
     const p2Target = remShortfall * (1 - p1Weight);
 
     // Step 3: GIA or ISA based on tax efficiency
-    const p1RemDrawn = drawGIAorISA(p1Bal, p1Target, p1Ledger, 'balanced', p1GainRatio, dividendYield);
-    const p2RemDrawn = drawGIAorISA(p2Bal, p2Target, p2Ledger, 'balanced', p2GainRatio, dividendYield);
+    const p1RemDrawn = drawGIAorISA(p1Bal, p1Target, p1Ledger, 'balanced', p1GainRatio);
+    const p2RemDrawn = drawGIAorISA(p2Bal, p2Target, p2Ledger, 'balanced', p2GainRatio);
 
     mergeDraw(p1Drawn, p1RemDrawn);
     mergeDraw(p2Drawn, p2RemDrawn);
@@ -221,7 +220,7 @@
     p1WrapperOrder, p2WrapperOrder,
     p1SIPPLocked, p2SIPPLocked,
     p1Ledger, p2Ledger,
-    dividendYield, p1GainRatio, p2GainRatio,
+    p1GainRatio, p2GainRatio,
   }) {
     if (shortfall <= 0) return { p1Drawn: zero(), p2Drawn: zero() };
 
@@ -248,8 +247,8 @@
     const p2Target = remShortfall * (1 - p1Weight);
 
     // Step 3: ISA-first draw
-    const p1RemDrawn = drawGIAorISA(p1Bal, p1Target, p1Ledger, 'isaFirst', p1GainRatio, dividendYield);
-    const p2RemDrawn = drawGIAorISA(p2Bal, p2Target, p2Ledger, 'isaFirst', p2GainRatio, dividendYield);
+    const p1RemDrawn = drawGIAorISA(p1Bal, p1Target, p1Ledger, 'isaFirst', p1GainRatio);
+    const p2RemDrawn = drawGIAorISA(p2Bal, p2Target, p2Ledger, 'isaFirst', p2GainRatio);
 
     mergeDraw(p1Drawn, p1RemDrawn);
     mergeDraw(p2Drawn, p2RemDrawn);
@@ -276,7 +275,7 @@
     p1WrapperOrder, p2WrapperOrder,
     p1SIPPLocked, p2SIPPLocked,
     p1Ledger, p2Ledger,
-    dividendYield, p1GainRatio, p2GainRatio,
+    p1GainRatio, p2GainRatio,
   }) {
     if (shortfall <= 0) return { p1Drawn: zero(), p2Drawn: zero() };
 
@@ -303,8 +302,8 @@
     const p2Target = remShortfall * (1 - p1Weight);
 
     // Step 3: GIA-permissive draw
-    const p1RemDrawn = drawGIAorISA(p1Bal, p1Target, p1Ledger, 'sippFirst', p1GainRatio, dividendYield);
-    const p2RemDrawn = drawGIAorISA(p2Bal, p2Target, p2Ledger, 'sippFirst', p2GainRatio, dividendYield);
+    const p1RemDrawn = drawGIAorISA(p1Bal, p1Target, p1Ledger, 'sippFirst', p1GainRatio);
+    const p2RemDrawn = drawGIAorISA(p2Bal, p2Target, p2Ledger, 'sippFirst', p2GainRatio);
 
     mergeDraw(p1Drawn, p1RemDrawn);
     mergeDraw(p2Drawn, p2RemDrawn);
