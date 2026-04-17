@@ -405,8 +405,8 @@
         <div class="mc-primary-action__label" style="color:${verdictColour.actionLabel}">Recommended action</div>
         <p class="mc-primary-action__text" style="color:${verdictColour.actionText}">${actionLine}</p>
         <p class="mc-primary-action__impact" style="color:${verdictColour.actionImpact}">${actionImpact}</p>
-        <p class="mc-bridge-note">Use the tabs above to explore charts and tables showing how your plan unfolds year by year under fixed assumptions.</p>
-      </div>`;
+      </div>
+      <p class="mc-bridge-note">Use the tabs above to explore charts and tables showing how your plan unfolds year by year under fixed assumptions.</p>`;
 
     el.innerHTML = s1 + s23 + s4;
   }
