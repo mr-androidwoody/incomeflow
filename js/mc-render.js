@@ -137,7 +137,7 @@
         const hr = roundToNearest(headroom, 500);
         headroomHTML = `
           <div class="mc-stat-cell">
-            <div class="mc-stat-label">Annual headroom</div>
+            <div class="mc-stat-label">Typical headroom</div>
             <div class="mc-stat-value" style="color:var(--mc-dot-strong,#3B6D11)">+${fmt(hr)} / yr</div>
           </div>`;
       } else {
@@ -147,7 +147,7 @@
           : 'var(--mc-dot-risk,#A32D2D)';
         headroomHTML = `
           <div class="mc-stat-cell">
-            <div class="mc-stat-label">Annual gap</div>
+            <div class="mc-stat-label">Typical shortfall</div>
             <div class="mc-stat-value" style="color:${gapColour}">−${fmt(gap)} / yr</div>
           </div>`;
       }
@@ -155,7 +155,7 @@
 
     // ── Section 1: RETIREMENT OUTLOOK ─────────────────────────────────────
     const s1 = `
-      <section class="mc-section mc-outlook-card">
+      <section class="mc-section mc-outlook-card" style="border-left-color:${verdictDotColour}">
         <div class="mc-section-label">Retirement outlook</div>
         <div class="mc-verdict-row">
           <span class="mc-outlook-dot" style="background:${verdictDotColour}"></span>
@@ -224,11 +224,38 @@
       }).join('');
     }
 
+    // Survival interpretation: read the lowest bar in the projection
+    let survivalNote = '';
+    if (r.survivalByYear && r.years) {
+      const decadeYrsForNote = [2030, 2040, 2050, 2060, 2070].filter(
+        y => y >= firstYear && y <= lastYear
+      );
+      let minSurv = 1;
+      let minAge  = null;
+      for (const dy of decadeYrsForNote) {
+        const yi = r.years.indexOf(dy);
+        if (yi === -1) continue;
+        const sr = r.survivalByYear[yi] / r.simCount;
+        if (sr < minSurv) {
+          minSurv = sr;
+          minAge  = p1StartAge !== null ? p1StartAge + (dy - firstYear) : null;
+        }
+      }
+      if (minSurv >= 0.95) {
+        survivalNote = 'Risk remains low throughout the projection.';
+      } else if (minSurv >= 0.80) {
+        survivalNote = 'Risk is low early in retirement but increases meaningfully in later years.';
+      } else {
+        survivalNote = 'Risk builds significantly — later years carry substantial pressure.';
+      }
+    }
+
     const s2 = `
       <section class="mc-section">
         <div class="mc-section-label">When pressure occurs</div>
         <p class="mc-outlook-sentence" style="margin-bottom:14px">${pressureSentence}</p>
         ${decadeRowsHTML ? `<div class="mc-decade-chart">${decadeRowsHTML}</div>` : ''}
+        ${survivalNote ? `<p class="mc-survival-note">${survivalNote}</p>` : ''}
       </section>`;
 
     // ── Section 3: WHAT IF YOU CHANGE SOMETHING? ──────────────────────────
@@ -296,9 +323,16 @@
       l3Outcome   = 'Flexible spending in down years would be a modest incremental improvement — your plan does not depend on it.';
     }
 
-    function leverRow(name, pill, pillClass, outcome) {
+    // Which lever is primary? Same priority as action block.
+    const _leverPrimary =
+      (sustainableSpending !== null && !sustainableIsFloor && headroom < 0) ? 0 :
+      (rate < targetConfidence && delayPerturbations.some(p => p.successRate >= targetConfidence)) ? 1 :
+      (rate < targetConfidence && iqrWide) ? 2 : 0;
+
+    function leverRow(name, pill, pillClass, outcome, isPrimary) {
+      const rowClass = isPrimary ? 'mc-lever-row' : 'mc-lever-row mc-lever-row--secondary';
       return `
-        <div class="mc-lever-row">
+        <div class="${rowClass}">
           <span class="mc-lever-name">${name}</span>
           <span class="mc-lever-pill ${pillClass}">${pill}</span>
           <span class="mc-lever-outcome">${outcome}</span>
@@ -309,9 +343,9 @@
       <section class="mc-section">
         <div class="mc-section-label">What if you change something?</div>
         <div class="mc-lever-table">
-          ${leverRow('Spend less',        l1Pill, l1PillClass, l1Outcome)}
-          ${leverRow('Delay withdrawals', l2Pill, l2PillClass, l2Outcome)}
-          ${leverRow('Flexible spending', l3Pill, l3PillClass, l3Outcome)}
+          ${leverRow('Spend less',        l1Pill, l1PillClass, l1Outcome, _leverPrimary === 0)}
+          ${leverRow('Delay withdrawals', l2Pill, l2PillClass, l2Outcome, _leverPrimary === 1)}
+          ${leverRow('Flexible spending', l3Pill, l3PillClass, l3Outcome, _leverPrimary === 2)}
         </div>
       </section>`;
 
@@ -341,11 +375,22 @@
       actionBorderColour = 'var(--mc-dot-strong,#3B6D11)';
     }
 
+    // Tinted background matching verdict severity
+    const actionBg =
+      actionBorderColour.includes('3B6D11') ? 'background:#f0fdf4' :
+      actionBorderColour.includes('BA7517') ? 'background:#fffbeb' :
+                                              'background:#fef2f2';
+    const actionLabelColour =
+      actionBorderColour.includes('3B6D11') ? 'color:#166534' :
+      actionBorderColour.includes('BA7517') ? 'color:#92400e' :
+                                              'color:#991b1b';
+
     const s4 = `
-      <section class="mc-primary-action" style="border-left-color:${actionBorderColour}">
-        <div class="mc-section-label" style="margin-bottom:6px">Primary action</div>
-        <p class="mc-outlook-sentence" style="margin:0">${actionText}</p>
-      </section>`;
+      <section class="mc-primary-action" style="border-left-color:${actionBorderColour};${actionBg}">
+        <div class="mc-primary-action__label" style="${actionLabelColour}">Recommended action</div>
+        <p class="mc-primary-action__text">${actionText}</p>
+      </section>
+      <p class="mc-bridge-note">Charts below show your expected baseline plan — actual outcomes may vary as modelled above.</p>`;
 
     el.innerHTML = s1 + s2 + s3 + s4;
   }
