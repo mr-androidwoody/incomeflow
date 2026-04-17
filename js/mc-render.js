@@ -108,9 +108,9 @@
     // actionBg / actionBorder / actionLabel / actionText / actionImpact: terminal block colours
     const verdictColour =
       rate >= 0.95 ? {
-        heroBg: '#1E8A3C',
-        actionBg: '#E6F7EC', actionBorder: '#1E8A3C',
-        actionLabel: '#145C28', actionText: '#0A3317', actionImpact: '#1E8A3C'
+        heroBg: '#3B6D11',
+        actionBg: '#EAF3DE', actionBorder: '#3B6D11',
+        actionLabel: '#27500A', actionText: '#173404', actionImpact: '#3B6D11'
       } :
       rate >= 0.90 ? {
         heroBg: '#185FA5',
@@ -169,7 +169,7 @@
           <div class="mc-verdict-eyebrow">Your retirement outlook</div>
           <div class="mc-verdict-eyebrow mc-verdict-eyebrow--right">Success rate</div>
           <div class="mc-verdict-word">${verdictWord}</div>
-          <div class="mc-verdict-bignum">${fmtPct(rate)}</div>
+          <div class="mc-verdict-bignum">${Math.round(rate * 100)}%</div>
         </div>
         <div class="mc-verdict-lower">
           <div class="mc-verdict-lower__left">
@@ -219,7 +219,7 @@
         if (yi === -1) return '';
         const survRate  = r.survivalByYear[yi] / r.simCount;
         if (survRate < minSurv) minSurv = survRate;
-        const barColour = survRate >= 0.95 ? '#1E8A3C' : survRate >= 0.80 ? '#9A5E00' : '#8B1F1F';
+        const barColour = survRate >= 0.95 ? '#2D5F0F' : survRate >= 0.80 ? '#9A5E00' : '#8B1F1F';
         const isRising  = !risingMarked && survRate < 0.95;
         if (isRising) risingMarked = true;
         const rowClass  = isRising ? 'mc-decade-row mc-decade-row--rising' : 'mc-decade-row';
