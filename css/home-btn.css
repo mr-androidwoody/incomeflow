@@ -1,11 +1,5 @@
-/* ── Home button overlay ─────────────────────────────────────────────────── */
-/* Positioned absolutely within .top-header__inner (position:relative)        */
-/* Inherits the content-max constraint automatically                          */
-
-/* Give the inner container a positioning context */
-.top-header__inner {
-  position: relative;
-}
+/* ── Home button ─────────────────────────────────────────────────────────── */
+/* Sits inside .top-header__actions flex container alongside Run projection   */
 
 .home-btn {
   display: inline-flex;
@@ -44,17 +38,9 @@
   font-size: 13px;
 }
 
-/* Pin to top-right of the fixed header, outside layout flow */
-.home-btn--top {
-  position: absolute;
-  top: 16px;
-  right: 28px;
-  z-index: 200;
-}
-
 @media (max-width: 900px) {
-  .home-btn--top {
-    top: 12px;
-    right: 16px;
+  .home-btn {
+    font-size: 0.78rem;
+    padding: 5px 10px;
   }
 }
