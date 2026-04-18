@@ -461,7 +461,7 @@
       if (hr > 0) {
         const higherSpend = roundToNearest(currentSpending + hr, 500);
         items.push({ name: 'Consider spending more', pill: 'Headroom available', pillClass: 'mc-lever-pill--safe',
-          outcome: `Your plan stays above the ${confPct}% threshold even with around ${fmt(hr)} more per year — you could spend up to ${fmt(higherSpend)}/yr and remain resilient.` });
+          outcome: `Your plan stays above the ${confPct}% threshold even with around ${fmt(hr)} more per year . You could spend up to ${fmt(higherSpend)}/yr and remain resilient.` });
       }
       items.push({ name: 'Flexible spending', pill: iqrWide ? 'Material gain' : 'Small gain',
         pillClass: iqrWide ? 'mc-lever-pill--safe' : 'mc-lever-pill--neutral',
@@ -545,7 +545,7 @@
       // Strong
       if (sustainableSpending !== null && !sustainableIsFloor && headroom !== null && headroom >= 0) {
         const ceil = roundToNearest(sustainableSpending, 500);
-        bulletItems.push(`Your plan supports up to ${fmt(ceil)} / yr at ${confPct}% confidence — ${fmt(roundToNearest(headroom, 500))} above your current spending.`);
+        bulletItems.push(`Your plan supports up to ${fmt(ceil)} / yr at ${confPct}% confidence , ${fmt(roundToNearest(headroom, 500))} above your current spending.`);
       }
       if (p50Mid > 0) {
         bulletItems.push(`In a typical market, your portfolio is around ${fmt(roundToNearest(p50Mid, 10000))} at ${age80label}.`);
@@ -559,13 +559,13 @@
       // Good
       if (sustainableSpending !== null && !sustainableIsFloor && headroom !== null && headroom >= 0) {
         const ceil = roundToNearest(sustainableSpending, 500);
-        bulletItems.push(`Sustainable spending ceiling is ${fmt(ceil)} — ${fmt(roundToNearest(headroom, 500))} above where you are now.`);
+        bulletItems.push(`Sustainable spending ceiling is ${fmt(ceil)} , ${fmt(roundToNearest(headroom, 500))} above where you are now.`);
       }
       if (p50End > 0) {
         bulletItems.push(`Median portfolio at end of projection: ${fmt(roundToNearest(p50End, 10000))}.`);
       }
       if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 paths, funds run low around age ${p10DepletesAge} — late enough that adjustments remain possible.`);
+        bulletItems.push(`In the worst 1 in 10 paths, funds run low around age ${p10DepletesAge} . Adjustments remain possible.`);
       } else {
         bulletItems.push(`Even in the worst 1 in 10 paths, the portfolio survives the full projection.`);
       }
@@ -576,10 +576,10 @@
         bulletItems.push(`A ${fmt(gap)} / yr reduction fully closes the gap to the ${confPct}% threshold.`);
       }
       if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 paths, funds run out around age ${p10DepletesAge} — while spending flexibility still exists.`);
+        bulletItems.push(`In the worst 1 in 10 paths, funds run out around age ${p10DepletesAge} , while spending flexibility still exists.`);
       }
       if (p50End > 0) {
-        bulletItems.push(`Median portfolio at end of projection: ${fmt(roundToNearest(p50End, 10000))} — the plan works in most scenarios.`);
+        bulletItems.push(`Median portfolio at end of projection: ${fmt(roundToNearest(p50End, 10000))} . The plan works in most scenarios.`);
       }
     } else {
       // At risk
@@ -587,7 +587,7 @@
         bulletItems.push(`In the worst 1 in 10 paths, funds are exhausted by age ${p10DepletesAge}.`);
       }
       if (p50End > 0) {
-        bulletItems.push(`Median portfolio at end of projection: ${fmt(roundToNearest(p50End, 10000))} — depletion is a likely outcome, not just a tail risk.`);
+        bulletItems.push(`Median portfolio at end of projection: ${fmt(roundToNearest(p50End, 10000))} . Depletion is a likely outcome, not just a tail risk.`);
       }
       if (hasGap && delayEffective) {
         const gap = roundToNearest(Math.abs(headroom), 500);
@@ -622,7 +622,7 @@
       <p class="mc-bridge-note">Use the tabs above to explore charts and tables showing how your plan unfolds year by year under fixed assumptions.</p>`;
 
     const staleBanner = _stale
-      ? `<div class="mc-stale-banner">⚠ Based on previous inputs — re-run to update</div>`
+      ? `<div class="mc-stale-banner">⚠ Based on previous inputs. Re-run to update.</div>`
       : '';
     el.innerHTML = staleBanner + s1 + s23 + s4;
 
