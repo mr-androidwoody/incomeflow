@@ -334,11 +334,14 @@
           </div>`;
       } else {
         const gap = roundToNearest(Math.abs(headroom), 500);
-        shortfallHTML = `
+        if (gap >= 500) {
+          shortfallHTML = `
           <div class="mc-vstat">
             <div class="mc-vstat-label">Typical shortfall</div>
             <div class="mc-vstat-value">${fmt(gap)} / yr</div>
           </div>`;
+        }
+        // gap < 500 rounds to zero — suppress stat entirely
       }
     // shortfallHTML is empty string if no spending context — right column shows only success rate
     }
@@ -441,7 +444,9 @@
     } else if (headroom >= 0) {
       const hr = roundToNearest(headroom, 500);
       l1Pill = 'No cut needed'; l1PillClass = 'mc-lever-pill--safe';
-      l1Outcome = `You have around ${fmtB(hr)} per year of headroom, already within the ${confPct}% confidence band.`;
+      l1Outcome = hr >= 500
+        ? `You have around ${fmtB(hr)} per year of headroom, already within the ${confPct}% confidence band.`
+        : `Your plan is right at the ${confPct}% confidence threshold. No cut needed, but there is negligible room to increase spending.`;
     } else {
       const gap = roundToNearest(Math.abs(headroom), 500);
       const newTarget = roundToNearest(currentSpending - gap, 500);
@@ -474,7 +479,9 @@
     }
 
     // Lever 3 — Flexible spending
-    const iqrWide = (p75[lastIdx] - p25[lastIdx]) / Math.max(p50[lastIdx], 1) > 1.5;
+    const iqrWide = p50[lastIdx] > 0
+      ? (p75[lastIdx] - p25[lastIdx]) / p50[lastIdx] > 1.5
+      : false;
     let l3Pill, l3PillClass, l3Outcome;
     if (iqrWide) {
       l3Pill = 'Material gain'; l3PillClass = 'mc-lever-pill--safe';
@@ -485,12 +492,13 @@
     }
 
     // Is the plan already strong (no action needed)?
+    const effectiveHeadroom = headroom !== null ? roundToNearest(headroom, 500) : null;
     const planIsStrong = rate >= targetConfidence &&
-      (sustainableSpending === null || sustainableIsFloor || headroom >= 0);
+      (sustainableSpending === null || sustainableIsFloor || (headroom !== null && headroom >= 0 && effectiveHeadroom >= 0));
 
     // Primary lever index (-1 = strong plan, no primary)
     const _primary = planIsStrong ? -1 :
-      (sustainableSpending !== null && !sustainableIsFloor && headroom < 0) ? 0 :
+      hasGap ? 0 :
       (rate < targetConfidence && delayPerturbations.some(p => p.successRate >= targetConfidence)) ? 1 :
       (rate < targetConfidence && iqrWide) ? 2 : 0;
 
@@ -574,12 +582,14 @@
     // ── Section 4: PRIMARY ACTION ─────────────────────────────────────
     let actionLine, actionImpact;
 
-    const hasGap         = sustainableSpending !== null && !sustainableIsFloor && headroom < 0;
+    const roundedGap     = sustainableSpending !== null && !sustainableIsFloor && headroom < 0
+      ? roundToNearest(Math.abs(headroom), 500) : 0;
+    const hasGap         = roundedGap >= 500;
     const delayMin       = delayPerturbations.find(p => p.successRate >= targetConfidence);
     const delayEffective = !!delayMin;
 
     if (hasGap) {
-      const gap = roundToNearest(Math.abs(headroom), 500);
+      const gap = roundedGap;
       const newTarget = roundToNearest(currentSpending - gap, 500);
       actionLine   = `Reduce annual spending by ${fmtB(gap)} to ${fmtB(newTarget)}.`;
       actionImpact = `This closes the sustainability gap and removes most of the risk in weaker market scenarios.`;
@@ -621,8 +631,11 @@
     const p10End = _deflate(r.p10Portfolio[lastIdx], lastIdx);
 
     // Midpoint age (roughly age 80 equivalent index)
+    const _midYearMatch = p1StartAge !== null
+      ? r.years.find(y => y >= firstYear + (80 - p1StartAge))
+      : null;
     const midIdx = p1StartAge !== null
-      ? Math.min(r.years.indexOf(r.years.find(y => y >= firstYear + (80 - p1StartAge)) ?? lastYear), lastIdx)
+      ? Math.min(Math.max(r.years.indexOf(_midYearMatch ?? lastYear), 0), lastIdx)
       : Math.floor(lastIdx / 2);
     const p50Mid = _deflate(r.p50Portfolio[Math.max(midIdx, 0)], Math.max(midIdx, 0));
 
@@ -661,14 +674,13 @@
     } else if (rate >= 0.80) {
       // Borderline
       if (hasGap) {
-        const gap = roundToNearest(Math.abs(headroom), 500);
-        bulletItems.push(`A ${fmtB(gap)} / yr reduction fully closes the gap to the ${confPct}% threshold.`);
+        bulletItems.push(`A ${fmtB(roundedGap)} / yr reduction fully closes the gap to the ${confPct}% threshold.`);
       }
       if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 paths, funds run out around age ${p10DepletesAge} , while spending flexibility still exists.`);
+        bulletItems.push(`In the worst 1 in 10 paths, funds run out around age ${p10DepletesAge}, while spending flexibility still exists.`);
       }
       if (p50End > 0) {
-        bulletItems.push(`Median portfolio at end of projection: ${fmtB(roundToNearest(p50End, 10000))} . The plan works in most scenarios.`);
+        bulletItems.push(`Median portfolio at end of projection: ${fmtB(roundToNearest(p50End, 10000))}. The plan works in most scenarios.`);
       }
     } else {
       // At risk
@@ -676,15 +688,13 @@
         bulletItems.push(`In the worst 1 in 10 paths, funds are exhausted by age ${p10DepletesAge}.`);
       }
       if (p50End > 0) {
-        bulletItems.push(`Median portfolio at end of projection: ${fmtB(roundToNearest(p50End, 10000))} . Depletion is a likely outcome, not just a tail risk.`);
+        bulletItems.push(`Median portfolio at end of projection: ${fmtB(roundToNearest(p50End, 10000))}. Depletion is a likely outcome, not just a tail risk.`);
       }
       if (hasGap && delayEffective) {
-        const gap = roundToNearest(Math.abs(headroom), 500);
-        const newTarget = roundToNearest(currentSpending - gap, 500);
+        const newTarget = roundToNearest(currentSpending - roundedGap, 500);
         bulletItems.push(`Cutting spending to ${fmtB(newTarget)} and delaying by ${delayMin.yearsDelay} year${delayMin.yearsDelay > 1 ? 's' : ''} together lift success to ${fmtPctB(delayMin.successRate)}.`);
       } else if (hasGap) {
-        const gap = roundToNearest(Math.abs(headroom), 500);
-        bulletItems.push(`Reducing spending by ${fmtB(gap)} / yr would bring your plan to the ${confPct}% confidence threshold.`);
+        bulletItems.push(`Reducing spending by ${fmtB(roundedGap)} / yr would bring your plan to the ${confPct}% confidence threshold.`);
       }
     }
 
