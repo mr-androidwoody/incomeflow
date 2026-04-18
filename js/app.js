@@ -1166,6 +1166,7 @@
           r.checked = r.value === growthVal;
         });
       }
+      window.scrollTo(0, 0);
       return RetireTabs.switchTab(tab);
     }
 
