@@ -115,6 +115,10 @@
         const disclaimer = document.getElementById('det-disclaimer');
         if (disclaimer) disclaimer.classList.toggle('det-disclaimer--hidden', tab === 'outlook');
 
+        // Hide Test my plan button on outlook tab
+        const testPlanBtn = document.getElementById('btn-test-plan');
+        if (testPlanBtn) testPlanBtn.style.display = tab === 'outlook' ? 'none' : '';
+
         // Render tables on first visit
         if (tab === 'tables') renderTables();
       });
