@@ -939,8 +939,6 @@ input[type="radio"] { accent-color: var(--accent); }
   align-items: center;
   justify-content: center;
   gap: 1px;
-  padding: 3px 7px;
-  border-radius: 8px;
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
@@ -950,6 +948,7 @@ input[type="radio"] { accent-color: var(--accent); }
 .status .value {
   font-size: 0.8rem;
   font-weight: 800;
+  color: #1a2236;
 }
 
 .status .status-text {
@@ -958,9 +957,12 @@ input[type="radio"] { accent-color: var(--accent); }
   opacity: 0.85;
 }
 
-.status-ok   { background: #dcfce7; color: #16a34a; }
-.status-warn { background: #fef9c3; color: #a16207; }
-.status-err  { background: #fee2e2; color: #b91c1c; }
+.status-ok   { color: #16a34a; }
+.status-warn { color: #a16207; }
+.status-err  { color: #b91c1c; }
+
+.row-warn td { background: #fef9c3; }
+.row-err  td { background: #fee2e2; }
 
 .col-name { width: 11%; }
 .col-wrap { width: 7%; }
@@ -1353,7 +1355,6 @@ input[type="radio"] { accent-color: var(--accent); }
   white-space: normal;
   text-transform: none;
   letter-spacing: 0;
-  text-align: left;
 }
 
 .assump-tooltip-anchor:hover .assump-tooltip {
