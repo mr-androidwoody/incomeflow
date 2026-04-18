@@ -108,6 +108,7 @@
     const allocInputs = D.ALLOC_CLASSES.map(
       (cls) => {
         const allocVal = fixed ? (cls === 'cash' ? 100 : 0) : acc.alloc[cls];
+        const isDisabled = fixed && cls !== 'cash';
         return `
       <td class="col-alloc">
         <div class="stepper-input">
@@ -115,9 +116,9 @@
             data-account-id="${acc.id}"
             data-field="${cls}"
             value="${allocVal}"
-            ${fixed ? 'disabled' : ''}>
-          <button class="stepper-btn" data-step-direction="1" type="button">&#x25B2;</button>
-          <button class="stepper-btn" data-step-direction="-1" type="button">&#x25BC;</button>
+            ${isDisabled ? 'disabled style="opacity:0.35"' : ''}>
+          <button class="stepper-btn" data-step-direction="1" type="button" ${isDisabled ? 'disabled style="opacity:0.35"' : ''}>&#x25B2;</button>
+          <button class="stepper-btn" data-step-direction="-1" type="button" ${isDisabled ? 'disabled style="opacity:0.35"' : ''}>&#x25BC;</button>
         </div>
       </td>
     `;
@@ -253,12 +254,19 @@
     const row = document.getElementById('acct-row-' + acc.id);
     if (!row) return;
 
-    // Alloc % inputs — disabled for fixed Cash wrappers
+    // Alloc % inputs — disabled for fixed Cash wrappers (except cash itself which stays open)
     const fixed = D.FIXED_CASH_WRAPPERS.has(acc.wrapper);
     D.ALLOC_CLASSES.forEach((cls) => {
       const inp = row.querySelector(`[data-field="${cls}"]`);
       if (!inp) return;
-      inp.disabled = fixed;
+      const shouldDisable = fixed && cls !== 'cash';
+      inp.disabled = shouldDisable;
+      inp.style.opacity = shouldDisable ? '0.35' : '';
+      // Also dull stepper buttons for this field
+      inp.closest('.stepper-input')?.querySelectorAll('.stepper-btn').forEach(btn => {
+        btn.disabled = shouldDisable;
+        btn.style.opacity = shouldDisable ? '0.35' : '';
+      });
       if (fixed) {
         inp.value = cls === 'cash' ? 100 : 0;
         acc.alloc[cls] = cls === 'cash' ? 100 : 0;
