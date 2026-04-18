@@ -1955,6 +1955,14 @@ input[type="radio"] { accent-color: var(--accent); }
   margin-top: 0;
 }
 
+#results-panel-outlook .chart-canvas-area {
+  border-top-left-radius: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
 /* Table toolbar — sits above table content */
 .table-toolbar {
   display: flex;
