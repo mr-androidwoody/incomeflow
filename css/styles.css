@@ -1510,7 +1510,7 @@ input[type="radio"] { accent-color: var(--accent); }
 
 .results-header {
   display: grid;
-  grid-template-columns: 1fr 155px;
+  grid-template-columns: 1fr 270px;
   grid-template-rows: auto auto;
   gap: 0 12px;
   margin-bottom: 0;
@@ -4100,24 +4100,23 @@ input[type="radio"] { accent-color: var(--accent); }
   grid-column: 2;
   grid-row: 1 / 3;
   align-self: center;
-  width: 155px;
+  width: 270px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
+  justify-content: center;
+  gap: 0;
   padding: 10px 20px;
-  padding-bottom: 14px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #fff;
   background: var(--accent, #2d5bff);
-  border: none;
-  border-radius: 8px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
   cursor: pointer;
   white-space: nowrap;
   transition: background 140ms ease, opacity 140ms ease;
   letter-spacing: -0.01em;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .btn-test-plan:hover {
