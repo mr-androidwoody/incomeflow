@@ -188,9 +188,14 @@
     function updateRowBadge(acc) {
       const el = document.getElementById('badge-' + acc.id);
       if (!el) return;
+
+      const tr = el.closest('tr');
     
       const total = D.ALLOC_CLASSES.reduce((s, c) => s + (acc.alloc[c] || 0), 0);
       const pct = Math.round(total);
+
+      // Clear row highlight classes
+      if (tr) tr.classList.remove('row-warn', 'row-err');
     
       // ✅ Balanced
       if (pct === 100) {
@@ -206,7 +211,7 @@
       // ⚠️ Under-allocated
       if (pct < 100) {
         const diff = 100 - pct;
-    
+        if (tr) tr.classList.add('row-warn');
         el.innerHTML = `
           <div class="status status-warn">
             <span class="value">${pct}%</span>
@@ -218,7 +223,7 @@
     
       // ❌ Over-allocated
       const diff = pct - 100;
-    
+      if (tr) tr.classList.add('row-err');
       el.innerHTML = `
         <div class="status status-err">
           <span class="value">${pct}%</span>
