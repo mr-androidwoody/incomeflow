@@ -4536,7 +4536,7 @@ input[type="radio"] { accent-color: var(--accent); }
 .ps-row__right {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
 }
 
 /* Value lines — person name prefix + value */
