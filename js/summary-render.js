@@ -35,6 +35,35 @@
     }
     el.innerHTML = _buildHTML(_inputs, _result, _accounts);
     _stale = false;
+    _initTabSwitcher();
+  }
+
+  // ─────────────────────────────────────────────
+  // TAB SWITCHER — one card visible at a time
+  // ─────────────────────────────────────────────
+  var _activeTab = 'ps-card-people';
+
+  function _showTab(id) {
+    _activeTab = id;
+    var ids = ['ps-card-people', 'ps-card-spending', 'ps-card-portfolio', 'ps-card-strategy'];
+    ids.forEach(function(cardId) {
+      var el = document.getElementById(cardId);
+      if (el) el.style.display = (cardId === id) ? '' : 'none';
+    });
+    document.querySelectorAll('.ps-nav__link').forEach(function(btn) {
+      btn.classList.toggle('ps-nav__link--active', btn.dataset.psTab === id);
+    });
+  }
+
+  function _initTabSwitcher() {
+    _showTab(_activeTab);
+    var nav = document.querySelector('.ps-nav');
+    if (!nav || nav._psTabsWired) return;
+    nav._psTabsWired = true;
+    nav.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-ps-tab]');
+      if (btn) _showTab(btn.dataset.psTab);
+    });
   }
 
   // ─────────────────────────────────────────────
@@ -72,8 +101,9 @@
     return '<div class="ps-card__heading ps-card__heading--sub">' + text + '</div>';
   }
 
-  function card(inner, fullWidth) {
-    return '<div class="ps-card' + (fullWidth ? ' ps-card--full' : '') + '">' + inner + '</div>';
+  function card(inner, fullWidth, id) {
+    var idAttr = id ? ' id="' + id + '"' : '';
+    return '<div class="ps-card' + (fullWidth ? ' ps-card--full' : '') + '"' + idAttr + '>' + inner + '</div>';
   }
 
   function money(n) { return D.formatMoney(n); }
@@ -298,7 +328,7 @@
         chip.apply(null, endV),
         endNote
       )
-    );
+    , false, 'ps-card-people');
 
     // ══════════════════════════════════════════════════════════════════════
     // CARD 2 — Spending + Returns
@@ -337,7 +367,7 @@
         chip.apply(null, tmV),
         tmNote
       )
-    );
+    , false, 'ps-card-spending');
 
     // ══════════════════════════════════════════════════════════════════════
     // CARD 3 — Portfolio
@@ -377,8 +407,23 @@
         vline(((inputs.dividendYield || 0) * 100).toFixed(1) + '%'),
         chip('green','Reasonable'),
         'GIA dividends are taxed on an arising basis each year regardless of whether they are paid out or reinvested. The yield assumption affects both the tax model and the cashflow available to meet spending.'
-      )
-    );
+      ) +
+
+      (intAccts.length
+        ? subheading('Interest-bearing accounts') +
+          intAccts.map(function(a) {
+            var owner   = a.owner === 'p1' ? p1 : p2;
+            var rateStr = a.rate != null ? ' \u00b7 ' + a.rate + '% AER' : '';
+            var drawStr = a.monthlyDraw ? ' \u00b7 ' + money(a.monthlyDraw) + '/mo draw' : '';
+            return row(
+              a.name || '(unnamed)',
+              vline(money(a.value || 0) + rateStr + drawStr + ', ' + owner),
+              chip('info','Included'),
+              'This account is modelled separately from the main GIA balance. Interest is taxed as savings income each year using the Starting Rate for Savings, Personal Savings Allowance, and standard savings rates as applicable. Its balance is excluded from the dividend yield calculation to prevent double-counting.'
+            );
+          }).join('')
+        : '')
+    , false, 'ps-card-portfolio');
 
     // ══════════════════════════════════════════════════════════════════════
     // CARD 4 — Strategy + BnI
@@ -449,33 +494,9 @@
       ) +
 
       bniContent
-    );
+    , false, 'ps-card-strategy');
 
-    // ══════════════════════════════════════════════════════════════════════
-    // CARD 5 — Interest-bearing accounts (full width, only if present)
-    // ══════════════════════════════════════════════════════════════════════
-    var c5 = '';
-    if (intAccts.length) {
-      c5 = card(
-        heading('Interest-bearing accounts') +
-        intAccts.map(function(a) {
-          var owner   = a.owner === 'p1' ? p1 : p2;
-          var rateStr = a.rate != null ? ' \u00b7 ' + a.rate + '% AER' : '';
-          var drawStr = a.monthlyDraw ? ' \u00b7 ' + money(a.monthlyDraw) + '/mo draw' : '';
-          return row(
-            a.name || '(unnamed)',
-            vline(money(a.value || 0) + rateStr + drawStr + ', ' + owner),
-            chip('info','Included'),
-            'This account is modelled separately from the main GIA balance. Interest is taxed as savings income each year using the Starting Rate for Savings, Personal Savings Allowance, and standard savings rates as applicable. Its balance is excluded from the dividend yield calculation to prevent double-counting.'
-          );
-        }).join(''),
-        true
-      );
-    }
-
-    var intro = '<p class="ps-intro">This page summarises every assumption driving your projection and gives each one a verdict. <strong style="color:#3b6d11">Green</strong> means the assumption is sound. <strong style="color:#854f0b">Amber</strong> means it’s worth a second look. <strong style="color:#a32d2d">Red</strong> means it’s likely to cause a problem and should be addressed. If you want to change anything, go back to Your plan, adjust the inputs, and re-run the projection to see the updated results here.</p>';
-
-    return intro + '<div class="ps-grid">' + c1 + c2 + c3 + c4 + c5 + '</div>';
+    return '<div class="ps-grid">' + c1 + c2 + c3 + c4 + '</div>';
   }
 
   window.RetireSummary = { setData: setData, render: render };
