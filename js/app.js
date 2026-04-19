@@ -1154,10 +1154,17 @@
       const tab = el.dataset.tab;
       if (state.activeTab === 'setup') syncSetupToAssumptions();
       state.activeTab = tab;
-      // Restore metrics band when leaving results tab
-      if (tab !== 'results') {
-        const band = document.querySelector('.metrics-band');
-        if (band) band.style.display = '';
+      // Restore metrics band when leaving results tab.
+      // When returning to results, check which sub-tab is active and keep
+      // the band hidden if the user was on Plan summary or Plan outlook.
+      const band = document.querySelector('.metrics-band');
+      if (band) {
+        if (tab !== 'results') {
+          band.style.display = '';
+        } else {
+          const activeSubTab = document.querySelector('.results-tab--active')?.dataset?.resultsTab;
+          band.style.display = (activeSubTab === 'summary' || activeSubTab === 'outlook') ? 'none' : '';
+        }
       }
       // Reapply comma formatting to currency inputs when returning to setup
       if (tab === 'setup') {
