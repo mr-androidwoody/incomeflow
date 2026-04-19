@@ -486,9 +486,16 @@ function percentile(sortedArr, p) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 self.onmessage = function (e) {
-  const { inputs, simCount, equityVol, inflationVol } = e.data;
+  const { inputs, simCount, equityVol, inflationVol, mcGrowth } = e.data;
 
-  const numYears = inputs.endYear - inputs.startYear + 1;
+  // If mcGrowth is provided, override inputs.growth with the historically-grounded
+  // figure from mc-assumptions.js. This allows the MC engine to use realistic
+  // market return assumptions independent of the user's conservative planning rate.
+  const effectiveInputs = (mcGrowth !== undefined && mcGrowth !== null)
+    ? { ...inputs, growth: mcGrowth }
+    : inputs;
+
+  const numYears = effectiveInputs.endYear - effectiveInputs.startYear + 1;
 
   // Accumulate per-year arrays across all paths.
   // portfolioMatrix[yi] = array of end-of-year portfolio values across paths.
@@ -500,7 +507,7 @@ self.onmessage = function (e) {
   const PROGRESS_INTERVAL = 500;
 
   for (let sim = 0; sim < simCount; sim++) {
-    const { portfolioByYear, taxByYear, survived } = runPath(inputs, equityVol, inflationVol);
+    const { portfolioByYear, taxByYear, survived } = runPath(effectiveInputs, equityVol, inflationVol);
 
     for (let yi = 0; yi < numYears; yi++) {
       portfolioMatrix[yi][sim] = portfolioByYear[yi];

@@ -946,13 +946,31 @@
       testPlanBtn.disabled = false;
     }
 
+    // ── Derive MC assumptions from actual portfolio allocation ──────────
+    // Uses historically-grounded return/vol figures from mc-assumptions.js,
+    // independent of the user's conservative deterministic planning rate.
+    const _mcAlloc  = window.RetireCalc.summarisePortfolio(state.portfolioAccounts).overallAllocation;
+    const _mcAssume = window.RetireMCAssumptions
+      ? window.RetireMCAssumptions.getMCAssumptions(
+          _mcAlloc.equities  || 0,
+          _mcAlloc.bonds     || 0,
+          _mcAlloc.cashlike  || 0,
+          _mcAlloc.cash      || 0,
+        )
+      : { growth: inputs.growth, equityVol: 0.16, inflationVol: 0.015 }; // fallback
+
+    const _mcGrowth      = _mcAssume.growth;
+    const _mcEquityVol   = _mcAssume.equityVol;
+    const _mcInflationVol = _mcAssume.inflationVol;
+
     try {
       // ── Main run: 10,000 paths at current spending ─────────────────────
       const result = await MCE.run({
         inputs,
         simCount:     10_000,
-        equityVol:    0.16,
-        inflationVol: 0.015,
+        mcGrowth:     _mcGrowth,
+        equityVol:    _mcEquityVol,
+        inflationVol: _mcInflationVol,
         onProgress:   (pct) => _setLoadingProgress(pct),
       });
 
@@ -966,10 +984,11 @@
 
       if (result.successRate >= TARGET_CONFIDENCE) {
         const rHigh = (await MCE.run({
-          inputs:      { ...inputs, spending: inputs.spending * 1.50 },
-          simCount:    BISECT_SIMS,
-          equityVol:   0.16,
-          inflationVol: 0.015,
+          inputs:       { ...inputs, spending: inputs.spending * 1.50 },
+          simCount:     BISECT_SIMS,
+          mcGrowth:     _mcGrowth,
+          equityVol:    _mcEquityVol,
+          inflationVol: _mcInflationVol,
         })).successRate;
 
         if (rHigh >= TARGET_CONFIDENCE) {
@@ -992,8 +1011,9 @@
           const midRes = await MCE.run({
             inputs:       { ...inputs, spending: mid },
             simCount:     BISECT_SIMS,
-            equityVol:    0.16,
-            inflationVol: 0.015,
+            mcGrowth:     _mcGrowth,
+            equityVol:    _mcEquityVol,
+            inflationVol: _mcInflationVol,
           });
           if (midRes.successRate >= TARGET_CONFIDENCE) {
             lo = mid;
@@ -1007,9 +1027,9 @@
 
       // ── Delay perturbations ───────────────────────────────────────────
       const DELAY_SIMS = 2_000;
-      const delay1 = await MCE.run({ inputs: { ...inputs, deferYears: 1 }, simCount: DELAY_SIMS, equityVol: 0.16, inflationVol: 0.015 });
-      const delay2 = await MCE.run({ inputs: { ...inputs, deferYears: 2 }, simCount: DELAY_SIMS, equityVol: 0.16, inflationVol: 0.015 });
-      const delay3 = await MCE.run({ inputs: { ...inputs, deferYears: 3 }, simCount: DELAY_SIMS, equityVol: 0.16, inflationVol: 0.015 });
+      const delay1 = await MCE.run({ inputs: { ...inputs, deferYears: 1 }, simCount: DELAY_SIMS, mcGrowth: _mcGrowth, equityVol: _mcEquityVol, inflationVol: _mcInflationVol });
+      const delay2 = await MCE.run({ inputs: { ...inputs, deferYears: 2 }, simCount: DELAY_SIMS, mcGrowth: _mcGrowth, equityVol: _mcEquityVol, inflationVol: _mcInflationVol });
+      const delay3 = await MCE.run({ inputs: { ...inputs, deferYears: 3 }, simCount: DELAY_SIMS, mcGrowth: _mcGrowth, equityVol: _mcEquityVol, inflationVol: _mcInflationVol });
       const delayPerturbations = [
         { yearsDelay: 1, successRate: delay1.successRate },
         { yearsDelay: 2, successRate: delay2.successRate },
