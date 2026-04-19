@@ -1107,12 +1107,11 @@
           <p class="chart-sidebar__label">Plan summary</p>
           <p class="ps-sidebar__intro">This page summarises every assumption driving your projection and gives each one a verdict. <strong>Green</strong> means the assumption is sound. <strong>Amber</strong> means it's worth a second look. <strong>Red</strong> means it's likely to cause a problem and should be addressed.</p>
           <hr class="chart-sidebar__divider" style="display:block; margin: 10px 0;">
-          <p class="chart-sidebar__label" style="margin-top:4px;">Jump to</p>
           <nav class="ps-nav">
-            <a class="ps-nav__link" href="#ps-card-people">People &amp; timeline</a>
-            <a class="ps-nav__link" href="#ps-card-spending">Spending</a>
-            <a class="ps-nav__link" href="#ps-card-portfolio">Portfolio</a>
-            <a class="ps-nav__link" href="#ps-card-strategy">Strategy</a>
+            <button class="ps-nav__link ps-nav__link--active" data-ps-tab="ps-card-people">People &amp; timeline</button>
+            <button class="ps-nav__link" data-ps-tab="ps-card-spending">Spending</button>
+            <button class="ps-nav__link" data-ps-tab="ps-card-portfolio">Portfolio</button>
+            <button class="ps-nav__link" data-ps-tab="ps-card-strategy">Strategy</button>
           </nav>
         </div>
         <div class="chart-canvas-area ps-canvas-area" id="summary-panel">
