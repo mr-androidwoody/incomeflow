@@ -125,9 +125,13 @@
         const metricsBand = document.querySelector('.metrics-band');
         if (metricsBand) metricsBand.style.display = (tab === 'summary' || tab === 'outlook') ? 'none' : '';
 
-        // Hide Test my plan button on outlook tab
+        // Hide Test my plan button on outlook tab, or permanently if MC has
+        // already been run (window.RetireMCEngine tracks this via app.js state).
         const testPlanBtn = document.getElementById('btn-test-plan');
-        if (testPlanBtn) testPlanBtn.style.display = tab === 'outlook' ? 'none' : '';
+        if (testPlanBtn) {
+          const riskDone = document.body.dataset.riskRun === 'true';
+          testPlanBtn.style.display = (tab === 'outlook' || riskDone) ? 'none' : '';
+        }
 
         // Render tables on first visit
         if (tab === 'tables') renderTables();

@@ -1064,7 +1064,9 @@
       state.riskStale = false;
       MCR.setStale(false);
       _resetTestPlanBtn();
-      // Hide the button -- it reappears only when the user re-runs projection
+      // Hide the button permanently for this session. calc-render.js reads
+      // data-risk-run to avoid re-showing it on sub-tab switches.
+      document.body.dataset.riskRun = 'true';
       if (testPlanBtn) testPlanBtn.style.display = 'none';
 
       // ── Refresh the deterministic metrics badge now RetireMCResults is populated ──
