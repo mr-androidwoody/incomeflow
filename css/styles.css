@@ -1974,6 +1974,16 @@ input[type="radio"] { accent-color: var(--accent); }
   box-shadow: none;
 }
 
+/* Summary panel: close the gap between tab bar and content,
+   and remove the top border so the active tab bleeds in cleanly */
+#results-panel-summary {
+  margin-top: 0;
+}
+
+#results-panel-summary .chart-canvas-area {
+  border-top: none;
+}
+
 /* Table toolbar — sits above table content */
 .table-toolbar {
   display: flex;
