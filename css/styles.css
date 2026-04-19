@@ -2009,8 +2009,7 @@ input[type="radio"] { accent-color: var(--accent); }
   margin-top: 0;
 }
 
-#results-panel-outlook .chart-canvas-area,
-#results-panel-summary .chart-canvas-area {
+#results-panel-outlook .chart-canvas-area {
   border-top-left-radius: 0;
   border-top: none;
   padding: 10px;
@@ -2019,9 +2018,71 @@ input[type="radio"] { accent-color: var(--accent); }
   box-shadow: none;
 }
 
-/* Summary panel: close the gap between tab bar and content */
+/* Summary panel */
 #results-panel-summary {
   margin-top: 0;
+  align-items: start;
+}
+
+/* Summary sidebar — sticky so nav stays in view while scrolling cards */
+.ps-sidebar {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.ps-sidebar__intro {
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
+/* Summary canvas area — scrollable card column */
+.ps-canvas-area {
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+  padding: 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+/* Anchor nav in summary sidebar */
+.ps-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.ps-nav__link {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 5px 8px;
+  border-radius: 5px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ps-nav__link:hover {
+  background: var(--panel-soft);
+  color: var(--text);
+}
+
+.ps-nav__link--active {
+  background: var(--panel-soft);
+  color: var(--accent, #3460e8);
+  font-weight: 600;
+}
+
+/* Scroll anchor offset for each card */
+.ps-card[id] {
+  scroll-margin-top: 16px;
 }
 
 /* Table toolbar — sits above table content */
@@ -4518,10 +4579,10 @@ input[type="radio"] { accent-color: var(--accent); }
   border-radius: var(--radius-sm);
 }
 
-/* Two-column card grid */
+/* Single-column card grid — cards stack inside the scrollable canvas area */
 .ps-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
