@@ -4444,3 +4444,198 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .app-footer__link:hover { color: var(--text); }
+
+/* ========================================
+   Plan summary tab
+   ======================================== */
+
+#plan-summary-content {
+  padding: 4px 0 24px;
+}
+
+.ps-section {
+  margin-bottom: 20px;
+}
+
+.ps-section__label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.ps-row {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ps-row:last-child {
+  border-bottom: none;
+}
+
+.ps-row--single {
+  grid-template-columns: 150px 1fr auto 220px;
+}
+
+.ps-row--dual {
+  grid-template-columns: 150px 1fr 1fr 220px;
+}
+
+.ps-row__label {
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 2px;
+  line-height: 1.4;
+}
+
+.ps-row__value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding-top: 2px;
+}
+
+.ps-row__verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-row__note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.ps-person {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ps-person__name {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.ps-person__value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ps-person__chip {
+  margin-top: 2px;
+}
+
+/* Verdict chips */
+.ps-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.ps-chip__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.ps-chip--green  { background: #eaf3de; color: #3b6d11; }
+.ps-chip--amber  { background: #faeeda; color: #854f0b; }
+.ps-chip--red    { background: #fcebeb; color: #a32d2d; }
+.ps-chip--info   { background: #e6f1fb; color: #185fa5; }
+
+/* Empty state shown before first projection run */
+.ps-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ps-empty strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+/* ========================================
+   Depletion alert on Sources of income chart
+   ======================================== */
+
+#income-chart-wrap {
+  position: relative;
+}
+
+#depletion-alert {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #faeeda;
+  border: 1px solid #f0c070;
+  border-radius: var(--radius-xs);
+  padding: 8px 12px;
+  max-width: 280px;
+  z-index: 10;
+}
+
+.depletion-alert__icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1.4;
+  color: #854f0b;
+}
+
+.depletion-alert__text {
+  font-size: 11px;
+  color: #854f0b;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.depletion-alert__text strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.depletion-alert__cta {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #185fa5;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.depletion-alert__cta:hover {
+  color: var(--accent);
+}
