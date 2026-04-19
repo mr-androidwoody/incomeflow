@@ -1062,6 +1062,8 @@
       state.riskStale = false;
       MCR.setStale(false);
       _resetTestPlanBtn();
+      // Hide the button -- it reappears only when the user re-runs projection
+      if (testPlanBtn) testPlanBtn.style.display = 'none';
 
       // ── Refresh the deterministic metrics badge now RetireMCResults is populated ──
       window.RetireCalcRender?.renderMetrics();
