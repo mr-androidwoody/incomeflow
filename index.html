@@ -635,38 +635,31 @@
               </tr>
             </table>
             <div class="wiz-section-divider"></div>
-            <div class="wiz-col-heading wiz-col-heading--sub">Second step-down <span class="wiz-badge-soon">coming soon</span></div>
-            <table class="wiz-table">
-              <tr>
-                <td class="wiz-label">Enable</td>
-                <td class="wiz-val" style="text-align:right">
-                  <div class="wiz-seg wiz-seg--disabled">
-                    <label class="wiz-seg__btn"><input type="radio" name="stepDown2Enabled" value="true" disabled> Enabled</label>
-                    <label class="wiz-seg__btn"><input type="radio" name="stepDown2Enabled" value="false" checked disabled> Disabled</label>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="wiz-label">Age</td>
-                <td class="wiz-val" style="text-align:right">
-                  <div class="stepper-input" >
-                    <input type="number" id="stepDown2Age" value="80" min="75" max="95" disabled>
-                    <button class="stepper-btn" data-step-for="stepDown2Age" data-step-direction="1" type="button" disabled>&#x25B2;</button>
-                    <button class="stepper-btn" data-step-for="stepDown2Age" data-step-direction="-1" type="button" disabled>&#x25BC;</button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="wiz-label">Reduction (%)</td>
-                <td class="wiz-val" style="text-align:right">
-                  <div class="stepper-input" >
-                    <input type="number" id="stepDown2Pct" value="10" min="1" max="50" disabled>
-                    <button class="stepper-btn" data-step-for="stepDown2Pct" data-step-direction="1" type="button" disabled>&#x25B2;</button>
-                    <button class="stepper-btn" data-step-for="stepDown2Pct" data-step-direction="-1" type="button" disabled>&#x25BC;</button>
-                  </div>
-                </td>
-              </tr>
-            </table>
+            <div class="drawdown-rate-panel">
+              <p class="drawdown-rate-panel__intro">Your drawdown rate is the annual income as a percentage of your total portfolio. A rate below 4% is generally considered sustainable over a long retirement.</p>
+              <div class="drawdown-rate-cards">
+                <div class="drawdown-rate-card">
+                  <p class="drawdown-rate-card__label">Initial drawdown rate</p>
+                  <p class="drawdown-rate-card__value" id="dwr-initial">&#8211;</p>
+                  <p class="drawdown-rate-card__sub">Before <span data-p1>Person 1</span> turns 75</p>
+                </div>
+                <div class="drawdown-rate-card">
+                  <p class="drawdown-rate-card__label">Rate from age 75</p>
+                  <p class="drawdown-rate-card__value" id="dwr-post">&#8211;</p>
+                  <p class="drawdown-rate-card__sub" id="dwr-post-sub">Reduced spending applied</p>
+                </div>
+                <div class="drawdown-rate-card">
+                  <p class="drawdown-rate-card__label">Lifetime drawdown rate</p>
+                  <p class="drawdown-rate-card__value" id="dwr-lifetime">&#8211;</p>
+                  <p class="drawdown-rate-card__sub">Weighted across plan horizon</p>
+                </div>
+              </div>
+              <div class="drawdown-rate-legend">
+                <span class="drawdown-rate-legend__item drawdown-rate-legend__item--ok">Below 4% — sustainable</span>
+                <span class="drawdown-rate-legend__item drawdown-rate-legend__item--warn">4&#8211;5% — monitor closely</span>
+                <span class="drawdown-rate-legend__item drawdown-rate-legend__item--err">Above 5% — at risk</span>
+              </div>
+            </div>
             <div id="int-accts-section" style="display:none">
               <div class="wiz-section-divider"></div>
               <div class="wiz-col-heading wiz-col-heading--sub">Interest-bearing accounts</div>
