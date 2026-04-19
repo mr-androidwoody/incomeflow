@@ -818,9 +818,11 @@
         if (outlookTab) outlookTab.classList.add('results-tab--hidden');
       }
 
-      // Show the Test my plan button
+      // Show the Test my plan button only if MC has never been run.
+      // Once the user has run Test my plan, the button stays hidden permanently
+      // for the session -- they navigate to Plan outlook to see results instead.
       const testPlanBtn = document.getElementById('btn-test-plan');
-      if (testPlanBtn) {
+      if (testPlanBtn && !state.riskRun) {
         testPlanBtn.style.display = '';
         testPlanBtn.classList.remove('btn-test-plan--stale');
       }
