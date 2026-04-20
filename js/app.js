@@ -1648,6 +1648,10 @@
     }
   }
 
+  // Populate hidden GIA/Cash fields from portfolio so BnI notes are correct on first load
+  syncSetupToAssumptions();
+  _updateBniMaxYears();
+
   // Gate tabs after everything is loaded — must run after RetireTabs.init()
   // so our disabled state wins over any defaults set by the tab system
   refreshPortfolioUI();
