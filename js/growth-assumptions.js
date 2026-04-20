@@ -40,9 +40,9 @@
   'use strict';
 
   // ── Asset class nominal return assumptions (gross, annualised) ────────────
-  const EQ_NOM = 0.0800;   // Global equities (MSCI World / VWRL)
-  const BD_NOM = 0.0475;   // Global bonds
-  const CL_NOM = 0.0325;   // Cashlike / money market
+  const EQ_NOM = 0.0650;   // Global equities (MSCI World / VWRL)
+  const BD_NOM = 0.0400;   // Global bonds
+  const CL_NOM = 0.0250;   // Cashlike / money market
   const CA_NOM = 0.0000;   // Uninvested cash
 
   // ── Fee deduction ─────────────────────────────────────────────────────────
