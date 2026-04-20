@@ -213,7 +213,7 @@
         const gapPct = Math.round(gap * 100);
         const tipBody = gap >= 0.25
           ? `Based on fixed return assumptions, real markets vary. Typical market outcome is ${gapPct}% lower. See Plan Outlook for a market-adjusted view.`
-          : `Assumes consistent returns. Plan Outlook may differ as it accounts for market fluctuations and investment variability.`;
+          : `Consistent with the market-adjusted estimate from Plan Outlook.`;
         const tipTitle = 'Straight-line estimate';
 
         if (!mcIcon) {
