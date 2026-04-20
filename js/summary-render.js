@@ -449,23 +449,26 @@
             : 'Not configured')
         : null;
 
-      var survChip = p1BniV.survival[0] === 'red' || (p2BniV && p2BniV.survival[0] === 'red')
+      // p2 is "active" in BnI only if they have a configured annual amount
+      var p2BniActive = dual && inputs.bniP2GIA > 0;
+
+      var survChip = p1BniV.survival[0] === 'red' || (p2BniActive && p2BniV && p2BniV.survival[0] === 'red')
         ? chip('red', 'At risk')
-        : p1BniV.survival[0] === 'amber' || (p2BniV && p2BniV.survival[0] === 'amber')
+        : p1BniV.survival[0] === 'amber' || (p2BniActive && p2BniV && p2BniV.survival[0] === 'amber')
           ? chip('amber', 'Marginal')
           : chip('green', 'On track');
 
       var survNote = p1BniV.survival[0] === 'red' ? p1BniV.survivalNote
-        : (p2BniV && p2BniV.survival[0] === 'red') ? p2BniV.survivalNote
+        : (p2BniActive && p2BniV && p2BniV.survival[0] === 'red') ? p2BniV.survivalNote
         : p1BniV.survival[0] === 'amber' ? p1BniV.survivalNote
-        : (p2BniV && p2BniV.survival[0] === 'amber') ? p2BniV.survivalNote
+        : (p2BniActive && p2BniV && p2BniV.survival[0] === 'amber') ? p2BniV.survivalNote
         : p1BniV.survivalNote;
 
       bniContent = subheading('Bed-and-ISA') +
 
         row('Transfers planned',
           dual
-            ? vline(p1Pl, p1) + vline(p2Pl, p2)
+            ? vline(p1Pl, p1) + (p2BniActive ? vline(p2Pl, p2) : '')
             : vline(p1Pl),
           chip.apply(null, p1BniV.planned),
           'Each year up to \u00a320,000 per person is sold from the GIA and immediately repurchased inside an ISA. Future growth and income on the transferred amount becomes permanently tax-free. CGT may be triggered at the point of transfer.'
@@ -473,7 +476,7 @@
 
         row('GIA funds transfers?',
           dual
-            ? vline(p1BniV.survivalLabel, p1) + vline(p2BniV ? p2BniV.survivalLabel : 'n/a', p2)
+            ? vline(p1BniV.survivalLabel, p1) + (p2BniActive && p2BniV ? vline(p2BniV.survivalLabel, p2) : '')
             : vline(p1BniV.survivalLabel),
           survChip,
           survNote
