@@ -2777,6 +2777,17 @@ input[type="radio"] { accent-color: var(--accent); }
   font-weight: 700;
 }
 
+.results-tab--risk-ready:not(.results-tab--active) {
+  background: var(--tab-verdict-colour, #dc2626);
+  color: #fff;
+  border-color: var(--tab-verdict-colour, #dc2626);
+}
+
+.results-tab--risk-ready:not(.results-tab--active):hover {
+  opacity: 0.88;
+  color: #fff;
+}
+
 .results-tab--risk-ready.results-tab--active {
   background: var(--panel-solid);
   border-top: 3px solid var(--tab-verdict-colour, #dc2626);
