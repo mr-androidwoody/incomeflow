@@ -3298,6 +3298,16 @@ input[type="radio"] { accent-color: var(--accent); }
   border-bottom: 1px solid var(--border);
 }
 
+/* ── Suggestion bar padding ── */
+.growth-suggestion-row {
+  border-top: 1px solid var(--border);
+}
+
+.growth-suggestion-cell {
+  padding-top: 12px;
+}
+/* ── End suggestion bar padding ── */
+
 .wiz-table tr:last-child {
   border-bottom: none;
 }
