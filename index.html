@@ -40,7 +40,7 @@
       color: #22314d;
       line-height: 1;
     }
-    /* ── Splash screen: transparent so body bg shows through ── */
+    /* ── Splash screen: show bg image, preserve fixed positioning and z-index ── */
     #splash-screen {
       background:
         linear-gradient(
@@ -50,6 +50,9 @@
           rgba(18, 30, 60, 0.82) 100%
         ),
         url('img/bg.jpg') center center / cover fixed no-repeat;
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
     }
 
     /* ── Background image ── */
@@ -76,9 +79,8 @@
       pointer-events: none;
       z-index: 0;
     }
-    /* Ensure content sits above the overlay — target specific children, not header */
+    /* Ensure content sits above the overlay — target specific children, not header or splash */
     .page-content,
-    #splash-screen,
     .app-footer {
       position: relative;
       z-index: 1;
