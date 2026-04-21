@@ -453,12 +453,17 @@
         if (sugg.bondPct     > 0) parts.push(`${sugg.bondPct}% bond`);
         if (sugg.cashlikePct > 0) parts.push(`${sugg.cashlikePct}% cashlike`);
         if (sugg.cashPct     > 0) parts.push(`${sugg.cashPct}% cash`);
-        suggEl.innerHTML = `Suggested growth rate: <strong>${ratePct}%</strong> · reflects your ${parts.join(' / ')} allocation`;
+        suggEl.dataset.suggestedRate = ratePct;
+        suggEl.innerHTML = `<span class="growth-sugg__title">Suggested rate: <strong>${ratePct}%</strong></span><span class="growth-sugg__hint">Reflects your ${parts.join(' / ')} allocation. Click to apply.</span>`;
+        suggEl.classList.add('growth-sugg--has-value');
       } else {
         suggEl.textContent = '';
+        suggEl.classList.remove('growth-sugg--has-value');
+        delete suggEl.dataset.suggestedRate;
       }
     } else if (suggEl) {
       suggEl.textContent = '';
+      suggEl.classList.remove('growth-sugg--has-value');
     }
   }
 
@@ -1407,6 +1412,20 @@
   ['p1Salary','p2Salary'].forEach(id => {
     safeEl(id)?.addEventListener('input', _applySweepSurplusVisibility);
     safeEl(id)?.addEventListener('change', _applySweepSurplusVisibility);
+  });
+
+  // Growth suggestion — click to apply suggested rate
+  document.getElementById('growth-suggestion')?.addEventListener('click', () => {
+    const suggEl = document.getElementById('growth-suggestion');
+    if (!suggEl?.dataset?.suggestedRate) return;
+    const growthEl = document.getElementById('growth');
+    if (!growthEl) return;
+    growthEl.value = suggEl.dataset.suggestedRate;
+    // Clear preset radio selection since this is a custom value
+    document.querySelectorAll('input[name="growthPreset"]').forEach(r => r.checked = false);
+    // Trigger drawdown rate refresh
+    const s = C.summarisePortfolio(state.portfolioAccounts);
+    refreshDrawdownRates(s.total);
   });
 
   document.getElementById('spending')?.addEventListener('input', () => {
