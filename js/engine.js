@@ -350,6 +350,53 @@
       p1Drawn.Cash += p1CashDrawn;
       p2Drawn.Cash += p2CashDrawn;
 
+      // ── Residual interest-account sweep ──────────────────────────────────
+      // The intAccts loop above respects each account's user-configured monthly
+      // draw schedule — a soft cap reflecting the account's role as a steady
+      // income source (e.g. QMMF paying £1,300/mo). But once wrappers deplete,
+      // leaving capital stranded in a liquid interest account is wrong: the
+      // user's intent when running the plan is "spend what's needed." So after
+      // the strategy has done its work, if a shortfall remains and intAccts
+      // still hold capital, sweep them for the residual.
+      //
+      // Only capital is taken here — interest for this year was already earned
+      // at the top of the loop and flowed into p1IntTaxable / p2IntTaxable, so
+      // tax treatment is unchanged. QMMF-style cashlike accounts have
+      // essentially zero capital gain, so no CGT accumulation is triggered.
+      const wrapperDrawn =
+        (p1Drawn.GIA || 0) + (p1Drawn.SIPP || 0) + (p1Drawn.ISA || 0) +
+        (p2Drawn.GIA || 0) + (p2Drawn.SIPP || 0) + (p2Drawn.ISA || 0);
+      let residualShortfall = Math.max(
+        0,
+        target - guaranteed - p1CashDrawn - p2CashDrawn - wrapperDrawn
+      );
+
+      if (residualShortfall > 0) {
+        for (const a of intAccts) {
+          if (residualShortfall <= 0) break;
+          if ((a.balance || 0) <= 0) continue;
+
+          const extra = Math.min(a.balance, residualShortfall);
+          a.balance        -= extra;
+          intDrawTotal     += extra;
+          residualShortfall -= extra;
+          if (a.owner === 'p1') p1IntDraw += extra;
+          else                  p2IntDraw += extra;
+
+          // Depletion tracking — identical key format to the normal loop
+          const key = a.name + ' (' + a.owner + ')';
+          if (!depletions[key] && (startBal[key] || 0) > 0 && a.balance <= 0) {
+            depletions[key] = { year, age: year - (a.owner === 'p1' ? p1DOB : p2DOB) };
+            annotations.push({
+              year,
+              person: a.owner,
+              event: 'depletion',
+              message: `${a.name} depleted`,
+            });
+          }
+        }
+      }
+
       // Growth (cost basis NOT grown — gains accumulate naturally)
       C.growBalances(p1Bal, netGrowth);
       C.growBalances(p2Bal, netGrowth);
