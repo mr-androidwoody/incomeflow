@@ -375,7 +375,7 @@
       const sfYears = rows
         .map((r, i) => ({ year: r.year, sf: (_engineShortfall[i] || 0) * 1000 }))
         .filter(x => x.sf >= 20000);
-      if (!sfYears.length) return 'Portfolio fully meets the spending target across all years — no shortfall';
+      if (!sfYears.length) return 'Portfolio fully meets the spending target across all years with no shortfall';
       return `Spending target unmet in ${sfYears.length} year${sfYears.length !== 1 ? 's' : ''}, first occurring in ${sfYears[0].year}`;
     }
 
