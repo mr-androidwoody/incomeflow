@@ -187,6 +187,7 @@
           sp:            safeValue('p1SP'),
           salary:        safeValue('p1Salary'),
           salaryStopAge: safeValue('p1SalaryStopAge'),
+          sweepSurplus:  document.querySelector('input[name="p1SweepSurplus"]:checked')?.value === 'true',
         },
         p2: {
           name:          safeValue('sp-p2name').trim(),
@@ -195,6 +196,7 @@
           sp:            safeValue('p2SP'),
           salary:        safeValue('p2Salary'),
           salaryStopAge: safeValue('p2SalaryStopAge'),
+          sweepSurplus:  document.querySelector('input[name="p2SweepSurplus"]:checked')?.value === 'true',
         },
       },
       startYear: safeNumber(safeValue('sp-startYear')),
@@ -234,12 +236,16 @@
     svCur('p1SP',         data.people?.p1?.sp            || '');
     svCur('p1Salary',     data.people?.p1?.salary        || '');
     sv('p1SalaryStopAge', data.people?.p1?.salaryStopAge || '');
+    const p1Sweep = document.querySelector(`input[name="p1SweepSurplus"][value="${data.people?.p1?.sweepSurplus ? 'true' : 'false'}"]`);
+    if (p1Sweep) p1Sweep.checked = true;
     sv('sp-p2name',       data.people?.p2?.name          || '');
     sv('sp-p2dob',        data.people?.p2?.dob           || '');
     sv('p2SPAge',         data.people?.p2?.spAge         || '');
     svCur('p2SP',         data.people?.p2?.sp            || '');
     svCur('p2Salary',     data.people?.p2?.salary        || '');
     sv('p2SalaryStopAge', data.people?.p2?.salaryStopAge || '');
+    const p2Sweep = document.querySelector(`input[name="p2SweepSurplus"][value="${data.people?.p2?.sweepSurplus ? 'true' : 'false'}"]`);
+    if (p2Sweep) p2Sweep.checked = true;
     sv('sp-startYear',    data.startYear                 || '');
     sv('sp-endYear',      data.endYear                   || '');
 
@@ -301,6 +307,7 @@
 
     updateSidebarNames();
     applyP2State();
+    _applySweepSurplusVisibility();
     const _summary = C.summarisePortfolio(state.portfolioAccounts);
     refreshDrawdownRates(_summary.total);
   }
@@ -923,8 +930,10 @@
       stepDownPct:       gvi('stepDownPct'),
       p1Salary:          gv('p1Salary'),
       p1SalaryStop:      gvi('p1SalaryStopAge'),
+      p1SweepSurplus:    document.querySelector('input[name="p1SweepSurplus"]:checked')?.value === 'true',
       p2Salary:          state.p2enabled ? gv('p2Salary')         : 0,
       p2SalaryStop:      state.p2enabled ? gvi('p2SalaryStopAge') : 0,
+      p2SweepSurplus:    state.p2enabled && document.querySelector('input[name="p2SweepSurplus"]:checked')?.value === 'true',
       p1SPAge:           gvi('p1SPAge'),
       p1SPAmt:           gv('p1SP'),
       p2SPAge:           state.p2enabled ? gvi('p2SPAge') : 0,
@@ -1384,7 +1393,7 @@
     }
   });
 
-  // Show/hide sweep surplus toggle when salary fields change
+  // Show/hide sweep surplus toggle based on salary value
   ['p1Salary','p2Salary'].forEach(id => {
     safeEl(id)?.addEventListener('input', _applySweepSurplusVisibility);
     safeEl(id)?.addEventListener('change', _applySweepSurplusVisibility);
@@ -1670,6 +1679,7 @@
   // Populate hidden GIA/Cash fields from portfolio so BnI notes are correct on first load
   syncSetupToAssumptions();
   _updateBniMaxYears();
+  _applySweepSurplusVisibility();
 
   // Gate tabs after everything is loaded — must run after RetireTabs.init()
   // so our disabled state wins over any defaults set by the tab system
