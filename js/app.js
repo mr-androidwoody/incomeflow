@@ -1688,6 +1688,12 @@
 
   // Populate hidden GIA/Cash fields from portfolio so BnI notes are correct on first load
   syncSetupToAssumptions();
+  // Re-apply currency formatting to visible salary/SP fields after syncSetupToAssumptions
+  // overwrites them with raw integers via setHidden
+  ['p1Salary','p2Salary','p1SP','p2SP'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) R.applyCurrencyFormattingToInput(el);
+  });
   _updateBniMaxYears();
   _applySweepSurplusVisibility();
 
