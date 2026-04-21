@@ -3305,7 +3305,7 @@ input[type="radio"] { accent-color: var(--accent); }
 
 /* Add spacing inside the suggestion row */
 .wiz-table tr.growth-suggestion-row td {
-  padding-top: 22px;
+  padding-top: 12px;
 }
 
 .wiz-table tr:last-child {
