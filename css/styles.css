@@ -3787,6 +3787,19 @@ input[type="radio"] { accent-color: var(--accent); }
   background: rgba(45, 91, 255, 0.11);
 }
 
+#growth-suggestion.growth-sugg--has-value.growth-sugg--inactive .growth-sugg__card {
+  background: var(--panel-soft);
+  border-color: var(--border);
+}
+
+#growth-suggestion.growth-sugg--has-value.growth-sugg--inactive:hover .growth-sugg__card {
+  background: rgba(255,255,255,0.7);
+}
+
+#growth-suggestion.growth-sugg--has-value.growth-sugg--inactive .growth-sugg__title {
+  color: var(--text);
+}
+
 .growth-sugg__title {
   font-size: 0.82rem;
   font-weight: 700;
