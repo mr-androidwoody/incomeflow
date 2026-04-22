@@ -331,8 +331,7 @@
   // SCENARIO CARDS
   // Four cards (Baseline + 3 stress scenarios) replace the old button strip.
   // Baseline is always pre-active. Stress cards show idle/done/active states.
-  // Click handlers are bound by _bindStressBtns() — data-stress-state attr
-  // is preserved so that function works unchanged.
+  // Click handlers bound by _bindStressBtns() — data-stress-state preserved.
   // ─────────────────────────────────────────────────────────────────────────
 
   const CARD_META = {
@@ -354,7 +353,7 @@
     },
   };
 
-  function _buildScenarioCardsHTML() {
+  function _buildStressBtnsHTML() {
     if (!_results.baseline) return '';
 
     const cards = STATE_IDS.map(id => {
@@ -363,21 +362,16 @@
       const isStale   = hasResult && _staleStates[id];
       const meta      = CARD_META[id];
 
-      // Card state class
       let cardCls = 'mc-sc-card';
-      if (isActive)       cardCls += ' mc-sc-card--active';
-      else if (hasResult) cardCls += ' mc-sc-card--done';
+      if (isActive)             cardCls += ' mc-sc-card--active';
+      else if (hasResult)       cardCls += ' mc-sc-card--done';
       else if (id !== 'baseline') cardCls += ' mc-sc-card--idle';
 
-      // CTA label and state
       let ctaLabel, ctaCls;
       if (isActive) {
         ctaLabel = 'Viewing results';
         ctaCls   = 'mc-sc-card__cta mc-sc-card__cta--viewing';
-      } else if (hasResult) {
-        ctaLabel = 'View results';
-        ctaCls   = 'mc-sc-card__cta mc-sc-card__cta--done';
-      } else if (id === 'baseline') {
+      } else if (hasResult || id === 'baseline') {
         ctaLabel = 'View results';
         ctaCls   = 'mc-sc-card__cta mc-sc-card__cta--done';
       } else {
@@ -399,11 +393,6 @@
     }).join('');
 
     return `<div class="mc-sc-cards">${cards}</div>`;
-  }
-
-  function _buildStressBtnsHTML() {
-    // Delegates to card layout — kept for call-site compatibility.
-    return _buildScenarioCardsHTML();
   }
 
   function _bindStressBtns() {
@@ -689,7 +678,6 @@
         <div class="mc-verdict-lower">
           <div class="mc-verdict-lower__left">
             <p class="mc-verdict-sentence">${verdictSentence}</p>
-            ${_activeState !== 'baseline' ? `<div class="mc-verdict-scenario-tag">${STATE_LABELS[_activeState]} scenario</div>` : ''}
             <div class="mc-verdict-meta">Based on ${r.simCount.toLocaleString('en-GB')} simulations · ${firstYear} – ${lastYear}</div>
           </div>
           <div class="mc-verdict-lower__right">
@@ -1101,7 +1089,8 @@
             </div>
           </div>
         </div>
-        <p class="mc-bridge-note">This scenario shows what happens to your plan under a specific adverse condition. Use the Baseline view for your main spending guidance and recommended actions.</p>`;
+        <p class="mc-bridge-note">This scenario shows what happens to your plan under a specific adverse condition. Use the Baseline view for your main spending guidance and recommended actions.</p>
+        ${basisNote}`;
 
     } else {
       // ── Baseline: full action block ───────────────────────────────
@@ -1229,7 +1218,8 @@
             </div>` : ''}
           </div>
         </div>
-        <p class="mc-bridge-note">This view tests your plan against weaker and stronger market conditions, so you can see whether it still holds up when reality is less tidy than a straight-line forecast. Use the tabs above to explore how your plan unfolds year by year.</p>`;
+        <p class="mc-bridge-note">This view tests your plan against weaker and stronger market conditions, so you can see whether it still holds up when reality is less tidy than a straight-line forecast. Use the tabs above to explore how your plan unfolds year by year.</p>
+        ${basisNote}`;
     }
 
     // Always expose the nominal median end value for the deterministic metrics badge.
@@ -1245,7 +1235,6 @@
     const stressRow = `
       <div class="mc-below-hero">
         ${_buildStressBtnsHTML()}
-        ${basisNote}
       </div>`;
 
     el.innerHTML = staleBanner + s1 + stressRow + s23 + s4;
