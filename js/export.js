@@ -563,97 +563,104 @@
   // ── Main export function ───────────────────────────────────────────────────
 
   /**
-   * Assemble the full plan snapshot and trigger a JSON download.
+   * Assemble the plan snapshot and generate a PDF download.
    *
    * @param {object} inputs            — state.lastInputs from app.js
    * @param {object} engineResult      — state.lastResult from app.js
    * @param {Array}  portfolioAccounts — state.portfolioAccounts from app.js
    */
-  function exportJSON(inputs, engineResult, portfolioAccounts) {
+  async function exportJSON(inputs, engineResult, portfolioAccounts) {
     if (!inputs || !engineResult) {
       console.warn('RetireExport: no projection result available');
       return;
     }
 
-    // ── MC snapshot ────────────────────────────────────────────────────────
-    const MCR = window.RetireMCRender;
-    const mcSnapshot = MCR && MCR.getSnapshot ? MCR.getSnapshot() : {
-      baseline: null, sorr: null, inflation: null, lostDecade: null,
-      spendingContext: null, meanInflation: 0.025, narrativeSnapshot: null,
-    };
+    // ── Button loading state ───────────────────────────────────────────────
+    const exportBtn = document.querySelector('[data-action="export-plan"]');
+    const originalLabel = exportBtn ? exportBtn.textContent : 'Export plan';
+    if (exportBtn) {
+      exportBtn.textContent = 'Generating PDF…';
+      exportBtn.disabled = true;
+    }
 
-    // ── MC assumptions detail ──────────────────────────────────────────────
-    const MCASSUME = window.RetireMCAssumptions;
-    const alloc = window.RetireCalc
-      ? window.RetireCalc.summarisePortfolio(portfolioAccounts).overallAllocation
-      : { equities: 0, bonds: 0, cashlike: 0, cash: 0 };
-    const mcDetail = MCASSUME
-      ? MCASSUME.getMCAssumptionsDetail(
-          alloc.equities  || 0,
-          alloc.bonds     || 0,
-          alloc.cashlike  || 0,
-          alloc.cash      || 0,
-        )
-      : null;
+    function resetBtn() {
+      if (!exportBtn) return;
+      exportBtn.textContent = originalLabel;
+      exportBtn.disabled = false;
+    }
 
-    // ── Assemble snapshot ──────────────────────────────────────────────────
-    const snapshot = {
-      schema_version: SCHEMA_VERSION,
-      generated_at:   _isoNow(),
-      report_id:      _uuid(),
+    try {
+      // ── MC snapshot ──────────────────────────────────────────────────────
+      const MCR = window.RetireMCRender;
+      const mcSnapshot = MCR && MCR.getSnapshot ? MCR.getSnapshot() : {
+        baseline: null, sorr: null, inflation: null, lostDecade: null,
+        spendingContext: null, meanInflation: 0.025, narrativeSnapshot: null,
+      };
 
-      meta: {
-        report_title: 'Retirement Plan Report',
-        persons: [
-          { ref: 'p1', name: inputs.p1name, dob_year: inputs.p1DOB },
-          ...(inputs.p2enabled ? [{ ref: 'p2', name: inputs.p2name, dob_year: inputs.p2DOB }] : []),
-        ],
-        plan_start_year:    inputs.startYear,
-        plan_end_year:      inputs.endYear,
-        currency:           'GBP',
-        real_or_nominal:    'nominal',
-        withdrawal_strategy: inputs.strategy,
-        mc_run:             !!mcSnapshot.baseline,
-        stress_runs: {
-          sorr:       !!mcSnapshot.sorr,
-          inflation:  !!mcSnapshot.inflation,
-          lostDecade: !!mcSnapshot.lostDecade,
+      // ── MC assumptions detail ────────────────────────────────────────────
+      const MCASSUME = window.RetireMCAssumptions;
+      const alloc = window.RetireCalc
+        ? window.RetireCalc.summarisePortfolio(portfolioAccounts).overallAllocation
+        : { equities: 0, bonds: 0, cashlike: 0, cash: 0 };
+      const mcDetail = MCASSUME
+        ? MCASSUME.getMCAssumptionsDetail(
+            alloc.equities  || 0,
+            alloc.bonds     || 0,
+            alloc.cashlike  || 0,
+            alloc.cash      || 0,
+          )
+        : null;
+
+      // ── Assemble snapshot ────────────────────────────────────────────────
+      const snapshot = {
+        schema_version: SCHEMA_VERSION,
+        generated_at:   _isoNow(),
+        report_id:      _uuid(),
+
+        meta: {
+          report_title: 'Retirement Plan Report',
+          persons: [
+            { ref: 'p1', name: inputs.p1name, dob_year: inputs.p1DOB },
+            ...(inputs.p2enabled ? [{ ref: 'p2', name: inputs.p2name, dob_year: inputs.p2DOB }] : []),
+          ],
+          plan_start_year:    inputs.startYear,
+          plan_end_year:      inputs.endYear,
+          currency:           'GBP',
+          real_or_nominal:    'nominal',
+          withdrawal_strategy: inputs.strategy,
+          mc_run:             !!mcSnapshot.baseline,
+          stress_runs: {
+            sorr:       !!mcSnapshot.sorr,
+            inflation:  !!mcSnapshot.inflation,
+            lostDecade: !!mcSnapshot.lostDecade,
+          },
         },
-      },
 
-      assumptions: _buildAssumptions(inputs, portfolioAccounts, mcDetail),
-      plan:        _buildPlan(inputs, portfolioAccounts),
-      results:     _buildResults(inputs, engineResult, mcSnapshot),
-      stress_tests: mcSnapshot.baseline ? _buildStressTests(mcSnapshot) : null,
-      narrative:   _buildNarrative(mcSnapshot),
-      depletions:  engineResult.depletions  || {},
-      annotations: engineResult.annotations || [],
-    };
+        assumptions: _buildAssumptions(inputs, portfolioAccounts, mcDetail),
+        plan:        _buildPlan(inputs, portfolioAccounts),
+        results:     _buildResults(inputs, engineResult, mcSnapshot),
+        stress_tests: mcSnapshot.baseline ? _buildStressTests(mcSnapshot) : null,
+        narrative:   _buildNarrative(mcSnapshot),
+        depletions:  engineResult.depletions  || {},
+        annotations: engineResult.annotations || [],
+      };
 
-    // ── Download ───────────────────────────────────────────────────────────
-    const filename = _buildFilename(inputs);
-    const json     = JSON.stringify(snapshot, null, 2);
-    const blob     = new Blob([json], { type: 'application/json' });
-    const url      = URL.createObjectURL(blob);
+      // ── Capture live chart canvases ──────────────────────────────────────
+      // Wealth chart (portfolio fan) → page 3
+      // Income chart (withdrawal sources) → page 4
+      const chartCanvases = {
+        wealth: document.getElementById('wealthChart') || null,
+        income: document.getElementById('incomeChart') || null,
+      };
 
-    const a = document.createElement('a');
-    a.href     = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+      // ── Generate PDF ─────────────────────────────────────────────────────
+      await window.RetirePDFRender.generate(snapshot, chartCanvases);
 
-  function _buildFilename(inputs) {
-    const date  = new Date().toISOString().slice(0, 10);
-    const names = [inputs.p1name, inputs.p2enabled ? inputs.p2name : null]
-      .filter(Boolean)
-      .map(n => n.replace(/\s+/g, '-'))
-      .join('-');
-    return `incomeflow-plan-${names}-${date}.json`;
+    } catch (err) {
+      console.error('RetireExport PDF error:', err);
+    } finally {
+      resetBtn();
+    }
   }
 
   window.RetireExport = { exportJSON };
-
-})();
