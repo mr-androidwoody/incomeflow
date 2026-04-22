@@ -4055,16 +4055,16 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .mc-verdict-sentence {
-  font-size: 12px;
-  line-height: 1.7;
-  color: rgba(255,255,255,0.75);
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.92);
   margin: 0;
-  max-width: 500px;
+  max-width: 520px;
 }
 
 .mc-verdict-meta {
-  font-size: 9px;
-  color: rgba(255,255,255,0.35);
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
   letter-spacing: .01em;
 }
 
@@ -4402,7 +4402,7 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .mc-primary-action__impact {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   margin: 0;
 }
@@ -4417,7 +4417,7 @@ input[type="radio"] { accent-color: var(--accent); }
 }
 
 .mc-action-bullet {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.55;
   color: var(--text, #374151);
   padding-left: 16px;
