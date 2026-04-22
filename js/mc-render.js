@@ -543,13 +543,13 @@
 
       if (rate >= 0.95) {
         verdictSentence = _stressMarginal
-          ? `${_blLabel}, and this scenario makes little difference. The plan remains robust under these conditions.`
-          : `${_blLabel}. This scenario does not change that, and the plan holds up well even under these conditions.`;
+          ? `${_blLabel}, and this scenario makes little difference. It holds up well even if retirement starts badly.`
+          : `${_blLabel}. This scenario does not change that. A difficult start to retirement would not be enough to knock it off course.`;
       } else if (rate >= 0.90) {
         verdictSentence = _stressMarginal
-          ? `${_blLabel}. This scenario is not significantly more demanding, and the plan still holds, though with a little less room.`
+          ? `${_blLabel}. This scenario adds a little pressure, but the plan still holds. There is slightly less room for error, not enough to act on.`
           : _stressSignificant
-          ? `${_blLabel}, but this scenario puts it under considerably more pressure. The margin is thinner here.`
+          ? `${_blLabel}, but this scenario tightens the margin considerably. It still works, but with noticeably less room to absorb a bad run of returns.`
           : `${_blLabel}, but this scenario is more demanding. The plan still works, though the buffer is reduced.`;
       } else if (rate >= 0.80) {
         verdictSentence = _stressMarginal
@@ -561,8 +561,8 @@
         verdictSentence = _stressMarginal
           ? `${_blShort}, and this scenario makes it worse. Under these conditions, the plan is at risk.`
           : _stressSignificant
-          ? `${_blLabel}, but this scenario puts it significantly at risk. The drop compared with your baseline is large enough to matter.`
-          : `${_blLabel}, but this scenario puts it at risk. The plan is considerably weaker under these conditions.`;
+          ? `${_blLabel}, but this scenario puts it under serious pressure. A start like this would leave the plan with very little room to recover.`
+          : `${_blLabel}, but this scenario puts it at risk. Under these conditions, the plan does not have enough in reserve to absorb a difficult start.`;
       }
     } else {
       // Baseline verdict sentence — unchanged logic, "baseline plan" label added
@@ -707,7 +707,7 @@
         ? `In weaker market conditions, the plan starts coming under real pressure around age ${depAge}, when it is harder to make big adjustments.`
         : `In weaker market conditions, the plan starts coming under real pressure in ${lifeStage}, when it is harder to make big adjustments.`;
     } else {
-      pressureSentence = `Pressure stays low throughout retirement. Even in weaker outcomes, the plan does not run out before the end of the plan.`;
+      pressureSentence = `Pressure stays low throughout retirement. Even in weaker outcomes, the plan holds up from start to finish.`;
     }
 
     let decadeRowsHTML = '';
@@ -841,7 +841,7 @@
           ? `Your plan still holds under this scenario, but the cushion is thinner. It stays above the level needed to remain reliable, but with less room.`
           : rate >= 0.80
           ? `In this scenario the plan becomes borderline. This exposes a weakness that the baseline view may not fully show.`
-          : `In this scenario, the plan comes under real strain. The risk of running short before the end of retirement is too high to ignore.`;
+          : `Under these conditions, the plan comes under real strain. Running short before the end of retirement becomes a genuine possibility.`;
 
       // Block 2 — best next move
       const b2Pill =
@@ -856,10 +856,10 @@
         rate >= 0.95
           ? `No immediate change is needed on the strength of this scenario. Use the Baseline view for your main spending guidance and overall plan decisions.`
           : rate >= 0.90
-          ? `No immediate change is needed, but check whether your baseline buffer is large enough to absorb conditions like this if they arise early in retirement.`
+          ? `No immediate change needed, but check that your baseline buffer is large enough to absorb a start like this.`
           : rate >= 0.80
-          ? `Treat the spending and delay changes shown in your baseline plan as more urgent under this scenario. Check whether your current plan has enough margin to cope if early retirement turns out to be this difficult.`
-          : `Treat the spending and delay changes shown in your baseline plan as a priority. This scenario suggests the plan needs more margin than it currently has, and conditions like this are not implausible.`;
+          ? `Your baseline actions are worth prioritising. This is a realistic scenario, and it shows the plan does not have much room to spare.`
+          : `Your baseline actions become more important here, not less. This scenario shows how much your current buffer actually needs to do.`;
 
       // Block 3 — vs baseline (delta context)
       const b3Pill =
@@ -1028,25 +1028,25 @@
       // Consequence-led headline — names the outcome, not the scenario
       let stressTakeaway;
       if (rate >= 0.95) {
-        stressTakeaway = `This scenario leaves the plan looking robust.`;
+        stressTakeaway = `This scenario does not change your position.`;
       } else if (rate >= 0.90) {
-        stressTakeaway = `This scenario puts the plan under more pressure, though it still holds.`;
+        stressTakeaway = `The plan still holds, but your buffer matters more under these conditions.`;
       } else if (rate >= 0.80) {
-        stressTakeaway = `A difficult start to retirement makes this plan borderline.`;
+        stressTakeaway = `A rough start to retirement puts this plan on the edge.`;
       } else {
-        stressTakeaway = `A difficult start to retirement puts this plan at risk.`;
+        stressTakeaway = `A rough start to retirement puts this plan under serious strain.`;
       }
 
       // Detail — consequence-led, delta in natural language, Baseline as explicit action
       let stressDetail;
       if (rate >= 0.95) {
-        stressDetail = `Even under these conditions, the plan holds up well${deltaPhS4 ? `, with the likelihood of holding up only ${deltaPhS4} compared with your baseline` : ''}. No immediate change is needed on the strength of this result.`;
+        stressDetail = `Even under these conditions, the plan holds up well${deltaPhS4 ? `, with the likelihood of holding up only ${deltaPhS4} compared with your baseline` : ''}. You do not need to change anything on the strength of this result.`;
       } else if (rate >= 0.90) {
-        stressDetail = `The plan stays workable, but this scenario reduces the cushion${deltaPhS4 ? `, with the likelihood of holding up ${deltaPhS4} compared with your baseline` : ''}. Check whether your baseline buffer is large enough to absorb this kind of pressure if it arises early in retirement.`;
+        stressDetail = `The plan stays workable, but the cushion is thinner${deltaPhS4 ? `, with the likelihood of holding up ${deltaPhS4} compared with your baseline` : ''}. It is worth checking that your baseline buffer is big enough to absorb a start like this, if it happens.`;
       } else if (rate >= 0.80) {
-        stressDetail = `This exposes a real weakness that the baseline view may not fully show${deltaPhS4 ? `. Compared with your baseline, the likelihood of holding up is ${deltaPhS4}, which suggests your current buffer may not cope with a difficult start to retirement` : ''}. Treat your baseline spending and delay changes as more urgent.`;
+        stressDetail = `This reveals a vulnerability the baseline does not fully capture${deltaPhS4 ? `. Compared with your baseline, the likelihood of holding up is ${deltaPhS4}, which suggests your current buffer may not cope with a difficult start to retirement` : ''}. That makes your baseline spending and delay changes more important to act on.`;
       } else {
-        stressDetail = `This is the kind of difficult start your current buffer may not be strong enough to absorb.${deltaPhS4 ? ` Compared with your baseline, the plan is much weaker here, with its likelihood of holding up ${deltaPhS4}.` : ''} That makes your baseline spending and delay changes more important.`;
+        stressDetail = `Your current buffer may not be large enough to withstand a start like this.${deltaPhS4 ? ` Compared with your baseline, the plan is much weaker here, with its likelihood of holding up ${deltaPhS4}.` : ''} Acting on your baseline spending and delay targets becomes more important, not optional.`;
       }
 
       // Stress bullets — consequence-led, collapse duplicate £0 figures
