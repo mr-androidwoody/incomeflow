@@ -1001,6 +1001,9 @@
     // ── Section 4: PRIMARY ACTION ─────────────────────────────────────
     // For stress views, show a scenario-level takeaway rather than
     // baseline-calibrated spending/delay recommendations.
+    const inflationPct = (_meanInflation * 100).toFixed(1);
+    const basisNote = `<p class="mc-basis-note">All £ figures on this tab are in today's money, adjusted for ${inflationPct}% annual inflation.</p>`;
+
     let s4;
     if (isStressView) {
       const baselineRate  = _results.baseline ? _results.baseline.successRate : null;
@@ -1224,9 +1227,6 @@
 
     // Always expose the nominal median end value for the deterministic metrics badge.
     window.RetireMCResults = { medianEndPortfolioNominal: r.p50Portfolio[lastIdx] };
-
-    const inflationPct = (_meanInflation * 100).toFixed(1);
-    const basisNote = `<p class="mc-basis-note">All £ figures on this tab are in today's money, adjusted for ${inflationPct}% annual inflation.</p>`;
 
     const staleScenario = _activeState !== 'baseline' ? ` (${STATE_LABELS[_activeState]})` : '';
     const staleBanner = _stale
