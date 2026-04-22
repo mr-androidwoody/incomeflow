@@ -4022,6 +4022,11 @@ input[type="radio"] { accent-color: var(--accent); }
   margin: 0;
 }
 
+.mc-verdict-word--long {
+  font-size: 38px;
+  letter-spacing: -.025em;
+}
+
 .mc-verdict-bignum {
   font-size: 58px;
   font-weight: 700;
