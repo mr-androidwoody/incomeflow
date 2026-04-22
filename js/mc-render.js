@@ -187,6 +187,7 @@
         _syncToggleButtons();
         _syncStressControls();
         _renderNarrative();
+        _bindStressBtns();
         // Fade narrative in
         el.classList.add('mc-narrative--fade-in');
         requestAnimationFrame(() => {
@@ -198,6 +199,7 @@
       _syncToggleButtons();
       _syncStressControls();
       _renderNarrative();
+      _bindStressBtns();
     }
   }
 
@@ -285,6 +287,7 @@
     _stale       = _staleStates[stateId];
     _syncStressControls();
     _renderNarrative();
+    _bindStressBtns();
   }
 
   function render() {
@@ -292,6 +295,7 @@
     _syncToggleButtons();
     _syncStressControls();
     _renderNarrative();
+    _bindStressBtns();
   }
 
   function _syncToggleButtons() {
@@ -303,70 +307,60 @@
 
   // ─────────────────────────────────────────────────────────────────────────
   // STRESS CONTROLS
-  // Renders the four scenario toggle buttons into #mc-stress-controls.
-  // This container is a static sibling of #mc-narrative and is never replaced
-  // by narrative renders — only this function touches it.
+  // Buttons are rendered inline inside the hero band by _renderNarrative via
+  // _buildStressBtnsHTML(). Click handlers are bound by _bindStressBtns()
+  // after each narrative render. _syncStressControls keeps the legacy external
+  // container hidden (it still exists in the HTML as a no-op anchor).
   // ─────────────────────────────────────────────────────────────────────────
-  function _syncStressControls() {
-    const container = document.getElementById('mc-stress-controls');
-    if (!container) return;
 
-    // Only show the controls once baseline has been run.
-    if (!_results.baseline) {
-      container.style.display = 'none';
-      return;
-    }
-
-    container.style.display = 'flex';
+  function _buildStressBtnsHTML() {
+    if (!_results.baseline) return '';
 
     const btns = STATE_IDS.map(id => {
-      const hasResult  = !!_results[id];
-      const isActive   = id === _activeState;
-      const isStale    = hasResult && _staleStates[id];
-      const label      = STATE_LABELS[id];
+      const hasResult = !!_results[id];
+      const isActive  = id === _activeState;
+      const isStale   = hasResult && _staleStates[id];
+      const label     = STATE_LABELS[id];
 
-      // Pills: active gets solid fill; computed-but-inactive gets outlined; unrun gets muted outline.
       let cls = 'mc-sc-btn';
-      if (isActive)         cls += ' mc-sc-btn--active';
-      else if (hasResult)   cls += ' mc-sc-btn--done';
-      else                  cls += ' mc-sc-btn--idle';
+      if (isActive)       cls += ' mc-sc-btn--active';
+      else if (hasResult) cls += ' mc-sc-btn--done';
+      else                cls += ' mc-sc-btn--idle';
 
-      const staleIndicator = isStale
+      const staleDot = isStale
         ? '<span class="mc-sc-stale-dot" title="Re-run to update"></span>'
         : '';
 
-      // data-stress-state drives the click handler bound below.
-      return `<button class="${cls}" data-stress-state="${id}" type="button">${label}${staleIndicator}</button>`;
+      return `<button class="${cls}" data-stress-state="${id}" type="button">${label}${staleDot}</button>`;
     }).join('');
 
-    // Active scenario description (shown when a stress state is active).
     const desc = (_activeState !== 'baseline' && STATE_DESCRIPTIONS[_activeState])
       ? `<p class="mc-sc-desc">${STATE_DESCRIPTIONS[_activeState]}</p>`
       : '';
 
-    container.innerHTML = `
-      <div class="mc-sc-row">
-        <div class="mc-sc-btns">${btns}</div>
-      </div>
-      ${desc}`;
+    return `<div class="mc-sc-inline"><div class="mc-sc-btns">${btns}</div>${desc}</div>`;
+  }
 
-    // Bind click handlers on the freshly injected buttons.
-    container.querySelectorAll('[data-stress-state]').forEach(btn => {
+  function _bindStressBtns() {
+    const narrative = document.getElementById('mc-narrative');
+    if (!narrative) return;
+    narrative.querySelectorAll('[data-stress-state]').forEach(btn => {
       btn.addEventListener('click', function () {
         const stateId = this.dataset.stressState;
-        if (stateId === _activeState) return; // already active — no-op
-
+        if (stateId === _activeState) return;
         if (_results[stateId]) {
-          // Already computed — instant switch.
           switchState(stateId);
         } else {
-          // Not yet run — fire the stress run via app.js coordinator.
-          // We dispatch a custom event so mc-render.js doesn't need a direct
-          // reference to app.js. app.js listens for this and calls runStress.
           document.dispatchEvent(new CustomEvent('mc-run-stress', { detail: { stressId: stateId } }));
         }
       });
     });
+  }
+
+  function _syncStressControls() {
+    // External container is kept in HTML but hidden — buttons now live inside the hero band.
+    const container = document.getElementById('mc-stress-controls');
+    if (container) container.style.display = 'none';
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -569,6 +563,7 @@
           <div class="mc-verdict-lower__left">
             <p class="mc-verdict-sentence">${verdictSentence}</p>
             <div class="mc-verdict-meta">Based on ${r.simCount.toLocaleString('en-GB')} simulations · ${firstYear} – ${lastYear}${_activeState !== 'baseline' ? ' · ' + STATE_LABELS[_activeState] + ' scenario' : ''}</div>
+            ${_buildStressBtnsHTML()}
           </div>
           <div class="mc-verdict-lower__right">
             ${shortfallHTML}
