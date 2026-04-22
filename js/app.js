@@ -1061,11 +1061,7 @@
         delete document.body.dataset.riskRun;
       }
 
-      _syncHeaderBtn();
-
-    } catch (err) {
-      resetBtn();
-      console.error('runProjection error:', err);
+      _syncExportBtn();
       showToast('Run failed — see console', true);
     }
   }
@@ -1307,6 +1303,9 @@
       document.body.dataset.riskRun = 'true';
       if (testPlanBtn) testPlanBtn.style.display = 'none';
 
+      // Show export button now MC is complete.
+      _syncExportBtn();
+
       // ── Refresh the deterministic metrics badge now RetireMCResults is populated ──
       window.RetireCalcRender?.renderMetrics();
 
@@ -1498,18 +1497,14 @@
   });
 
   // ─────────────────────────────
-  // HEADER BUTTON TOGGLE
-  // Swaps Run projection ↔ Export plan when entering/leaving results tab.
+  // EXPORT BUTTON VISIBILITY
+  // Shown inside results-header only after MC has completed at least once.
+  // Hidden again if projection is re-run (riskRun resets to stale).
   // ─────────────────────────────
-  function _syncHeaderBtn() {
-    const runBtn    = document.querySelector('.top-header__actions [data-action="run-projection"]');
-    const exportBtn = document.querySelector('.top-header__actions [data-action="export-plan"]');
-    if (!runBtn || !exportBtn) return;
-    const onResults = state.activeTab === 'results';
-    // Use inline style to override the btn-run--hidden CSS class on the run button.
-    // The export button has no hidden class so style.display alone controls it.
-    runBtn.style.display    = onResults ? 'none' : '';
-    exportBtn.style.display = onResults ? ''     : 'none';
+  function _syncExportBtn() {
+    const exportBtn = document.getElementById('btn-export-plan');
+    if (!exportBtn) return;
+    exportBtn.style.display = state.riskRun ? '' : 'none';
   }
 
   // ─────────────────────────────
@@ -1558,7 +1553,6 @@
           r.checked = r.value === growthVal;
         });
       }
-      _syncHeaderBtn();
       window.scrollTo(0, 0);
       return RetireTabs.switchTab(tab);
     }

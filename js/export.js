@@ -576,8 +576,8 @@
     }
 
     // ── Button loading state ───────────────────────────────────────────────
-    const exportBtn = document.querySelector('[data-action="export-plan"]');
-    const originalLabel = exportBtn ? exportBtn.textContent : 'Export plan';
+    const exportBtn = document.getElementById('btn-export-plan');
+    const originalLabel = exportBtn ? exportBtn.textContent.trim() : 'Export plan ↓';
     if (exportBtn) {
       exportBtn.textContent = 'Generating PDF…';
       exportBtn.disabled = true;
