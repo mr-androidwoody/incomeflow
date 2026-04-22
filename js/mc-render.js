@@ -408,12 +408,16 @@
     if (simCountEl) simCountEl.textContent = r.simCount.toLocaleString('en-GB');
 
     // ── Spending context ──────────────────────────────────────────────
-    const sc                  = _spendingContext || {};
+    // spendingContext is only valid for the baseline run. Stress scenarios
+    // do not run bisection or delay perturbations, so those fields must be
+    // suppressed to avoid showing baseline-calibrated advice on a stress view.
+    const isStressView = _activeState !== 'baseline';
+    const sc                  = (!isStressView && _spendingContext) ? _spendingContext : {};
     const currentSpending     = sc.currentSpending     ?? 0;
     const sustainableSpending = sc.sustainableSpending ?? null;
     const sustainableIsFloor  = !!sc.sustainableIsFloor;
     const targetConfidence    = sc.targetConfidence    ?? 0.90;
-    const delayPerturbations  = sc.delayPerturbations  || [];
+    const delayPerturbations  = isStressView ? [] : (sc.delayPerturbations || []);
     const confPct             = Math.round(targetConfidence * 100);
 
     // ── Verdict ───────────────────────────────────────────────────────
@@ -702,8 +706,52 @@
       l3Outcome = 'Flexible spending in down years adds a modest incremental improvement.';
     }
 
-    // Is the plan already strong (no action needed)?
-        const effectiveHeadroom = headroom !== null ? roundToNearest(headroom, 500) : null;
+    let s2Right;
+    if (isStressView) {
+      // Stress scenarios don't run bisection or delay perturbations.
+      // Show what the scenario tests and what the success rate means vs baseline.
+      const baselineRate    = _results.baseline ? _results.baseline.successRate : null;
+      const baselinePct     = baselineRate !== null ? Math.round(baselineRate * 100) : null;
+      const scenarioPct     = Math.round(rate * 100);
+      const delta           = baselineRate !== null ? Math.round((rate - baselineRate) * 100) : null;
+      const deltaStr        = delta !== null
+        ? (delta >= 0 ? `+${delta}pp vs baseline` : `${delta}pp vs baseline`)
+        : null;
+      const deltaClass      = delta === null ? '' : delta >= 0 ? 'mc-stress-delta--up' : 'mc-stress-delta--down';
+
+      const resilienceNote =
+        rate >= 0.95 ? `The plan remains strong even under this adverse scenario. The stress condition does not materially change the outlook.` :
+        rate >= 0.90 ? `The plan holds under this scenario, though with reduced margin. The stress condition introduces meaningful sensitivity.` :
+        rate >= 0.80 ? `The plan is borderline under this scenario. The stress condition reveals real vulnerability that the baseline does not show.` :
+        `The plan is at risk under this scenario. This stress condition exposes a material weakness that warrants attention.`;
+
+      const actionNote =
+        rate >= 0.90
+          ? `No immediate action is needed, but this scenario is worth monitoring. If your early retirement years resemble these conditions, consider reviewing spending at that point.`
+          : rate >= 0.80
+          ? `Consider building a buffer into your baseline plan. The levers available are spending reduction and delaying initial withdrawals — run the baseline analysis for specific figures.`
+          : `This scenario indicates a structural sensitivity. Review the baseline Recommended action and consider whether your plan has sufficient margin to absorb adverse early conditions.`;
+
+      s2Right = `
+        <div class="mc-evidence-pane">
+          <div class="mc-section-label">Scenario interpretation</div>
+          <div class="mc-stress-interp">
+            <div class="mc-stress-interp__row">
+              <span class="mc-stress-interp__label">Scenario success rate</span>
+              <span class="mc-stress-interp__val">${scenarioPct}%${deltaStr ? ` <span class="mc-stress-delta ${deltaClass}">${deltaStr}</span>` : ''}</span>
+            </div>
+            ${baselinePct !== null ? `
+            <div class="mc-stress-interp__row">
+              <span class="mc-stress-interp__label">Baseline success rate</span>
+              <span class="mc-stress-interp__val">${baselinePct}%</span>
+            </div>` : ''}
+            <p class="mc-stress-interp__note">${resilienceNote}</p>
+            <p class="mc-stress-interp__action">${actionNote}</p>
+          </div>
+        </div>`;
+    } else {
+    // ── Baseline: full lever analysis ────────────────────────────────
+    const effectiveHeadroom = headroom !== null ? roundToNearest(headroom, 500) : null;
     const planIsStrong = rate >= targetConfidence &&
       (sustainableSpending === null || sustainableIsFloor || (headroom !== null && headroom >= 0 && effectiveHeadroom >= 0));
 
@@ -803,7 +851,8 @@
             ${leverBlock('Flexible spending', l3Pill, l3PillClass, l3Outcome, _primary === 2, false)}
           </div>
         </div>`;
-    }
+    } // end planIsStrong/lever branch
+    } // end baseline s2Right block
 
     const s23 = `
       <div class="mc-evidence-card">
@@ -812,144 +861,202 @@
       </div>`;
 
     // ── Section 4: PRIMARY ACTION ─────────────────────────────────────
-    let actionLine, actionImpact;
+    // For stress views, show a scenario-level takeaway rather than
+    // baseline-calibrated spending/delay recommendations.
+    let s4;
+    if (isStressView) {
+      const baselineRate = _results.baseline ? _results.baseline.successRate : null;
+      const scenarioLabel = STATE_LABELS[_activeState];
 
-    const delayMin       = delayPerturbations.find(p => p.successRate >= targetConfidence);
-    const delayEffective = !!delayMin;
-
-    if (hasGap) {
-      const gap = roundedGap;
-      const newTarget = roundToNearest(currentSpending - gap, 500);
-      actionLine   = `Reduce annual spending by ${fmtB(gap)} to ${fmtB(newTarget)}.`;
-      actionImpact = `This closes the sustainability gap and removes most of the risk in weaker market scenarios.`;
-    } else if (rate < targetConfidence && delayEffective) {
-      actionLine   = `Delay drawing from your portfolio by ${delayMin.yearsDelay} year${delayMin.yearsDelay > 1 ? 's' : ''}.`;
-      actionImpact = `This allows the portfolio to compound without draws and lifts your success rate to ${fmtPctB(delayMin.successRate)}.`;
-    } else if (rate < targetConfidence && iqrWide) {
-      actionLine   = `Adopt a flexible spending rule.`;
-      actionImpact = `Reducing withdrawals by 10 to 15% in down years is the most practical lever available.`;
-    } else {
-      const hrForAction = sustainableSpending !== null && !sustainableIsFloor && headroom > 0
-        ? roundToNearest(headroom, 500) : null;
-      if (marginTight && hrForAction) {
-        actionLine   = `No changes needed, but headroom is limited at ${fmtB(hrForAction)} per year.`;
-        actionImpact = `Maintain your current spending and keep this under annual review. A poor sequence in the early years would consume this margin quickly.`;
-      } else if (marginModerate && hrForAction) {
-        actionLine   = `No changes needed. You have ${fmtB(hrForAction)} per year of room, though the margin is not wide.`;
-        actionImpact = `Any spending increase should be modest and kept under review as market conditions evolve.`;
+      let stressTakeaway, stressDetail;
+      if (rate >= 0.95) {
+        stressTakeaway = `Your plan is robust to the ${scenarioLabel} scenario.`;
+        stressDetail   = `Even under these adverse conditions, the plan succeeds in ${Math.round(rate * 100)}% of simulated paths. Return to the Baseline view for spending headroom and specific recommendations.`;
+      } else if (rate >= 0.90) {
+        stressTakeaway = `Your plan holds under the ${scenarioLabel} scenario, with reduced margin.`;
+        stressDetail   = `Success falls to ${Math.round(rate * 100)}%${baselineRate !== null ? ` from ${Math.round(baselineRate * 100)}% at baseline` : ''}. The plan remains above the ${confPct}% threshold, but the buffer is thinner. Consider whether your baseline headroom is sufficient to absorb this kind of scenario.`;
+      } else if (rate >= 0.80) {
+        stressTakeaway = `Your plan is borderline under the ${scenarioLabel} scenario.`;
+        stressDetail   = `Success falls to ${Math.round(rate * 100)}%${baselineRate !== null ? ` from ${Math.round(baselineRate * 100)}% at baseline` : ''}, below the ${confPct}% threshold. This scenario reveals real sensitivity. Review the Baseline recommendations and consider whether your plan has sufficient margin to absorb adverse conditions.`;
       } else {
-        actionLine   = hrForAction
-          ? `No changes needed. You could increase spending by up to ${fmtB(hrForAction)} per year.`
-          : `No changes needed.`;
-        actionImpact = `Any increase still leaves meaningful margin above the confidence threshold.`;
+        stressTakeaway = `Your plan is at risk under the ${scenarioLabel} scenario.`;
+        stressDetail   = `Success falls to ${Math.round(rate * 100)}%${baselineRate !== null ? ` from ${Math.round(baselineRate * 100)}% at baseline` : ''}. This scenario exposes a material weakness. The Baseline recommendations for spending and delay adjustments become more urgent if early retirement conditions resemble this scenario.`;
       }
-    }
 
-    // ── Contextual bullets (right half of action block) ───────────────
-    // Worst-case depletion age from p10 portfolio
-    let p10DepletesAge = null;
-    if (r.p1StartAge != null) {
-      for (let i = 0; i < r.p10Portfolio.length; i++) {
-        if (r.p10Portfolio[i] <= 0) { p10DepletesAge = r.p1StartAge + i; break; }
+      // Stress-specific bullets: portfolio outcomes under the scenario
+      const p50End = _deflate(r.p50Portfolio[lastIdx], lastIdx);
+      const p10End = _deflate(r.p10Portfolio[lastIdx], lastIdx);
+      const roundKend = v => roundToNearest(v, 10000);
+      const fmtKendB  = v => fmtB(roundKend(Math.max(0, v)));
+
+      let p10DepletesAge = null;
+      if (r.p1StartAge != null) {
+        for (let i = 0; i < r.p10Portfolio.length; i++) {
+          if (r.p10Portfolio[i] <= 0) { p10DepletesAge = r.p1StartAge + i; break; }
+        }
       }
-    }
 
-    // Median and p90 end-of-projection values (deflated)
-    const p50End = _deflate(r.p50Portfolio[lastIdx], lastIdx);
-    const p90End = _deflate(r.p90Portfolio[lastIdx], lastIdx);
-    const p10End = _deflate(r.p10Portfolio[lastIdx], lastIdx);
-
-    // Expose nominal median end value for the deterministic metrics badge.
-    // Always nominal (no deflation) so calc-render.js can compare apples-to-apples
-    // against the raw nominal totalPortfolio from the engine rows.
-    window.RetireMCResults = { medianEndPortfolioNominal: r.p50Portfolio[lastIdx] };
-
-    // Helpers for this block
-    const roundKend = v => roundToNearest(v, 10000);
-    const fmtKendB  = v => fmtB(roundKend(Math.max(0, v)));
-
-    let bulletItems = [];
-
-    if (rate >= 0.95) {
-      // Strong: p10 / p50 / p90 end values.
-      // These own the tail / typical / upside angle; no repeat of headroom, ceiling, or threshold.
+      const stressBullets = [];
       if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 outcomes, funds run low around age ${p10DepletesAge}.`);
+        stressBullets.push(`In the worst 1 in 10 paths under this scenario, funds run low around age ${p10DepletesAge}.`);
       } else {
-        bulletItems.push(`In the worst 1 in 10 outcomes, the portfolio ends at around ${fmtKendB(p10End)}.`);
+        stressBullets.push(`In the worst 1 in 10 paths, the portfolio ends at around ${fmtKendB(p10End)}.`);
       }
-      bulletItems.push(`In a typical market, it ends at ${fmtKendB(p50End)}.`);
-      bulletItems.push(`Upside scenarios finish at ${fmtKendB(p90End)} or higher.`);
-    } else if (rate >= 0.90) {
-      // Good: tail behaviour, typical end, sensitivity note.
-      if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 outcomes, funds run low around age ${p10DepletesAge}.`);
-      } else {
-        bulletItems.push(`In the worst 1 in 10 outcomes, the portfolio ends at around ${fmtKendB(p10End)}.`);
-      }
-      bulletItems.push(`In a typical market, it ends at ${fmtKendB(p50End)}.`);
-      if (_earlyMarginTight || marginTight) {
-        bulletItems.push(`A poor early-returns period is the main sensitivity to watch.`);
-      } else if (_lateRisk) {
-        bulletItems.push(`Risk concentrates in the later years, where flexibility to adjust is more limited.`);
-      } else {
-        bulletItems.push(`A flexible spending rule would further widen the margin above the threshold.`);
-      }
-    } else if (rate >= 0.80) {
-      // Borderline: consequence of inaction, tail age, typical end.
-      bulletItems.push(`Making no change leaves around a 1 in ${Math.max(2, Math.round(1 / Math.max(0.01, 1 - rate)))} chance of serious shortfall by the later years.`);
-      if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 paths, funds run low around age ${p10DepletesAge}.`);
-      } else {
-        bulletItems.push(`In the worst 1 in 10 paths, the portfolio ends at around ${fmtKendB(p10End)}.`);
-      }
-      bulletItems.push(`In a typical market, the portfolio reaches ${fmtKendB(p50End)}. The plan works in most scenarios, but not with margin.`);
-    } else {
-      // At risk: tail age, fix magnitude, combined fix outcome.
-      if (p10DepletesAge !== null) {
-        bulletItems.push(`In the worst 1 in 10 paths, funds are exhausted by age ${p10DepletesAge}.`);
-      } else {
-        bulletItems.push(`A significant share of paths end in depletion before retirement ends.`);
-      }
-      if (hasGap) {
-        const newTarget = roundToNearest(currentSpending - roundedGap, 500);
-        bulletItems.push(`Cutting to ${fmtB(newTarget)} alone brings success closer to the ${confPct}% threshold.`);
-      } else if (p50End > 0) {
-        bulletItems.push(`In a typical market, the portfolio reaches ${fmtKendB(p50End)}, but depletion is a likely outcome.`);
-      } else {
-        bulletItems.push(`A typical market still sees the portfolio depleted before the end of the projection.`);
-      }
-      if (hasGap && delayEffective) {
-        bulletItems.push(`Combining this cut with a ${delayMin.yearsDelay}-year delay lifts success to ${fmtPctB(delayMin.successRate)}.`);
-      } else if (delayEffective) {
-        bulletItems.push(`A ${delayMin.yearsDelay}-year delay in drawing from the portfolio lifts success to ${fmtPctB(delayMin.successRate)}.`);
-      } else {
-        bulletItems.push(`A flexible spending rule of 10 to 15% cuts in weak years is the strongest remaining lever.`);
-      }
-    }
+      stressBullets.push(`In a typical path under this scenario, the portfolio ends at ${fmtKendB(p50End)}.`);
+      stressBullets.push(`Switch to Baseline for spending headroom figures and recommended actions.`);
 
-    // Always produce exactly 3 bullets. Slice in case any state pushed more.
-    bulletItems = bulletItems.slice(0, 3);
-    const bulletsHTML = bulletItems.map(b => `<li class="mc-action-bullet">${b}</li>`).join('');
+      const stressBulletsHTML = stressBullets.map(b => `<li class="mc-action-bullet">${b}</li>`).join('');
 
-    const s4 = `
-      <div class="mc-primary-action" style="border-top-color:${verdictColour.actionBorder};background:${verdictColour.actionBg}">
-        <div class="mc-primary-action__body">
-          <div class="mc-primary-action__left">
-            <div class="mc-primary-action__label" style="color:${verdictColour.actionLabel}">Recommended action</div>
-            <p class="mc-primary-action__text" style="color:${verdictColour.actionText}">${actionLine}</p>
-            <p class="mc-primary-action__impact" style="color:${verdictColour.actionImpact}">${actionImpact}</p>
+      s4 = `
+        <div class="mc-primary-action" style="border-top-color:${verdictColour.actionBorder};background:${verdictColour.actionBg}">
+          <div class="mc-primary-action__body">
+            <div class="mc-primary-action__left">
+              <div class="mc-primary-action__label" style="color:${verdictColour.actionLabel}">Scenario takeaway</div>
+              <p class="mc-primary-action__text" style="color:${verdictColour.actionText}">${stressTakeaway}</p>
+              <p class="mc-primary-action__impact" style="color:${verdictColour.actionImpact}">${stressDetail}</p>
+            </div>
+            <div class="mc-primary-action__right">
+              <ul class="mc-action-bullets" style="--bullet-colour:${verdictColour.actionBorder}">
+                ${stressBulletsHTML}
+              </ul>
+            </div>
           </div>
-          ${bulletsHTML ? `
-          <div class="mc-primary-action__right">
-            <ul class="mc-action-bullets" style="--bullet-colour:${verdictColour.actionBorder}">
-              ${bulletsHTML}
-            </ul>
-          </div>` : ''}
         </div>
-      </div>
-      <p class="mc-bridge-note">The Plan summary tab shows your inputs and planning assumptions. These simulations test those assumptions across thousands of market scenarios with realistic return variability, showing how your plan holds up when markets don't behave as expected.</p>
-      <p class="mc-bridge-note">Use the tabs above to explore charts and tables showing how your plan unfolds year by year under your planning assumptions.</p>`;
+        <p class="mc-bridge-note">The Plan summary tab shows your inputs and planning assumptions. These simulations test those assumptions across thousands of market scenarios with realistic return variability, showing how your plan holds up when markets don't behave as expected.</p>
+        <p class="mc-bridge-note">Use the tabs above to explore charts and tables showing how your plan unfolds year by year under your planning assumptions.</p>`;
+
+    } else {
+      // ── Baseline: full action block ───────────────────────────────
+      let actionLine, actionImpact;
+
+      const delayMin       = delayPerturbations.find(p => p.successRate >= targetConfidence);
+      const delayEffective = !!delayMin;
+
+      if (hasGap) {
+        const gap = roundedGap;
+        const newTarget = roundToNearest(currentSpending - gap, 500);
+        actionLine   = `Reduce annual spending by ${fmtB(gap)} to ${fmtB(newTarget)}.`;
+        actionImpact = `This closes the sustainability gap and removes most of the risk in weaker market scenarios.`;
+      } else if (rate < targetConfidence && delayEffective) {
+        actionLine   = `Delay drawing from your portfolio by ${delayMin.yearsDelay} year${delayMin.yearsDelay > 1 ? 's' : ''}.`;
+        actionImpact = `This allows the portfolio to compound without draws and lifts your success rate to ${fmtPctB(delayMin.successRate)}.`;
+      } else if (rate < targetConfidence && iqrWide) {
+        actionLine   = `Adopt a flexible spending rule.`;
+        actionImpact = `Reducing withdrawals by 10 to 15% in down years is the most practical lever available.`;
+      } else {
+        const hrForAction = sustainableSpending !== null && !sustainableIsFloor && headroom > 0
+          ? roundToNearest(headroom, 500) : null;
+        if (marginTight && hrForAction) {
+          actionLine   = `No changes needed, but headroom is limited at ${fmtB(hrForAction)} per year.`;
+          actionImpact = `Maintain your current spending and keep this under annual review. A poor sequence in the early years would consume this margin quickly.`;
+        } else if (marginModerate && hrForAction) {
+          actionLine   = `No changes needed. You have ${fmtB(hrForAction)} per year of room, though the margin is not wide.`;
+          actionImpact = `Any spending increase should be modest and kept under review as market conditions evolve.`;
+        } else {
+          actionLine   = hrForAction
+            ? `No changes needed. You could increase spending by up to ${fmtB(hrForAction)} per year.`
+            : `No changes needed.`;
+          actionImpact = `Any increase still leaves meaningful margin above the confidence threshold.`;
+        }
+      }
+
+      // ── Contextual bullets ────────────────────────────────────────
+      let p10DepletesAge = null;
+      if (r.p1StartAge != null) {
+        for (let i = 0; i < r.p10Portfolio.length; i++) {
+          if (r.p10Portfolio[i] <= 0) { p10DepletesAge = r.p1StartAge + i; break; }
+        }
+      }
+
+      const p50End = _deflate(r.p50Portfolio[lastIdx], lastIdx);
+      const p90End = _deflate(r.p90Portfolio[lastIdx], lastIdx);
+      const p10End = _deflate(r.p10Portfolio[lastIdx], lastIdx);
+
+      window.RetireMCResults = { medianEndPortfolioNominal: r.p50Portfolio[lastIdx] };
+
+      const roundKend = v => roundToNearest(v, 10000);
+      const fmtKendB  = v => fmtB(roundKend(Math.max(0, v)));
+
+      let bulletItems = [];
+
+      if (rate >= 0.95) {
+        if (p10DepletesAge !== null) {
+          bulletItems.push(`In the worst 1 in 10 outcomes, funds run low around age ${p10DepletesAge}.`);
+        } else {
+          bulletItems.push(`In the worst 1 in 10 outcomes, the portfolio ends at around ${fmtKendB(p10End)}.`);
+        }
+        bulletItems.push(`In a typical market, it ends at ${fmtKendB(p50End)}.`);
+        bulletItems.push(`Upside scenarios finish at ${fmtKendB(p90End)} or higher.`);
+      } else if (rate >= 0.90) {
+        if (p10DepletesAge !== null) {
+          bulletItems.push(`In the worst 1 in 10 outcomes, funds run low around age ${p10DepletesAge}.`);
+        } else {
+          bulletItems.push(`In the worst 1 in 10 outcomes, the portfolio ends at around ${fmtKendB(p10End)}.`);
+        }
+        bulletItems.push(`In a typical market, it ends at ${fmtKendB(p50End)}.`);
+        if (_earlyMarginTight || marginTight) {
+          bulletItems.push(`A poor early-returns period is the main sensitivity to watch.`);
+        } else if (_lateRisk) {
+          bulletItems.push(`Risk concentrates in the later years, where flexibility to adjust is more limited.`);
+        } else {
+          bulletItems.push(`A flexible spending rule would further widen the margin above the threshold.`);
+        }
+      } else if (rate >= 0.80) {
+        bulletItems.push(`Making no change leaves around a 1 in ${Math.max(2, Math.round(1 / Math.max(0.01, 1 - rate)))} chance of serious shortfall by the later years.`);
+        if (p10DepletesAge !== null) {
+          bulletItems.push(`In the worst 1 in 10 paths, funds run low around age ${p10DepletesAge}.`);
+        } else {
+          bulletItems.push(`In the worst 1 in 10 paths, the portfolio ends at around ${fmtKendB(p10End)}.`);
+        }
+        bulletItems.push(`In a typical market, the portfolio reaches ${fmtKendB(p50End)}. The plan works in most scenarios, but not with margin.`);
+      } else {
+        if (p10DepletesAge !== null) {
+          bulletItems.push(`In the worst 1 in 10 paths, funds are exhausted by age ${p10DepletesAge}.`);
+        } else {
+          bulletItems.push(`A significant share of paths end in depletion before retirement ends.`);
+        }
+        if (hasGap) {
+          const newTarget = roundToNearest(currentSpending - roundedGap, 500);
+          bulletItems.push(`Cutting to ${fmtB(newTarget)} alone brings success closer to the ${confPct}% threshold.`);
+        } else if (p50End > 0) {
+          bulletItems.push(`In a typical market, the portfolio reaches ${fmtKendB(p50End)}, but depletion is a likely outcome.`);
+        } else {
+          bulletItems.push(`A typical market still sees the portfolio depleted before the end of the projection.`);
+        }
+        if (hasGap && delayEffective) {
+          bulletItems.push(`Combining this cut with a ${delayMin.yearsDelay}-year delay lifts success to ${fmtPctB(delayMin.successRate)}.`);
+        } else if (delayEffective) {
+          bulletItems.push(`A ${delayMin.yearsDelay}-year delay in drawing from the portfolio lifts success to ${fmtPctB(delayMin.successRate)}.`);
+        } else {
+          bulletItems.push(`A flexible spending rule of 10 to 15% cuts in weak years is the strongest remaining lever.`);
+        }
+      }
+
+      bulletItems = bulletItems.slice(0, 3);
+      const bulletsHTML = bulletItems.map(b => `<li class="mc-action-bullet">${b}</li>`).join('');
+
+      s4 = `
+        <div class="mc-primary-action" style="border-top-color:${verdictColour.actionBorder};background:${verdictColour.actionBg}">
+          <div class="mc-primary-action__body">
+            <div class="mc-primary-action__left">
+              <div class="mc-primary-action__label" style="color:${verdictColour.actionLabel}">Recommended action</div>
+              <p class="mc-primary-action__text" style="color:${verdictColour.actionText}">${actionLine}</p>
+              <p class="mc-primary-action__impact" style="color:${verdictColour.actionImpact}">${actionImpact}</p>
+            </div>
+            ${bulletsHTML ? `
+            <div class="mc-primary-action__right">
+              <ul class="mc-action-bullets" style="--bullet-colour:${verdictColour.actionBorder}">
+                ${bulletsHTML}
+              </ul>
+            </div>` : ''}
+          </div>
+        </div>
+        <p class="mc-bridge-note">The Plan summary tab shows your inputs and planning assumptions. These simulations test those assumptions across thousands of market scenarios with realistic return variability, showing how your plan holds up when markets don't behave as expected.</p>
+        <p class="mc-bridge-note">Use the tabs above to explore charts and tables showing how your plan unfolds year by year under your planning assumptions.</p>`;
+    }
+
+    // Always expose the nominal median end value for the deterministic metrics badge.
+    window.RetireMCResults = { medianEndPortfolioNominal: r.p50Portfolio[lastIdx] };
 
     const inflationPct = (_meanInflation * 100).toFixed(1);
     const basisNote = `<p class="mc-basis-note">All £ figures on this tab are in today's money, adjusted for ${inflationPct}% annual inflation.</p>`;
