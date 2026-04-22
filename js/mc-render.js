@@ -547,10 +547,10 @@
       if (rate >= 0.95) {
         verdictSentence = _stressMarginal
           ? `Your baseline plan is on track, and this scenario makes little difference. The plan remains robust under these conditions.`
-          : `Your baseline plan is on track. This scenario does not change that — the plan holds up well even under these conditions.`;
+          : `Your baseline plan is on track. This scenario does not change that, and the plan holds up well even under these conditions.`;
       } else if (rate >= 0.90) {
         verdictSentence = _stressMarginal
-          ? `Your baseline plan is on track. This scenario is not significantly more demanding — the plan still holds, though with a little less room.`
+          ? `Your baseline plan is on track. This scenario is not significantly more demanding, and the plan still holds, though with a little less room.`
           : _stressSignificant
           ? `Your baseline plan is on track, but this scenario puts it under considerably more pressure. The margin is thinner here.`
           : `Your baseline plan is on track, but this scenario is more demanding. The plan still works, though the buffer is reduced.`;
@@ -877,10 +877,10 @@
         absDelta === null || absDelta === 0
           ? `This scenario produces results very close to your baseline plan.`
           : absDelta <= 5
-          ? `The likelihood of holding up is ${absDelta} percentage point${absDelta === 1 ? '' : 's'} lower than your baseline — a small difference that does not materially change the picture.`
+          ? `The likelihood of holding up is ${absDelta} percentage point${absDelta === 1 ? '' : 's'} lower than your baseline, a small difference that does not materially change the picture.`
           : absDelta <= 20
           ? `The likelihood of holding up is ${absDelta} percentage points lower than your baseline. This is a meaningful reduction worth factoring into your planning.`
-          : `The likelihood of holding up is ${absDelta} percentage points lower than your baseline — a large drop that highlights a real sensitivity in the plan.`;
+          : `The likelihood of holding up is ${absDelta} percentage points lower than your baseline, a large drop that highlights a real sensitivity in the plan.`;
 
       // Inline lever-block helper (mirrors baseline leverBlock, scoped to stress branch)
       function stressLeverBlock(name, pill, pillClass, outcome, isPrimary) {
@@ -900,7 +900,7 @@
           <div class="mc-section-label">What this means</div>
           <div class="mc-lever-table">
             ${stressLeverBlock('Outcome',            b1Pill, b1PillClass, b1Outcome, true)}
-            ${stressLeverBlock('Vs your baseline',   b3Pill, b3PillClass, b3Outcome, false)}
+            ${stressLeverBlock('Compared with baseline', b3Pill, b3PillClass, b3Outcome, false)}
             ${stressLeverBlock('Best next move',     b2Pill, b2PillClass, b2Outcome, false)}
           </div>
         </div>`;
@@ -1044,13 +1044,13 @@
       // Detail — consequence-led, delta in natural language, Baseline as explicit action
       let stressDetail;
       if (rate >= 0.95) {
-        stressDetail = `Even under these conditions, the plan holds up well${deltaPhS4 ? ` — the likelihood of holding up is only ${deltaPhS4} compared with your baseline` : ''}. No immediate change is needed on the strength of this result.`;
+        stressDetail = `Even under these conditions, the plan holds up well${deltaPhS4 ? `, with the likelihood of holding up only ${deltaPhS4} compared with your baseline` : ''}. No immediate change is needed on the strength of this result.`;
       } else if (rate >= 0.90) {
         stressDetail = `The plan stays above the sustainability threshold, but this scenario reduces the cushion${deltaPhS4 ? `, with the likelihood of holding up ${deltaPhS4} compared with your baseline` : ''}. Check whether your baseline buffer is large enough to absorb this kind of pressure if it arises early in retirement.`;
       } else if (rate >= 0.80) {
         stressDetail = `This exposes a real weakness that the baseline view may not fully show${deltaPhS4 ? `. Compared with your baseline, the likelihood of holding up is ${deltaPhS4}, which suggests your current buffer may not cope with a difficult start to retirement` : ''}. Treat your baseline spending and delay changes as more urgent.`;
       } else {
-        stressDetail = `This is the kind of difficult start your current buffer may not be strong enough to absorb.${deltaPhS4 ? ` Compared with your baseline, the plan is much weaker here, with its likelihood of holding up ${deltaPhS4} lower.` : ''} That makes your baseline spending and delay changes more important.`;
+        stressDetail = `This is the kind of difficult start your current buffer may not be strong enough to absorb.${deltaPhS4 ? ` Compared with your baseline, the plan is much weaker here, with its likelihood of holding up ${deltaPhS4}.` : ''} That makes your baseline spending and delay changes more important.`;
       }
 
       // Stress bullets — consequence-led, collapse duplicate £0 figures
