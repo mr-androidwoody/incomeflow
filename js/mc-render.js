@@ -182,6 +182,7 @@
       wrap.classList.add('mc-loader-wrap--fade-out');
       setTimeout(() => {
         _syncToggleButtons();
+        _syncStressControls();
         _renderNarrative();
         // Fade narrative in
         el.classList.add('mc-narrative--fade-in');
@@ -191,6 +192,7 @@
       }, 300);
     } else {
       _syncToggleButtons();
+      _syncStressControls();
       _renderNarrative();
     }
   }
