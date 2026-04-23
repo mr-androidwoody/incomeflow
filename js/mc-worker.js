@@ -413,11 +413,11 @@ function runPath(inputs, equityVol, inflationVol, stressMode, stressParams) {
       if (yi < 5) growthMean = growth - 2 * equityVol;
       // inflationVol unchanged
     } else if (stressMode === 'inflation') {
-      if (yi < 10) { inflationMean = 0.05; inflVol = 0.02; }
+      if (yi < 10) { inflationMean = 0.075; inflVol = 0.02; }
       // growth unchanged
     } else if (stressMode === 'lostDecade' && stressParams) {
       const winStart = stressParams.lostDecadeStart;
-      if (yi >= winStart && yi < winStart + 10) growthMean = 0;
+      if (yi >= winStart && yi < winStart + 10) growthMean = -0.005;
       // inflationVol unchanged
     }
 
