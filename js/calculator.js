@@ -130,9 +130,13 @@
 
     // PSA tier is determined by whether ANY taxable income (after PA) falls in the higher
     // rate band — HMRC explicitly includes dividend income in this assessment (LITRG).
+    // We compare against (basicLimit - pa) and (additionalThreshold - pa) — using the
+    // *tapered* PA — because the band boundaries widen when PA is reduced by the taper.
+    // Using the untagered TAX.PA constant here would misclassify people in the upper taper
+    // zone (roughly £112k–£125k) as additional-rate PSA payers when they are still higher-rate.
     const taxableForPSA = nsNet + savAfterSRS + divNet;
-    const psa = taxableForPSA <= (TAX.basicLimit - TAX.PA)          ? TAX.psa.basic
-              : taxableForPSA <= (TAX.additionalThreshold - TAX.PA) ? TAX.psa.higher
+    const psa = taxableForPSA <= (TAX.basicLimit - pa)          ? TAX.psa.basic
+              : taxableForPSA <= (TAX.additionalThreshold - pa) ? TAX.psa.higher
               : TAX.psa.additional;
     const psaCover   = Math.min(savAfterSRS, psa);
     const savTaxable = Math.max(0, savAfterSRS - psaCover);
