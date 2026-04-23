@@ -1337,32 +1337,50 @@ function page8(s) {
   rightCol.appendChild(connectEl);
 
   // Adviser-quality scenario framing
+  // fmtRate: avoids "100%" which implies infallibility — caps at "99%+"
+  function fmtRate(r) {
+    if (r == null) return '—';
+    if (r >= 0.995) return '99%+';
+    return Math.round(r * 100) + '%';
+  }
+  function deltaSmall(sc) { return Math.abs(sc.success_rate_delta || 0) < 0.005; }
+  function deltaMinor(sc) { return Math.abs(sc.success_rate_delta || 0) < 0.05; }
+
   const scenarioMeta = {
     sorr: {
       title:   'Early market downturn',
       what:    'Markets fall sharply in the first few years of retirement, before your portfolio has had time to recover.',
-      why:     'This is the most powerful adverse scenario for retirement plans. A poor sequence of returns in the early years permanently reduces the base from which your money compounds – and you are still drawing income throughout.',
+      why:     'This is the most powerful adverse scenario for retirement plans. A poor sequence of returns in the early years permanently reduces the base from which your money compounds, and you are still drawing income throughout.',
       forYou: (sc, baseRate) => {
-        const baseP = Math.round(baseRate * 100);
-        const scP   = Math.round(sc.success_rate * 100);
+        const scen  = fmtRate(sc.success_rate);
         const dep   = sc.earliest_depletion_year;
         const p50   = sc.terminal_portfolio_p50;
         if (sc.impact_level === 'high') {
-          return `Under your plan, this is the scenario to watch most closely. The likelihood drops from ${baseP}% to ${scP}%, a significant reduction. In a typical path under this stress, the portfolio ${p50 > 0 ? 'finishes with ' + fmt(p50) : 'depletes before the end of the plan'}${dep ? ', with the first depletion occurring around ' + dep : ''}. The most effective protection is maintaining a cash buffer to avoid selling investments at depressed prices in the early years.`;
+          const depStr = dep ? `, with the first depletion occurring around ${dep}` : '';
+          const p50Str = p50 > 0 ? `finishes with ${fmt(p50)}` : `depletes before the end of the plan`;
+          return `This is the scenario to watch most closely for your plan. Under these conditions, the likelihood falls to ${scen} – a meaningful reduction from the baseline. In a typical path under this stress, the portfolio ${p50Str}${depStr}. The most practical protection is a cash buffer of 6–12 months' spending, which lets you avoid selling investments at depressed prices in the early years.`;
+        } else if (deltaMinor(sc)) {
+          return `Your plan is well-placed against an early downturn. Under these conditions the likelihood stays high at ${scen}, barely changed from the baseline. This resilience comes partly from diversified income sources (interest accounts and ISA draws – which reduce reliance on investment returns in the critical early years).`;
         } else {
-          return `Your plan shows good resilience to an early downturn. The likelihood moves from ${baseP}% to ${scP}%, a marginal change. This is partly because your diversified income sources (interest accounts, ISA draws) reduce early reliance on investment returns.`;
+          return `Your plan shows good resilience to an early downturn. Under these conditions the likelihood remains at ${scen}, a modest step down from the baseline. Diversified income sources in early retirement reduce the impact of a poor sequence of returns.`;
         }
       },
     },
     inflation: {
       title:   'High inflation',
       what:    'A prolonged period of elevated inflation in the early years squeezes the real value of your withdrawals.',
-      why:     'Inflation is a slow erosion rather than a shock – it reduces what your money buys over time. The key protection is income sources that rise with prices, principally the State Pension.',
+      why:     'Inflation is a slow erosion rather than a shock. It reduces what your money buys over time. The key protection is income sources that rise with prices, principally the State Pension.',
       forYou: (sc, baseRate) => {
-        const baseP = Math.round(baseRate * 100);
-        const scP   = Math.round(sc.success_rate * 100);
-        const p50   = sc.terminal_portfolio_p50;
-        return `Your plan is well-protected against inflation. The likelihood moves from ${baseP}% to ${scP}%${scP === baseP ? ' — unchanged' : ''}. Both State Pensions are inflation-linked and start from age 67, providing a rising guaranteed income floor just as portfolio draws typically increase. ${p50 > 0 ? 'In a typical path, the plan finishes with ' + fmt(p50) + ' in today\'s money.' : ''}`;
+        const scen = fmtRate(sc.success_rate);
+        const p50  = sc.terminal_portfolio_p50;
+        const p50Str = p50 > 0 ? ` In a typical path, the plan finishes with ${fmt(p50)} in today's money.` : '';
+        if (deltaSmall(sc)) {
+          return `Your plan is well-protected against inflation. Under these conditions the likelihood stays very high at ${scen} – effectively unchanged. Both State Pensions are inflation-linked and begin from age 67, providing a rising guaranteed income floor just as portfolio draws typically increase.${p50Str}`;
+        } else if (deltaMinor(sc)) {
+          return `Your plan handles elevated inflation well. The likelihood remains high at ${scen}. State Pension indexing provides meaningful protection from the mid-2030s onwards, reducing the real-terms drag on the portfolio.${p50Str}`;
+        } else {
+          return `Inflation has a noticeable effect on this plan. The likelihood moves to ${scen}. The State Pension provides partial protection once it begins, but the early years carry more exposure. Keeping a meaningful cash buffer helps absorb the erosion before State Pension income starts.${p50Str}`;
+        }
       },
     },
     lostDecade: {
@@ -1370,10 +1388,16 @@ function page8(s) {
       what:    'Near-zero real returns for a decade at some point during retirement, limiting the portfolio\'s ability to compound.',
       why:     'Prolonged low growth is most damaging when it occurs early and when the portfolio is being drawn heavily. Later in retirement, its impact is cushioned by State Pension income reducing portfolio dependency.',
       forYou: (sc, baseRate) => {
-        const baseP = Math.round(baseRate * 100);
-        const scP   = Math.round(sc.success_rate * 100);
-        const p50   = sc.terminal_portfolio_p50;
-        return `Your plan manages a low-growth decade well. The likelihood moves from ${baseP}% to ${scP}%${scP === baseP ? ' — unchanged' : ''}. The combination of tax-efficient withdrawals and State Pension income from the mid-2030s means the portfolio is not solely reliant on growth to sustain income. ${p50 > 0 ? 'A typical path still finishes with ' + fmt(p50) + '.' : ''}`;
+        const scen = fmtRate(sc.success_rate);
+        const p50  = sc.terminal_portfolio_p50;
+        const p50Str = p50 > 0 ? ` A typical path still finishes with ${fmt(p50)}.` : '';
+        if (deltaSmall(sc)) {
+          return `Your plan manages a low-growth decade comfortably. The likelihood stays very high at ${scen} – effectively unchanged. The combination of tax-efficient withdrawals and State Pension income from the mid-2030s means the portfolio is not solely reliant on growth to sustain income.${p50Str}`;
+        } else if (deltaMinor(sc)) {
+          return `Your plan holds up well through a period of low growth. The likelihood remains high at ${scen}. State Pension income from the mid-2030s reduces portfolio dependency at the point when sustained low returns are most damaging.${p50Str}`;
+        } else {
+          return `Sustained low growth puts meaningful pressure on this plan, reducing the likelihood to ${scen}. The most effective response is spending flexibility – being willing to trim withdrawals in weaker years prevents the portfolio base from eroding too quickly.${p50Str}`;
+        }
       },
     },
   };
@@ -1391,12 +1415,12 @@ function page8(s) {
     } else {
       const rate2  = sc.success_rate;
       const col    = scBorder(rate2);
-      const scP    = Math.round(rate2 * 100);
-      const baseP  = Math.round(r.success_rate * 100);
+      const scP    = fmtRate(rate2);
+      const baseP  = fmtRate(r.success_rate);
       const absDelta = Math.abs(Math.round((sc.success_rate_delta||0) * 100));
-      const deltaText = sc.success_rate_delta === 0
-        ? 'No change to plan outcome'
-        : `Drops from ${baseP}% to ${scP}% under this scenario`;
+      const deltaText = deltaSmall(sc)
+        ? 'No meaningful change'
+        : `Baseline ${baseP} – under stress ${scP}`;
       const impactLabel = scLabel(rate2);
       const borderCol = scBorder(rate2);
 
