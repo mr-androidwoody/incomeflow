@@ -1108,7 +1108,7 @@
       // If p50 is non-zero but p10 was near-zero, the contrast is already clear — both show.
 
       // Bullet 3 — Baseline redirect as explicit action
-      stressBullets.push(`Use the Baseline view for spending guidance and your main recommended actions.`);
+      stressBullets.push(`Even with a strong baseline, this scenario shows why a cash buffer of 6–12 months' spending matters. It lets you avoid selling investments at the worst possible moment.`);
 
       const stressBulletsHTML = stressBullets.map(b => `<li class="mc-action-bullet">${b}</li>`).join('');
 
@@ -1116,7 +1116,7 @@
         <div class="mc-primary-action" style="border-top-color:${verdictColour.actionBorder};background:${verdictColour.actionBg}">
           <div class="mc-primary-action__body">
             <div class="mc-primary-action__left">
-              <div class="mc-primary-action__label" style="color:${verdictColour.actionLabel}">Bottom line</div>
+              <div class="mc-primary-action__label" style="color:${verdictColour.actionLabel}">What this means</div>
               <p class="mc-primary-action__text mc-primary-action__text--stress" style="color:${verdictColour.actionText}">${stressTakeaway}</p>
               <p class="mc-primary-action__impact" style="color:${verdictColour.actionImpact}">${stressDetail}</p>
             </div>
