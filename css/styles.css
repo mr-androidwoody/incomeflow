@@ -82,6 +82,40 @@ canvas { display: block; width: 100%; height: auto; }
   gap: 16px;
 }
 
+.title-block-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.incomeflow-logo {
+  flex-shrink: 0;
+  width: auto;
+  max-height: 52px;
+}
+
+/* ── Splash screen branding ── */
+.splash-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 1rem;
+}
+
+.splash-brand__logo {
+  flex-shrink: 0;
+  width: auto;
+  height: 44px;
+}
+
+.splash-brand__wordmark {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #22314d;
+  line-height: 1;
+}
+
 .title-block h1 {
   margin: 0 0 5px;
   font-size: clamp(1.5rem, 2vw, 1.9rem);
@@ -4580,6 +4614,9 @@ input[type="radio"] { accent-color: var(--accent); }
 .mc-sc-card__cta--idle  { color: #3460e8; }
 .mc-sc-card__cta--done  { color: #3460e8; }
 .mc-sc-card__cta--viewing { color: #64748b; }
+
+/* ── Stress scenario toggle controls (inline inside hero band) ── */
+#mc-stress-controls { display: none; }
 
 /* ── Stress scenario interpretation panel ── */
 .mc-stress-interp {
