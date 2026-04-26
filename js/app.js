@@ -361,6 +361,7 @@
     if (tbody) tbody.innerHTML = '';
     localStorage.removeItem(STORAGE_KEY);
     refreshSetupSummary();
+    refreshPortfolioUI();
   }
 
   // ─────────────────────────────
@@ -625,7 +626,10 @@
   }
 
   function _updateBniMaxYears() {
-    const startYear = parseInt(safeEl('startYear')?.value) || new Date().getFullYear();
+    // Read from the visible setup field; fall back to the hidden assumptions field
+    // if sp-startYear is absent (defensive, should always be present).
+    const startYearEl = safeEl('sp-startYear') || safeEl('startYear');
+    const startYear = parseInt(startYearEl?.value) || new Date().getFullYear();
     const config = [
       {
         giaIds:    ['p1GIAeq'],
@@ -1074,6 +1078,24 @@
   // ─────────────────────────────
   // RUN RISK (Monte Carlo)
   // ─────────────────────────────
+
+  // ── MC assumptions helper ────────────────────────────────────────────
+  // Derives historically-grounded growth/vol figures from the current portfolio
+  // allocation via mc-assumptions.js. Called by runRisk, the mc-run-stress event
+  // handler, and _runBackgroundStress so there is one source of truth and no risk
+  // of the three call sites drifting apart (Bug 18).
+  function _getMCAssume() {
+    const alloc = window.RetireCalc.summarisePortfolio(state.portfolioAccounts).overallAllocation;
+    return window.RetireMCAssumptions
+      ? window.RetireMCAssumptions.getMCAssumptions(
+          alloc.equities  || 0,
+          alloc.bonds     || 0,
+          alloc.cashlike  || 0,
+          alloc.cash      || 0,
+        )
+      : { growth: (state.lastInputs?.growth ?? 0.05), equityVol: 0.16, inflationVol: 0.015 };
+  }
+
   function _setRiskReady(ready) {
     const tabBtn = document.querySelector('.results-tab[data-results-tab="outlook"]');
     if (!tabBtn) return;
@@ -1187,19 +1209,9 @@
       testPlanBtn.disabled = false;
     }
 
-    // ── Derive MC assumptions from actual portfolio allocation ──────────
-    // Uses historically-grounded return/vol figures from mc-assumptions.js,
-    // independent of the user's conservative deterministic planning rate.
-    const _mcAlloc  = window.RetireCalc.summarisePortfolio(state.portfolioAccounts).overallAllocation;
-    const _mcAssume = window.RetireMCAssumptions
-      ? window.RetireMCAssumptions.getMCAssumptions(
-          _mcAlloc.equities  || 0,
-          _mcAlloc.bonds     || 0,
-          _mcAlloc.cashlike  || 0,
-          _mcAlloc.cash      || 0,
-        )
-      : { growth: inputs.growth, equityVol: 0.16, inflationVol: 0.015 }; // fallback
-
+    // ── Derive MC assumptions from actual portfolio allocation ──────────────────
+    // Uses historically-grounded return/vol figures via _getMCAssume() (Bug 18).
+    const _mcAssume      = _getMCAssume();
     const _mcGrowth      = _mcAssume.growth;
     const _mcEquityVol   = _mcAssume.equityVol;
     const _mcInflationVol = _mcAssume.inflationVol;
@@ -1247,23 +1259,42 @@
           ? inputs.spending * 1.50
           : inputs.spending;
 
-        for (let i = 0; i < BISECT_ITERS; i++) {
-          const mid    = (lo + hi) / 2;
-          const midRes = await MCE.run({
-            inputs:       { ...inputs, spending: mid },
-            simCount:     BISECT_SIMS,
-            mcGrowth:     _mcGrowth,
-            equityVol:    _mcEquityVol,
-            inflationVol: _mcInflationVol,
-          });
-          if (midRes.successRate >= TARGET_CONFIDENCE) {
-            lo = mid;
-          } else {
-            hi = mid;
+        // Lower-bound pre-check: mirrors the upper-bound check above.
+        // If even the floor (40% of current spending) fails the confidence
+        // threshold, the true sustainable level is below our search range.
+        // Skip the bisection and report lo as the best estimate, flagged via
+        // the comment on sustainableSpending so mc-render shows the full gap.
+        const rLow = (await MCE.run({
+          inputs:       { ...inputs, spending: lo },
+          simCount:     BISECT_SIMS,
+          mcGrowth:     _mcGrowth,
+          equityVol:    _mcEquityVol,
+          inflationVol: _mcInflationVol,
+        })).successRate;
+
+        if (rLow < TARGET_CONFIDENCE) {
+          // Lower bound itself is unsustainable — report it so the gap displayed
+          // to the user reflects at minimum how far over the floor they are.
+          sustainableSpending = Math.round(lo);
+        } else {
+          for (let i = 0; i < BISECT_ITERS; i++) {
+            const mid    = (lo + hi) / 2;
+            const midRes = await MCE.run({
+              inputs:       { ...inputs, spending: mid },
+              simCount:     BISECT_SIMS,
+              mcGrowth:     _mcGrowth,
+              equityVol:    _mcEquityVol,
+              inflationVol: _mcInflationVol,
+            });
+            if (midRes.successRate >= TARGET_CONFIDENCE) {
+              lo = mid;
+            } else {
+              hi = mid;
+            }
+            _setLoadingProgress(Math.round(((i + 1) / BISECT_ITERS) * 100));
           }
-          _setLoadingProgress(Math.round(((i + 1) / BISECT_ITERS) * 100));
+          sustainableSpending = Math.round((lo + hi) / 2);
         }
-        sustainableSpending = Math.round((lo + hi) / 2);
       }
 
       // ── Delay perturbations ───────────────────────────────────────────
@@ -1291,7 +1322,8 @@
         sustainableIsFloor,
         targetConfidence:    TARGET_CONFIDENCE,
         openingPortfolio:    Object.values(inputs.p1Bal).reduce((s, v) => s + v, 0) +
-                             Object.values(inputs.p2Bal).reduce((s, v) => s + v, 0),
+                             Object.values(inputs.p2Bal).reduce((s, v) => s + v, 0) +
+                             (inputs.intAccts || []).reduce((s, a) => s + (a.balance || 0), 0),
         delayPerturbations,
       });
       MCR.render();
@@ -1396,15 +1428,7 @@
 
     MCR.showLoader();
 
-    const _mcAlloc  = window.RetireCalc.summarisePortfolio(state.portfolioAccounts).overallAllocation;
-    const _mcAssume = window.RetireMCAssumptions
-      ? window.RetireMCAssumptions.getMCAssumptions(
-          _mcAlloc.equities  || 0,
-          _mcAlloc.bonds     || 0,
-          _mcAlloc.cashlike  || 0,
-          _mcAlloc.cash      || 0,
-        )
-      : { growth: inputs.growth, equityVol: 0.16, inflationVol: 0.015 };
+    const _mcAssume = _getMCAssume();
 
     try {
       const result = await MCE.runStress({
@@ -1601,8 +1625,6 @@
         document.querySelectorAll('input[name="growthPreset"]').forEach(r => {
           r.checked = r.value === growthVal;
         });
-        // Always land on step 1 (Who & when) when navigating to this tab.
-        window.RetireWizard?.showStep(0);
       }
       window.scrollTo(0, 0);
       return RetireTabs.switchTab(tab);
